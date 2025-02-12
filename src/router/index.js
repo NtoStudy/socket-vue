@@ -4,15 +4,15 @@ import {createWebHistory, createRouter} from 'vue-router'
 const routes = [
   {
     path:'/',
-    redirect: '/1'
+    redirect: '/login'
   },
   {
-    path: '/1',
+    path: '/login',
     component: ()=>import('../view/login.vue')
 
   },{
-    path: '/2',
-    component: ()=>import('../view/chat.vue')
+    path: '/chat',
+    component: ()=>import('../view/chat/index.vue')
   }
 ]
 

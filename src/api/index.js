@@ -1,13 +1,14 @@
 import axios from "axios";
+import {useUserInfoStore} from "@/store/user.js";
 
-
-import {useUserInfoStore} from "../store/user.js";
 const userStore = useUserInfoStore()
 const token = userStore?.token
+
+
 const instance = axios.create({
   baseURL: 'http://localhost:8080',
   timeout: 5000,
-  headers:{
+  headers: {
     'Content-Type': 'application/json',
     'token': token || ''
   }
