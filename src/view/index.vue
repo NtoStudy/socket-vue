@@ -11,8 +11,7 @@
       </div>
     </div>
     <div class="side">
-
-      <router-view />
+      <router-view/>
     </div>
   </div>
 
@@ -20,8 +19,9 @@
 </template>
 
 <script setup>
-import {ref} from 'vue';
+import {onMounted, ref} from 'vue';
 import router from "@/router/index.js";
+import {userInfoByJwt} from "@/api/user/index.js";
 
 // Sidebar items data
 const sidebarItems = ref([
@@ -32,6 +32,12 @@ const sidebarItems = ref([
 const handleRoute = (ev) => {
   router.push(ev)
 }
+
+
+
+onMounted(()=>{
+
+})
 </script>
 
 <style lang="scss" scoped>
@@ -86,7 +92,8 @@ const handleRoute = (ev) => {
       }
     }
   }
-  .side{
+
+  .side {
     flex: 1;
   }
 }

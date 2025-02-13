@@ -6,7 +6,7 @@ import instance from "@/api/index.js";
  * @returns {Promise} - 返回添加好友请求的Promise对象
  */
 export const addFriend = (friendNumber) => instance({
-  url: '/friend/add',
+  url: '/friends/add',
   method: 'post',
   params: {friendNumber}
 })
@@ -16,7 +16,7 @@ export const addFriend = (friendNumber) => instance({
  * @returns {Promise} - 返回获取好友列表请求的Promise对象
  */
 export const getFriendList = () => instance({
-  url: '/friend/list',
+  url: '/friends/friendlist',
   method: 'get'
 })
 
@@ -35,7 +35,7 @@ export const handleFriend = (relationId, status) => instance({
 
 /**
  * 发送消息
- * @param {string} receiverId - 接收者ID
+ * @param {number} receiverId - 接收者ID
  * @param {string} content - 消息内容
  * @returns {Promise} - 返回发送消息请求的Promise对象
  */
@@ -47,7 +47,7 @@ export const messageSend = (receiverId, content) => instance({
 
 /**
  * 获取消息历史
- * @param {string} receiverId - 接收者ID
+ * @param {number} receiverId - 接收者ID
  * @param {number} pageNum - 页码
  * @param {number} pageSize - 每页大小
  * @returns {Promise} - 返回获取消息历史的Promise对象

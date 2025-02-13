@@ -1,66 +1,44 @@
 <template>
   <div class="chat-list">
-    <div class="chat-item" v-for="(chat, index) in chats" :key="index">
-      <div class="chat-avatar">
-        <img :src="chat.avatar" alt="avatar" />
+    <!-- 按钮拨片切换 -->
+    <div class="chat-switcher">
+      <div
+          class="chat-switcher-item"
+          :class="{ active: isActive === 'friend' }"
+          @click="toggleList('friend')"
+      >
+        好友列表
       </div>
-      <div class="chat-content">
-        <div class="chat-header">
-          <span class="chat-title">{{ chat.title }}</span>
-          <span class="chat-time">{{ chat.time }}</span>
-        </div>
-        <div class="chat-message">
-          <span class="chat-text">{{ chat.message }}</span>
-        </div>
+      <div
+          class="chat-switcher-item"
+          :class="{ active: isActive === 'group' }"
+          @click="toggleList('group')"
+      >
+        群聊列表
       </div>
-      <div class="chat-badge" v-if="chat.unread > 0">{{ chat.unread }}</div>
     </div>
+    <!-- 根据切换显示不同内容 -->
+    <Friend v-if="isActive==='friend'"/>
+    <ChatRoom v-else/>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import {ref, onMounted} from "vue";
+import Friend from './Friend/index.vue'
+import ChatRoom from './ChatRoom/index.vue'
 
-// 模拟数据
-const chats = ref([
-  {
-    avatar: '', // 替换为实际头像 URL
-    title: '软工二班',
-    time: '星期二',
-    message: '李翔：[动画表情]',
-    unread: 0,
-  },
-  {
-    avatar: '', // 替换为实际头像 URL
-    title: '二轮项目',
-    time: '星期二',
-    message: '前端大家尽量都...',
-    unread: 0,
-  },
-  {
-    avatar: '', // 替换为实际头像 URL
-    title: '图片',
-    time: '2025/01/21',
-    message: '[图片]',
-    unread: 0,
-  },
-  {
-    avatar: '', // 替换为实际头像 URL
-    title: '2024电...',
-    time: '2025/01/05',
-    message: '240603324 郭阳...',
-    unread: 0,
-  },
-  {
-    avatar: 'https://via.placeholder.com/40', // 替换为实际头像 URL
-    title: '2023级...',
-    time: '2024/12/27',
-    message: '230207224牛文俊...',
-    unread: 0,
-  },
+const isActive = ref("friend"); // 初始显示好友列表
 
+// 切换列表
+const toggleList = (type) => {
+  if (type === "friend" || type === "group") {
+    isActive.value = type === "friend" ? "friend" : "group";
+  }
+};
+onMounted(() => {
 
-]);
+});
 </script>
 
 <style lang="scss" scoped>
@@ -73,6 +51,31 @@ const chats = ref([
   background-color: #f5f5f5;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  .chat-switcher {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+
+    .chat-switcher-item {
+      padding: 5px 10px;
+      border-radius: 20px;
+      background-color: #e0e0e0;
+      margin: 0 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+
+      &.active {
+        background-color: #007bff;
+        color: #fff;
+      }
+
+      &:hover {
+        background-color: #007bff;
+        color: #fff;
+      }
+    }
+  }
 
   .chat-item {
     display: flex;

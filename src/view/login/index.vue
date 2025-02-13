@@ -41,13 +41,12 @@
 
 <script setup>
 import {ref} from 'vue'
-import {userLogin, userRegister} from "@/api/user/index.js"; // 添加 userRegister 引入
-import {useUserInfoStore} from "@/store/user.js";
+import {userInfoByJwt, userLogin, userRegister} from "@/api/user/index.js"; // 添加 userRegister 引入
 import {useRouter} from 'vue-router';
-
-const router = useRouter();
+import {useUserInfoStore} from '@/store/user.js'
 
 const userInfoStore = useUserInfoStore()
+const router = useRouter();
 const form = ref({
   number: '',
   password: ''
@@ -62,9 +61,12 @@ const isRegister = ref(false) // 添加 isRegister 状态变量
 
 const handleLogin = async () => {
   const res = await userLogin(form.value.number, form.value.password)
-  console.log(res.data)
   userInfoStore.setToken(res.data.data)
-  await router.push('/chat');
+  if (res.data.code === 200) {
+    const response = await userInfoByJwt();
+    userInfoStore.setUserInfo(response.data.data)
+    await router.push('/main')
+  }
 }
 
 const handleRegister = () => {
@@ -131,6 +133,7 @@ const handleRegisterSubmit = async () => {
     }
   }
 }
+
 .el-button + .el-button {
   margin-left: 0;
 }

@@ -1,33 +1,21 @@
 <script setup>
+import {onMounted, ref} from "vue";
+import {messageHistory, messageSend} from "@/api/friend/index.js";
+import {useUserInfoStore} from "@/store/user.js";
+const useUserInfo = useUserInfoStore();
+const messages = ref([]);
+const inputContent = ref('');
 
-import {ref} from "vue";
-
-const messages = ref([
-  {id: 1, text: '要学到vue才能参与比赛嘛', isUser: true, time: '15:05'},
-  {id: 2, text: '因为要前后端联调啥的，学完vue用框架调接口会比较舒服', isUser: false, time: '15:06'},
-  {
-    id: 3,
-    text: '要学到vue才能参与比赛嘛',
-    isUser: false,
-    time: '15:05'
-  },
-  {
-    id: 4,
-    text: '要学到vue才能参与比赛嘛',
-    isUser: true,
-    time: '15:06'
-  },
-  {
-    id: 5,
-    text: '要学到vue才能参与比赛嘛',
-    isUser: true,
-    time: '15:28'
-  },
-  {id: 6, text: '我先去搞点事情', isUser: true, time: '15:06'},
-
-]);
+const handleChatMessage = async () => {
+  const res = await messageHistory(5, 1, 100);
+  messages.value = res.data.data.list;
+  console.log(messages.value)
+};
 
 
+onMounted(()=>{
+  handleChatMessage()
+})
 </script>
 
 <template>
@@ -35,26 +23,26 @@ const messages = ref([
     <div class="header">
       <div class="title">聊天窗口</div>
     </div>
-    <div class="messages">
+    <div class="messages" >
       <div
           v-for="(message, index) in messages"
           :key="message.id"
-          :class="['message', message.isUser ? 'user-message' : 'assistant-message']"
+          :class="['message', message.senderId === useUserInfo.userInfo.userId ? 'user-message' : 'assistant-message']"
       >
-        <div class="timestamp">{{ message.time }}</div>
-        <div v-if="message.isUser" class="user-content">
-          <div class="text">{{ message.text }}</div>
+        <div class="timestamp">{{ message.sentTime }}</div>
+        <div v-if="message.senderId === useUserInfo.userInfo.userId" class="user-content">
+          <div class="text">{{ message.content }}</div>
           <div class="avatar">我</div>
         </div>
         <div v-else class="assistant-content">
           <div class="avatar">AI</div>
-          <div class="text">{{ message.text }}</div>
+          <div class="text">{{ message.content }}</div>
         </div>
       </div>
     </div>
     <div class="input-area">
       <input type="text" placeholder="输入消息"/>
-      <button>发送</button>
+      <button @click="handleSendMessage">发送</button>
     </div>
   </div>
 </template>
