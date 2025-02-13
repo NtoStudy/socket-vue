@@ -131,7 +131,6 @@ const handleRegisterSubmit = async () => {
     }
   }
 }
-
 .el-button + .el-button {
   margin-left: 0;
 }

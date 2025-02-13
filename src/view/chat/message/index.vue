@@ -143,7 +143,6 @@ const messages = ref([
     padding: 10px;
     background-color: #f5f5f5;
     border-top: 1px solid #e0e0e0;
-
     input {
       flex: 1;
       padding: 8px;

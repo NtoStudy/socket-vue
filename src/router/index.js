@@ -3,18 +3,30 @@ import {createWebHistory, createRouter} from 'vue-router'
 
 const routes = [
   {
-    path:'/',
-    redirect: '/login'
+    path: '/',
+    redirect: '/main'
   },
   {
     path: '/login',
-    component: ()=>import('../view/login.vue')
+    component: () => import('../view/login/index.vue')
 
-  },{
-    path: '/chat',
-    component: ()=>import('../view/chat/index.vue')
+  }, {
+    path: '/main',
+    component: () => import('../view/index.vue'),
+    redirect: '/main/chat',
+    children: [
+      {
+        path: 'chat',
+        component: () => import('../view/chat/index.vue')
+      },
+      {
+        path: 'friend',
+        component: () => import('../view/friend/index.vue')
+      }
+    ]
   }
 ]
+
 
 const router = createRouter({
   history: createWebHistory(),

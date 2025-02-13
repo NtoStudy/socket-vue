@@ -14,7 +14,6 @@ import message from './message/index.vue'
 <style lang="scss" scoped>
 .chat-container {
   display: flex;
-  height: 100vh;
   background-color: #f5f5f5;
 }
 
