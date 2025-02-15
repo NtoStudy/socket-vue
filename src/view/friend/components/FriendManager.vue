@@ -1,24 +1,23 @@
 <template>
   <div class="friend-requests">
-    <h2 class="title">好友通知</h2>
+    <h2 class="title">{{ selectedMenu === 'friend' ? '好友通知' : '群通知' }}</h2>
     <div class="request-list">
+      <!-- 动态渲染请求列表 -->
       <div
-          v-for="(request, index) in requests"
+          v-for="(request, index) in currentRequests"
           :key="index"
           class="request-item"
       >
         <div class="request-avatar">
-          <img :src="request.avatar" alt="avatar"/>
+          <img :src="request.avatar" alt="avatar" />
         </div>
         <div class="request-content">
           <div class="request-header">
             <span class="request-name">{{ request.name }}</span>
             <span class="request-date">{{ request.date }}</span>
           </div>
-          <p class="request-message">
-            留言：问题1:留备注 回答:{{ request.message }}
-          </p>
-          <span class="request-status">已同意</span>
+          <p class="request-message">留言：{{ request.message }}</p>
+          <span class="request-status">{{ request.status }}</span>
         </div>
       </div>
     </div>
@@ -26,58 +25,17 @@
 </template>
 
 <script setup>
-import {ref} from 'vue';
+import {useFriendManagerStore} from '@/store/friendManager.js';
+import {storeToRefs} from 'pinia';
+import {computed} from "vue";
 
-// 模拟数据
-const requests = ref([
-  {
-    avatar: '', // 替换为实际头像 URL
-    name: '240603414姚文艳',
-    date: '昨天',
-    message: '240603414姚文艳',
-  },
-  {
-    avatar: '', // 替换为实际头像 URL
-    name: '谕小花',
-    date: '2025/01/27',
-    message: '我是谕小花老师',
-  },
-  {
-    avatar: '', // 替换为实际头像 URL
+const store = useFriendManagerStore();
+const {selectedMenu, friendRequests, groupRequests} = storeToRefs(store);
 
-    name: '240603330～吴前龙',
-    date: '2025/01/20',
-    message: '吴前龙',
-  },
-  {
-    avatar: '', // 替换为实际头像 URL
-
-    name: '240602330-张放（前端）',
-    date: '2025/01/16',
-    message: '张放',
-  },
-  {
-    avatar: '', // 替换为实际头像 URL
-
-    name: '杨蕊慈',
-    date: '2024/12/30',
-    message: '杨蕊慈',
-  },
-  {
-    avatar: '', // 替换为实际头像 URL
-
-    name: '240603422-班长-吴骞',
-    date: '2024/12/20',
-    message: '吴骞',
-  },
-  {
-    avatar: '', // 替换为实际头像 URL
-
-    name: '小新超人😊',
-    date: '2024/11/28',
-    message: '240201405_邓志蓉',
-  },
-]);
+// 计算当前要显示的请求列表
+const currentRequests = computed(() => {
+  return selectedMenu.value === 'friend' ? friendRequests.value : groupRequests.value;
+});
 </script>
 
 <style lang="scss" scoped>
@@ -85,7 +43,6 @@ const requests = ref([
   width: 100%;
   max-width: 800px;
   margin: 0 auto;
-  background-color: #f2f2f2;
   overflow-y: auto;
 
   .title {
@@ -159,3 +116,4 @@ const requests = ref([
   }
 }
 </style>
+

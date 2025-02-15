@@ -1,12 +1,18 @@
 <template>
   <div class="sidebar">
     <div class="sidebar-items">
-      <div class="sidebar-item">
-        <img src="" alt="friend notification" />
+      <div
+          class="sidebar-item"
+          @click="selectMenu('friend')"
+      >
+        <img src="https://example.com/friend-notification-icon.png" alt="friend notification" />
         <span>好友通知</span>
       </div>
-      <div class="sidebar-item">
-        <img src="" alt="group notification" />
+      <div
+          class="sidebar-item"
+          @click="selectMenu('group')"
+      >
+        <img src="https://example.com/group-notification-icon.png" alt="group notification" />
         <span>群通知</span>
       </div>
     </div>
@@ -14,10 +20,16 @@
 </template>
 
 <script setup>
+import { useFriendManagerStore } from '@/store/friendManager.js';
 
+const store = useFriendManagerStore();
+
+const selectMenu = (menu) => {
+  store.setSelectedMenu(menu);
+};
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .sidebar {
   width: 300px;
   background-color: #f5f5f5;
