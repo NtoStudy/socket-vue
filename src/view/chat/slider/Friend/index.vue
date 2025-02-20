@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted, ref } from 'vue'
-import { getFriendList } from '@/api/friend/index.js'
+import { friendMessageCount, getFriendList } from '@/api/friend/index.js'
 import { chatFriendOrChatRoomStore } from '@/store/chat.js'
 const chatFriendOrChatRoom = chatFriendOrChatRoomStore()
 const friendChats = ref([])
@@ -11,11 +11,39 @@ const handleFriendList = async () => {
   if (res.data.code === 200) {
     chatFriendOrChatRoom.setFriendId(res.data.data[0].friendId)
     friendChats.value = res.data.data
-  }
+      const updatedFriendList = await Promise.allSettled(
+        friendChats.value.map(async (friend) => {
+          try {
+              const CountRes = await friendMessageCount(friend.relationId);
+            return {
+              ...friend,
+              count: CountRes.data.data,
+            };
+          } catch (error) {
+            return { ...friend, count: 0 }; // 默认值为 0
+          }
+        })
+      );
+      // 处理每个结果
+      const finalFriendList = updatedFriendList.map((result) => {
+        if (result.status === "fulfilled") {
+          return result.value;
+        } else {
+          return { ...result.value, count: 0 }; // 默认值为 0
+        }
+      });
+
+      chatFriendOrChatRoom.setFriendId(finalFriendList[0].friendId);
+      friendChats.value = finalFriendList;
+    }
+
 }
 
 const handleChatMessage = (friendId) => {
   chatFriendOrChatRoom.setFriendId(friendId); // 更新 Pinia 状态
+  //TODO 处理实时刷新未读消息数量
+  handleFriendList()
+
 };
 
 onMounted(() => {
@@ -43,7 +71,7 @@ onMounted(() => {
         <span class="chat-text">{{ chat.message }}</span>
       </div>
     </div>
-    <div class="chat-badge" v-if="chat.unread > 0">{{ chat.unread }}</div>
+    <div class="chat-badge" v-if="chat.count > 0">{{ chat.count }}</div>
   </div>
 </template>
 

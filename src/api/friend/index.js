@@ -1,4 +1,4 @@
-import instance from "@/api/index.js";
+import instance from '@/api/index.js'
 
 /**
  * 添加好友
@@ -8,7 +8,7 @@ import instance from "@/api/index.js";
 export const addFriend = (friendNumber) => instance({
   url: '/friends/add',
   method: 'post',
-  params: {friendNumber}
+  params: { friendNumber },
 })
 
 /**
@@ -17,7 +17,7 @@ export const addFriend = (friendNumber) => instance({
  */
 export const getFriendList = () => instance({
   url: '/friends/friendlist',
-  method: 'get'
+  method: 'get',
 })
 
 /**
@@ -30,7 +30,7 @@ export const getFriendList = () => instance({
 export const handleFriend = (relationId, status) => instance({
   url: '/friends/accept',
   method: 'put',
-  params: {relationId, status}
+  params: { relationId, status },
 })
 
 /**
@@ -42,7 +42,7 @@ export const handleFriend = (relationId, status) => instance({
 export const messageSend = (receiverId, content) => instance({
   url: '/messages/send',
   method: 'post',
-  params: {receiverId, content}
+  params: { receiverId, content },
 })
 
 /**
@@ -55,7 +55,7 @@ export const messageSend = (receiverId, content) => instance({
 export const messageHistory = (receiverId, pageNum, pageSize) => instance({
   url: '/messages/history',
   method: 'get',
-  params: {receiverId, pageNum, pageSize}
+  params: { receiverId, pageNum, pageSize },
 })
 
 /**
@@ -66,6 +66,16 @@ export const messageHistory = (receiverId, pageNum, pageSize) => instance({
 export const messageDelete = (messageId) => instance({
   url: '/messages/delete',
   method: 'delete',
-  params: {messageId}
+  params: { messageId },
 })
 
+/**
+ * 获取好友消息数量
+ * @param relationId
+ * @returns {*}
+ */
+export const friendMessageCount = (relationId) => instance({
+  url: '/friends/messageCount',
+  method: 'get',
+  params: { relationId },
+})
