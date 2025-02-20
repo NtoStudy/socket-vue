@@ -1,21 +1,90 @@
 <script setup>
-import {onMounted, ref} from "vue";
-import {messageHistory, messageSend} from "@/api/friend/index.js";
-import {useUserInfoStore} from "@/store/user.js";
+import { onMounted, ref, watch } from 'vue'
+import { messageHistory } from '@/api/friend/index.js'
+import { useUserInfoStore } from '@/store/user.js'
+import { chatFriendOrChatRoomStore } from '@/store/chat.js'
+import { chatRoomHistory } from '@/api/ChatRoom/index.js'
+
+const chatFriendOrChatRoom = chatFriendOrChatRoomStore()
 const useUserInfo = useUserInfoStore();
 const messages = ref([]);
 const inputContent = ref('');
 
+/**
+ * 处理用户聊天消息
+ * @returns {Promise<void>}
+ */
 const handleChatMessage = async () => {
-  const res = await messageHistory(5, 1, 100);
-  messages.value = res.data.data.list;
-  console.log(messages.value)
+  const friendId = chatFriendOrChatRoom.friendId;
+  const res = await messageHistory(friendId, 1, 100);
+
+  // 格式化时间并计算时间间隔
+  messages.value = res.data.data.list.map((message, index, array) => {
+    // 格式化时间
+    message.sentTime = message.sentTime.replace("T", " ");
+
+    // 计算与上一条消息的时间间隔
+    if (index > 0) {
+      const currentTimestamp = new Date(message.sentTime).getTime();
+      const previousTimestamp = new Date(array[index - 1].sentTime).getTime();
+      const timeDifference = currentTimestamp - previousTimestamp;
+
+      // 如果时间间隔小于 3 分钟，不显示时间戳
+      message.showTimestamp = timeDifference >= 180000; // 3 分钟 = 180000 毫秒
+    } else {
+      // 第一条消息总是显示时间戳
+      message.showTimestamp = true;
+    }
+
+    return message;
+  });
+};
+/**
+ * 处理群聊消息
+ * @returns {Promise<void>}
+ */
+const handleChatRoomMessage = async () => {
+  const chatRoomId = chatFriendOrChatRoom.chatRoomId;
+  const res = await chatRoomHistory(chatRoomId, 1, 100);
+
+  // 格式化时间并计算时间间隔
+  messages.value = res.data.data.list.map((message, index, array) => {
+    // 格式化时间
+    message.sentTime = message.sentTime.replace("T", " ");
+
+    // 计算与上一条消息的时间间隔
+    if (index > 0) {
+      const currentTimestamp = new Date(message.sentTime).getTime();
+      const previousTimestamp = new Date(array[index - 1].sentTime).getTime();
+      const timeDifference = currentTimestamp - previousTimestamp;
+
+      // 如果时间间隔小于 3 分钟，不显示时间戳
+      message.showTimestamp = timeDifference >= 180000; // 3 分钟 = 180000 毫秒
+    } else {
+      // 第一条消息总是显示时间戳
+      message.showTimestamp = true;
+    }
+
+    return message;
+  });
 };
 
-
-onMounted(()=>{
-  handleChatMessage()
-})
+// 监听 friendId 的变化
+const handleFriendIdChange = () => {
+  handleChatMessage();
+};
+const handleRoomIdChange = () => {
+  handleChatRoomMessage();
+};
+onMounted(() => {
+  watch(
+    () => chatFriendOrChatRoom.friendId,
+    handleFriendIdChange
+  );
+  watch(()=> chatFriendOrChatRoom.chatRoomId,
+    handleRoomIdChange
+  )
+});
 </script>
 
 <template>
@@ -29,7 +98,7 @@ onMounted(()=>{
           :key="message.id"
           :class="['message', message.senderId === useUserInfo.userInfo.userId ? 'user-message' : 'assistant-message']"
       >
-        <div class="timestamp">{{ message.sentTime }}</div>
+        <div v-if="message.showTimestamp" class="timestamp">{{ message.sentTime }}</div>
         <div v-if="message.senderId === useUserInfo.userInfo.userId" class="user-content">
           <div class="text">{{ message.content }}</div>
           <div class="avatar">我</div>

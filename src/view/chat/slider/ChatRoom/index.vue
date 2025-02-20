@@ -1,57 +1,47 @@
 <script setup>
-import {ref} from "vue";
-import {chatRoomList} from "@/api/ChatRoom/index.js";
-import {messageHistory} from "@/api/friend/index.js";
+import { onMounted, ref } from 'vue'
+import { chatRoomList } from '@/api/ChatRoom/index.js'
+import { chatFriendOrChatRoomStore } from '@/store/chat.js'
+const friendOrChatRoomStore = chatFriendOrChatRoomStore()
 
-const groupChats = ref([
-  {
-    avatar: "", // 替换为实际头像 URL
-    title: "群聊一",
-    time: "2025/01/21",
-    message: "[图片]",
-    unread: 0,
-  },
-  {
-    avatar: "", // 替换为实际头像 URL
-    title: "群聊二",
-    time: "2025/01/05",
-    message: "240603324 郭阳...",
-    unread: 4,
-  },
-]);
+const groupChats = ref([])
 const handleChatRoomList = async () => {
-  const res = await chatRoomList();
-  // 更新群聊列表
-  groupChats.value = res.data;
+  const res = await chatRoomList()
+  if(res.data.code === 200){
+    groupChats.value = res.data.data
+    console.log(groupChats.value)
+    friendOrChatRoomStore.setChatRoomId(res.data.data[0].roomId)
+  }
+}
+const handleChatRoomMessage = (roomId) => {
+  friendOrChatRoomStore.setChatRoomId(roomId); // 更新 Pinia 状态
 };
-const handleChatMessage = async (ev) => {
-  const res = await messageHistory(ev, 1, 100);
-  console.log(res.data);
-};
-
+onMounted(() => {
+  handleChatRoomList()
+})
 </script>
 
 <template>
-    <div
-        class="chat-item"
-        v-for="(chat, index) in groupChats"
-        :key="index"
-        @click="handleChatMessage(index)"
-    >
-      <div class="chat-avatar">
-        <img :src="chat.avatar" alt="avatar"/>
-      </div>
-      <div class="chat-content">
-        <div class="chat-header">
-          <span class="chat-title">{{ chat.title }}</span>
-          <span class="chat-time">{{ chat.time }}</span>
-        </div>
-        <div class="chat-message">
-          <span class="chat-text">{{ chat.message }}</span>
-        </div>
-      </div>
-      <div class="chat-badge" v-if="chat.unread > 0">{{ chat.unread }}</div>
+  <div
+    class="chat-item"
+    v-for="(chat, index) in groupChats"
+    :key="index"
+    @click="handleChatRoomMessage(chat.roomId)"
+  >
+    <div class="chat-avatar">
+      <img :src="chat.avatarUrl" alt="avatar" />
     </div>
+    <div class="chat-content">
+      <div class="chat-header">
+        <span class="chat-title">{{ chat.roomName }}</span>
+        <span class="chat-time">{{ chat.time }}</span>
+      </div>
+      <div class="chat-message">
+        <span class="chat-text">{{ chat.message }}</span>
+      </div>
+    </div>
+    <div class="chat-badge" v-if="chat.unread > 0">{{ chat.unread }}</div>
+  </div>
 </template>
 
 <style lang="scss" scoped>

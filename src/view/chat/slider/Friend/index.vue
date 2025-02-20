@@ -1,47 +1,42 @@
 <script setup>
-import {onMounted, ref} from "vue";
-import {getFriendList, messageHistory} from "@/api/friend/index.js";
+import { onMounted, ref } from 'vue'
+import { getFriendList } from '@/api/friend/index.js'
+import { chatFriendOrChatRoomStore } from '@/store/chat.js'
+const chatFriendOrChatRoom = chatFriendOrChatRoomStore()
+const friendChats = ref([])
 
-const friendChats = ref([
-  {
-    avatar: "", // 替换为实际头像 URL
-    title: "好友一",
-    time: "星期二",
-    message: "李翔：[动画表情]",
-    unread: 0,
-  },
-  {
-    avatar: "", // 替换为实际头像 URL
-    title: "好友二",
-    time: "星期二",
-    message: "前端大家尽量都...",
-    unread: 0,
-  },
-]);
+
 const handleFriendList = async () => {
-  // TODO: 等封装完接口之后后续处理
-  const res = await getFriendList();
-  // 更新好友列表
-  // friendChats.value = res.data;
+  const res = await getFriendList()
+  if (res.data.code === 200) {
+    chatFriendOrChatRoom.setFriendId(res.data.data[0].friendId)
+    friendChats.value = res.data.data
+  }
+}
+
+const handleChatMessage = (friendId) => {
+  chatFriendOrChatRoom.setFriendId(friendId); // 更新 Pinia 状态
 };
 
+onMounted(() => {
+  handleFriendList();
+});
 
 </script>
 
 <template>
-
   <div
-      class="chat-item"
-      v-for="(chat, index) in friendChats"
-      :key="index"
-      @click="handleChatMessage(index)"
+    class="chat-item"
+    v-for="(chat, index) in friendChats"
+    :key="index"
+    @click="handleChatMessage(chat.friendId)"
   >
     <div class="chat-avatar">
-      <img :src="chat.avatar" alt="avatar"/>
+      <img :src="chat.avatarUrl" alt="avatar" />
     </div>
     <div class="chat-content">
       <div class="chat-header">
-        <span class="chat-title">{{ chat.title }}</span>
+        <span class="chat-title">{{ chat.username }}</span>
         <span class="chat-time">{{ chat.time }}</span>
       </div>
       <div class="chat-message">
@@ -50,7 +45,6 @@ const handleFriendList = async () => {
     </div>
     <div class="chat-badge" v-if="chat.unread > 0">{{ chat.unread }}</div>
   </div>
-
 </template>
 
 <style lang="scss" scoped>

@@ -30,6 +30,10 @@ export const userRegister = (username, password) => instance({
   }
 })
 
+/**
+ * 获取用户信息函数
+ * @returns {*}
+ */
 export const userInfoByJwt = () => instance({
   url: '/users/info',
   method: 'get'
@@ -46,11 +50,11 @@ export const userLogout = () => instance({
 
 /**
  * 获取用户信息函数
- * @param {string} userId - 用户ID
+ * @param {bigint} userId - 用户ID
  * @returns {Promise} - 返回获取用户信息请求的Promise对象
  */
 export const getUserInfoById = (userId) => instance({
-  url: '/users/info',
+  url: '/users/infoById',
   method: 'get',
   params: {
     userId

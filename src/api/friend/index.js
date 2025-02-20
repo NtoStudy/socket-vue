@@ -68,3 +68,4 @@ export const messageDelete = (messageId) => instance({
   method: 'delete',
   params: {messageId}
 })
+

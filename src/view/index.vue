@@ -21,7 +21,6 @@
 <script setup>
 import {onMounted, ref} from 'vue';
 import router from "@/router/index.js";
-import {userInfoByJwt} from "@/api/user/index.js";
 
 // Sidebar items data
 const sidebarItems = ref([
