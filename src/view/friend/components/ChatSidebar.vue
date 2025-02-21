@@ -9,7 +9,6 @@
       <el-popover
         placement="bottom"
         trigger="click"
-
       >
         <template #reference>
           <el-button :icon="Plus" />
@@ -19,7 +18,6 @@
             <el-icon>
               <ChatRound />
             </el-icon>
-
             创建群聊
           </el-menu-item>
           <el-menu-item @click="addContactOrGroup" style="height: 30px">

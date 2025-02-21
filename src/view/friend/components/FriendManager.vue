@@ -4,20 +4,38 @@
     <div class="request-list">
       <!-- 动态渲染请求列表 -->
       <div
-          v-for="(request, index) in currentRequests"
-          :key="index"
-          class="request-item"
+        v-for="(request, index) in currentRequests"
+        :key="index"
+        class="request-item"
       >
         <div class="request-avatar">
-          <img :src="request.avatar" alt="avatar" />
+          <img :src="request.avatarUrl" alt="avatar" />
         </div>
         <div class="request-content">
-          <div class="request-header">
-            <span class="request-name">{{ request.name }}</span>
-            <span class="request-date">{{ request.date }}</span>
+          <div class="request-right">
+            <div class="request-header">
+              <span class="request-name">{{ request.username }}</span>
+              <span class="request-date">{{ request.createdAt }}</span>
+
+            </div>
+            <div class="request-message">
+              <p>留言：{{ request.content }}</p>
+            </div>
           </div>
-          <p class="request-message">留言：{{ request.message }}</p>
-          <span class="request-status">{{ request.status }}</span>
+          <div class="request-left">
+            <el-dropdown split-button type="primary" v-if="request.status === 0">
+              同意
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item>拒绝</el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+            <p v-if="request.status === 1">已同意</p>
+            <p v-if="request.status === 2">已拒绝</p>
+          </div>
+
+
         </div>
       </div>
     </div>
@@ -25,17 +43,21 @@
 </template>
 
 <script setup>
-import {useFriendManagerStore} from '@/store/friendManager.js';
-import {storeToRefs} from 'pinia';
-import {computed} from "vue";
+import { useFriendManagerStore } from '@/store/friendManager.js'
+import { storeToRefs } from 'pinia'
+import { computed, onMounted } from 'vue'
 
-const store = useFriendManagerStore();
-const {selectedMenu, friendRequests, groupRequests} = storeToRefs(store);
+const store = useFriendManagerStore()
+const { selectedMenu, friendRequests, groupRequests } = storeToRefs(store)
 
 // 计算当前要显示的请求列表
 const currentRequests = computed(() => {
-  return selectedMenu.value === 'friend' ? friendRequests.value : groupRequests.value;
-});
+  return selectedMenu.value === 'friend' ? friendRequests.value : groupRequests.value
+})
+
+onMounted(() => {
+  store.handleFriendList()
+})
 </script>
 
 <style lang="scss" scoped>
@@ -60,11 +82,11 @@ const currentRequests = computed(() => {
 
   .request-item {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     background: #fff;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    padding: 15px;
+    padding: 10px;
     transition: transform 0.2s, box-shadow 0.2s;
 
     &:hover {
@@ -74,7 +96,13 @@ const currentRequests = computed(() => {
   }
 
   .request-avatar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 60px;
+
     img {
+      display: flex;
       width: 40px;
       height: 40px;
       border-radius: 50%;
@@ -84,36 +112,46 @@ const currentRequests = computed(() => {
 
   .request-content {
     flex: 1;
+    display: flex;
+    justify-content: space-between;
 
-    .request-header {
+    .request-right {
+      .request-header {
+        display: flex;
+        margin-bottom: 20px;
+
+        .request-name {
+          font-size: 14px;
+          margin-right: 30px;
+          font-weight: 500;
+          color: #333;
+        }
+
+        .request-date {
+          font-size: 12px;
+          color: #666;
+        }
+      }
+
+      .request-message {
+        margin-bottom: 10px;
+
+        p {
+          font-size: 12px;
+          color: #666;
+        }
+      }
+
+    }
+
+    .request-left{
       display: flex;
       justify-content: space-between;
-      margin-bottom: 5px;
-
-      .request-name {
-        font-size: 14px;
-        font-weight: 500;
-        color: #333;
-      }
-
-      .request-date {
-        font-size: 12px;
-        color: #666;
-      }
+      align-items: center;
+      margin-right: 20px;
+      color: #66667a;
     }
 
-    .request-message {
-      font-size: 12px;
-      color: #666;
-      margin-bottom: 5px;
-    }
-
-    .request-status {
-      font-size: 12px;
-      color: #888;
-      text-align: right;
-    }
   }
 }
 </style>
-
