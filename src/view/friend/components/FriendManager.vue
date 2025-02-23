@@ -23,19 +23,18 @@
             </div>
           </div>
           <div class="request-left">
-            <el-dropdown split-button type="primary" v-if="request.status === 0">
+            <el-dropdown split-button type="primary" v-if="request.status === 0"
+                         @click="handleFriendOrRequestRequest(request,1)">
               同意
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item>拒绝</el-dropdown-item>
+                  <el-dropdown-item @click="handleFriendOrRequestRequest(request,2)">拒绝</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
             <p v-if="request.status === 1">已同意</p>
             <p v-if="request.status === 2">已拒绝</p>
           </div>
-
-
         </div>
       </div>
     </div>
@@ -45,18 +44,41 @@
 <script setup>
 import { useFriendManagerStore } from '@/store/friendManager.js'
 import { storeToRefs } from 'pinia'
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
+import { handleFriend } from '@/api/friend/index.js'
+import { chatRoomHandle } from '@/api/ChatRoom/index.js'
+import { handleChatRoom } from '@/api/notification/index.js'
 
 const store = useFriendManagerStore()
 const { selectedMenu, friendRequests, groupRequests } = storeToRefs(store)
+
 
 // 计算当前要显示的请求列表
 const currentRequests = computed(() => {
   return selectedMenu.value === 'friend' ? friendRequests.value : groupRequests.value
 })
 
+const handleFriendOrRequestRequest = async (request, status) => {
+  if (request.relationId) {
+    const res = await handleFriend(request.relationId, status)
+    if (res.data.code === 200) {
+      await store.handleFriendList()
+    }
+  }
+  if (request.roomId) {
+    const res = await chatRoomHandle(request.roomId, status)
+    if (res.data.code === 200) {
+      await store.handleGroupList()
+    }
+  }
+
+}
+
+
 onMounted(() => {
   store.handleFriendList()
+  store.handleGroupList()
+
 })
 </script>
 
@@ -144,7 +166,7 @@ onMounted(() => {
 
     }
 
-    .request-left{
+    .request-left {
       display: flex;
       justify-content: space-between;
       align-items: center;

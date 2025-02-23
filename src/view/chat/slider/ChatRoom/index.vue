@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted, ref } from 'vue'
-import { chatRoomList } from '@/api/ChatRoom/index.js'
+import { chatRoomList, chatRoomUser } from '@/api/ChatRoom/index.js'
 import { chatFriendOrChatRoomStore } from '@/store/chat.js'
 const friendOrChatRoomStore = chatFriendOrChatRoomStore()
 
@@ -9,12 +9,13 @@ const handleChatRoomList = async () => {
   const res = await chatRoomList()
   if(res.data.code === 200){
     groupChats.value = res.data.data
-    console.log(groupChats.value)
     friendOrChatRoomStore.setChatRoomId(res.data.data[0].roomId)
   }
 }
-const handleChatRoomMessage = (roomId) => {
+const handleChatRoomMessage =async (roomId) => {
   friendOrChatRoomStore.setChatRoomId(roomId); // 更新 Pinia 状态
+  const promise = await chatRoomUser(roomId)
+  console.log(promise.data)
 };
 onMounted(() => {
   handleChatRoomList()

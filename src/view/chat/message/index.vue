@@ -9,7 +9,6 @@ const chatFriendOrChatRoom = chatFriendOrChatRoomStore()
 const useUserInfo = useUserInfoStore();
 const messages = ref([]);
 const inputContent = ref('');
-
 /**
  * 处理用户聊天消息
  * @returns {Promise<void>}
@@ -17,7 +16,6 @@ const inputContent = ref('');
 const handleChatMessage = async () => {
   const friendId = chatFriendOrChatRoom.friendId;
   const res = await messageHistory(friendId, 1, 100);
-
   // 格式化时间并计算时间间隔
   messages.value = res.data.data.list.map((message, index, array) => {
     // 格式化时间
@@ -46,7 +44,7 @@ const handleChatMessage = async () => {
 const handleChatRoomMessage = async () => {
   const chatRoomId = chatFriendOrChatRoom.chatRoomId;
   const res = await chatRoomHistory(chatRoomId, 1, 100);
-
+  //TODO根据res.data.data.list里面的senderId进行查询头像
   // 格式化时间并计算时间间隔
   messages.value = res.data.data.list.map((message, index, array) => {
     // 格式化时间
@@ -69,22 +67,28 @@ const handleChatRoomMessage = async () => {
   });
 };
 
-// 监听 friendId 的变化
-const handleFriendIdChange = () => {
-  handleChatMessage();
-};
-const handleRoomIdChange = () => {
-  handleChatRoomMessage();
-};
 onMounted(() => {
   watch(
     () => chatFriendOrChatRoom.friendId,
-    handleFriendIdChange
+    async (newFriendId) => {
+      if (newFriendId) {
+        await handleChatMessage();
+      }
+    }
   );
-  watch(()=> chatFriendOrChatRoom.chatRoomId,
-    handleRoomIdChange
-  )
+
+  watch(
+    () => chatFriendOrChatRoom.chatRoomId,
+    async (newChatRoomId) => {
+      if (newChatRoomId) {
+        await handleChatRoomMessage();
+      }
+    }
+  );
 });
+
+
+
 </script>
 
 <template>

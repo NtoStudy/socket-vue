@@ -1,7 +1,7 @@
 // stores/friendManagerStore.js
 import { defineStore } from 'pinia';
 import { ref } from 'vue'
-import { handleFriend } from '@/api/notification/index.js'
+import { handleChatRoom, handleFriend } from '@/api/notification/index.js'
 
 export const useFriendManagerStore = defineStore('friendManager', ()=>{
   const selectedMenu = ref('friend'); // 当前选中的菜单：friend 或 group
@@ -14,13 +14,17 @@ export const useFriendManagerStore = defineStore('friendManager', ()=>{
   const handleFriendList = async ()=>{
     const res = await handleFriend()
     friendRequests.value = res.data.data
-    console.log(friendRequests.value)
+  }
+  const handleGroupList = async ()=>{
+    const res = await handleChatRoom()
+    groupRequests.value = res.data.data
   }
   return {
     selectedMenu,
     friendRequests,
     groupRequests,
     setSelectedMenu,
-    handleFriendList
+    handleFriendList,
+    handleGroupList
   }
 });

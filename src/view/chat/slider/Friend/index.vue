@@ -41,9 +41,6 @@ const handleFriendList = async () => {
 
 const handleChatMessage = (friendId) => {
   chatFriendOrChatRoom.setFriendId(friendId); // 更新 Pinia 状态
-  //TODO 处理实时刷新未读消息数量
-  handleFriendList()
-
 };
 
 onMounted(() => {
