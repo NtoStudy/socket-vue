@@ -50,13 +50,13 @@ export const userLogout = () => instance({
 
 /**
  * 获取用户信息函数
- * @param {bigint} userId - 用户ID
+ * @param {string} number - 用户ID
  * @returns {Promise} - 返回获取用户信息请求的Promise对象
  */
-export const getUserInfoById = (userId) => instance({
-  url: '/users/infoById',
+export const getUserInfoByNumber = (number) => instance({
+  url: '/users/infoByNumber',
   method: 'get',
   params: {
-    userId
+    number
   }
 })

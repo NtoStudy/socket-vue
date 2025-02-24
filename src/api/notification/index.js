@@ -23,7 +23,7 @@ export const friendNumber = () => instance({
  * 通过GET方法请求notifications/chatroom接口，获取聊天室通知的相关数据
  */
 export const handleChatRoom = () => instance({
-  url:'/notifications/chatroom',
+    url:'/notifications/chatroom',
   method:'get'
 })
 

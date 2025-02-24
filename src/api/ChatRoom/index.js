@@ -13,6 +13,18 @@ export const chatRoomCreate = (roomName, userIds) => instance({
 })
 
 /**
+ * 获取聊天室信息
+ * @param groupNumber
+ * @returns {*}
+ */
+export const chatRoomInquire = (groupNumber) => instance({
+  url: '/chat-rooms/inquire',
+  method: 'get',
+  params: {groupNumber}
+})
+
+
+/**
  * 处理聊天室邀请或请求
  * @param {number} roomId - 聊天室ID
  * @param {string} status - 处理状态
