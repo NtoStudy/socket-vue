@@ -11,6 +11,23 @@ const useUserInfo = useUserInfoStore()
 const messages = ref([])
 const websocket = new WebSocketService()
 const newMessage = ref('')
+
+// 消息格式化相关函数
+const formatMessages = (messagesList) => {
+  return messagesList.map((message, index, array) => {
+    message.sentTime = message.sentTime.replace('T', ' ')
+    if (index > 0) {
+      const currentTimestamp = new Date(message.sentTime).getTime()
+      const previousTimestamp = new Date(array[index - 1].sentTime).getTime()
+      const timeDifference = currentTimestamp - previousTimestamp
+      message.showTimestamp = timeDifference >= 180000
+    } else {
+      message.showTimestamp = true
+    }
+    return message
+  })
+}
+
 /**
  * 处理用户聊天消息
  * @returns {Promise<void>}
@@ -18,26 +35,7 @@ const newMessage = ref('')
 const handleChatMessage = async () => {
   const friendId = chatFriendOrChatRoom.friendId
   const res = await messageHistory(friendId, 1, 100)
-  // 格式化时间并计算时间间隔
-  messages.value = res.data.data.list.map((message, index, array) => {
-    // 格式化时间
-    message.sentTime = message.sentTime.replace('T', ' ')
-
-    // 计算与上一条消息的时间间隔
-    if (index > 0) {
-      const currentTimestamp = new Date(message.sentTime).getTime()
-      const previousTimestamp = new Date(array[index - 1].sentTime).getTime()
-      const timeDifference = currentTimestamp - previousTimestamp
-
-      // 如果时间间隔小于 3 分钟，不显示时间戳
-      message.showTimestamp = timeDifference >= 180000 // 3 分钟 = 180000 毫秒
-    } else {
-      // 第一条消息总是显示时间戳
-      message.showTimestamp = true
-    }
-
-    return message
-  })
+  messages.value = formatMessages(res.data.data.list)
 }
 /**
  * 处理群聊消息
@@ -46,32 +44,14 @@ const handleChatMessage = async () => {
 const handleChatRoomMessage = async () => {
   const chatRoomId = chatFriendOrChatRoom.chatRoomId
   const res = await chatRoomHistory(chatRoomId, 1, 100)
-  // 格式化时间并计算时间间隔
-  messages.value = res.data.data.list.map((message, index, array) => {
-    // 格式化时间
-    message.sentTime = message.sentTime.replace('T', ' ')
-
-    // 计算与上一条消息的时间间隔
-    if (index > 0) {
-      const currentTimestamp = new Date(message.sentTime).getTime()
-      const previousTimestamp = new Date(array[index - 1].sentTime).getTime()
-      const timeDifference = currentTimestamp - previousTimestamp
-
-      // 如果时间间隔小于 3 分钟，不显示时间戳
-      message.showTimestamp = timeDifference >= 180000 // 3 分钟 = 180000 毫秒
-    } else {
-      // 第一条消息总是显示时间戳
-      message.showTimestamp = true
-    }
-
-    return message
-  })
+  messages.value = formatMessages(res.data.data.list)
 }
 
 onMounted(() => {
   websocket.connect()
   websocket.onMessage((message) => {
-    messages.value.push(`[${username}] ${message}`)
+    // 将接收到的消息添加到消息列表
+    messages.value = formatMessages([...messages.value, message])
     scrollToBottom()
   })
 })
@@ -81,17 +61,43 @@ onUnmounted(() => {
 })
 
 const sendMessage = () => {
-  // if (newMessage.value.trim()) {
-  //   websocket.sendMessage(newMessage.value)
-  //   messages.value.push(`[你] ${newMessage.value}`)
-  //   newMessage.value = ''
-  //   scrollToBottom()
-  // }
+  if (newMessage.value.trim()) {
+    if (!chatFriendOrChatRoom.friendId) {
+      console.error('Receiver ID is not available.')
+      return
+    }
+
+    const message = {
+      content: newMessage.value,
+      receiverId: chatFriendOrChatRoom.friendId,
+      sentTime: new Date()
+        .toLocaleString('zh-CN', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: false, // 24小时制
+        })
+        .replace(/\//g, '-')
+        .replace(',', ''), // 格式化为 "2025-02-25 15:14:51"
+      senderId: useUserInfo.userInfo.userId, // 关键修复
+    }
+
+    messages.value = formatMessages([...messages.value, message])
+
+    websocket.sendMessage(newMessage.value, chatFriendOrChatRoom.friendId)
+    newMessage.value = ''
+    scrollToBottom()
+  }
 }
 
 const scrollToBottom = () => {
   const messagesEl = document.querySelector('.messages')
-  messagesEl.scrollTop = messagesEl.scrollHeight
+  if (messagesEl) {
+    messagesEl.scrollTop = messagesEl.scrollHeight
+  }
 }
 
 onMounted(() => {
@@ -227,6 +233,7 @@ onMounted(() => {
     padding: 10px;
     background-color: #f5f5f5;
     border-top: 1px solid #e0e0e0;
+
     input {
       flex: 1;
       padding: 8px;

@@ -1,6 +1,7 @@
 import { useUserInfoStore } from '@/store/user.js'
 const useUserInfo = useUserInfoStore()
 const token = useUserInfo.token
+
 export default class WebSocketService {
   constructor() {
     this.socket = null
@@ -8,7 +9,14 @@ export default class WebSocketService {
     this.onopenCallbacks = []
     this.oncloseCallbacks = []
   }
+
+  // 连接 WebSocket
   connect() {
+    if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+      console.warn('WebSocket is already open.')
+      return
+    }
+
     this.socket = new WebSocket(`ws://localhost:8080/chat?token=${token}`)
 
     this.socket.onopen = () => {
@@ -28,26 +36,33 @@ export default class WebSocketService {
     }
   }
 
-  sendMessage(message) {
+  // 发送消息
+  sendMessage(content, receiverId) {
     if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-      this.socket.send(JSON.stringify({ content: message }))
+      this.socket.send(JSON.stringify({ content, receiverId }))
+    } else {
+      console.error("WebSocket is not open. Can't send message.")
     }
   }
 
+  // 断开连接
   disconnect() {
     if (this.socket) {
       this.socket.close()
     }
   }
 
+  // 注册消息回调
   onMessage(callback) {
     this.callbacks.push(callback)
   }
 
+  // 注册连接打开回调
   onOpen(callback) {
     this.onopenCallbacks.push(callback)
   }
 
+  // 注册连接关闭回调
   onClose(callback) {
     this.oncloseCallbacks.push(callback)
   }
