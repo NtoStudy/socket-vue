@@ -47,7 +47,6 @@ import { storeToRefs } from 'pinia'
 import { computed, onMounted, ref } from 'vue'
 import { handleFriend } from '@/api/friend/index.js'
 import { chatRoomHandle } from '@/api/ChatRoom/index.js'
-import { handleChatRoom } from '@/api/notification/index.js'
 
 const store = useFriendManagerStore()
 const { selectedMenu, friendRequests, groupRequests } = storeToRefs(store)
@@ -59,14 +58,18 @@ const currentRequests = computed(() => {
 })
 
 const handleFriendOrRequestRequest = async (request, status) => {
+  console.log(request)
   if (request.relationId) {
+    console.log(123)
     const res = await handleFriend(request.relationId, status)
     if (res.data.code === 200) {
       await store.handleFriendList()
     }
   }
   if (request.roomId) {
+    console.log(456)
     const res = await chatRoomHandle(request.roomId, status)
+    console.log(res.data)
     if (res.data.code === 200) {
       await store.handleGroupList()
     }

@@ -30,7 +30,7 @@ export const chatRoomInquire = (groupNumber) => instance({
  * @param {string} status - 处理状态
  * @returns {Promise} - 返回处理聊天室邀请或请求的Promise对象
  */
-export const chatRoomHandle = (roomId, status) => instance({
+export const  chatRoomHandle = (roomId, status) => instance({
   url: '/chat-rooms/accept',
   method: 'put',
   params: {roomId, status}
