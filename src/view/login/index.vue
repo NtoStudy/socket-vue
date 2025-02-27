@@ -7,10 +7,10 @@
             <h2 class="login-title">{{ isRegister ? '用户注册' : '用户登录' }}</h2>
             <el-form v-if="!isRegister" :model="form" label-width="80px">
               <el-form-item label="用户名">
-                <el-input v-model="form.number" placeholder="请输入用户名"/>
+                <el-input v-model="form.number" placeholder="请输入用户名" />
               </el-form-item>
               <el-form-item label="密码">
-                <el-input v-model="form.password" type="password" placeholder="请输入密码"/>
+                <el-input v-model="form.password" type="password" placeholder="请输入密码" />
               </el-form-item>
               <el-form-item>
                 <el-button type="primary" @click="handleLogin" class="login-button">登录</el-button>
@@ -19,13 +19,13 @@
             </el-form>
             <el-form v-if="isRegister" :model="registerForm" label-width="80px">
               <el-form-item label="用户名">
-                <el-input v-model="registerForm.number" placeholder="请输入用户名"/>
+                <el-input v-model="registerForm.number" placeholder="请输入用户名" />
               </el-form-item>
               <el-form-item label="密码">
-                <el-input v-model="registerForm.password" type="password" placeholder="请输入密码"/>
+                <el-input v-model="registerForm.password" type="password" placeholder="请输入密码" />
               </el-form-item>
               <el-form-item label="确认密码">
-                <el-input v-model="registerForm.confirmPassword" type="password" placeholder="请确认密码"/>
+                <el-input v-model="registerForm.confirmPassword" type="password" placeholder="请确认密码" />
               </el-form-item>
               <el-form-item>
                 <el-button type="primary" @click="handleRegisterSubmit" class="login-button">注册</el-button>
@@ -40,21 +40,21 @@
 </template>
 
 <script setup>
-import {ref} from 'vue'
-import {userInfoByJwt, userLogin, userRegister} from "@/api/user/index.js"; // 添加 userRegister 引入
-import {useRouter} from 'vue-router';
-import {useUserInfoStore} from '@/store/user.js'
+import { ref } from 'vue'
+import { userInfoByJwt, userLogin, userRegister } from '@/api/user/index.js' // 添加 userRegister 引入
+import { useRouter } from 'vue-router'
+import { useUserInfoStore } from '@/store/user.js'
 
 const userInfoStore = useUserInfoStore()
-const router = useRouter();
+const router = useRouter()
 const form = ref({
   number: '',
-  password: ''
+  password: '',
 })
 const registerForm = ref({
   number: '',
   password: '',
-  confirmPassword: ''
+  confirmPassword: '',
 })
 
 const isRegister = ref(false) // 添加 isRegister 状态变量
@@ -63,7 +63,7 @@ const handleLogin = async () => {
   const res = await userLogin(form.value.number, form.value.password)
   userInfoStore.setToken(res.data.data)
   if (res.data.code === 200) {
-    const response = await userInfoByJwt();
+    const response = await userInfoByJwt()
     userInfoStore.setUserInfo(response.data.data)
     await router.push('/main')
   }
@@ -80,7 +80,6 @@ const handleRegisterSubmit = async () => {
     return
   }
   const res = await userRegister(registerForm.value.number, registerForm.value.password)
-  console.log(res.data)
   alert('注册成功')
   isRegister.value = false // 注册成功后切换回登录表单
 }

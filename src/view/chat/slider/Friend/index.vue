@@ -1,10 +1,34 @@
 <script setup>
 import { onMounted, ref } from 'vue'
-import { friendMessageCount, getFriendList } from '@/api/friend/index.js'
+import { friendMessageCount, getFriendList, messageHistory } from '@/api/friend/index.js'
 import { chatFriendOrChatRoomStore } from '@/store/chat.js'
 const chatFriendOrChatRoom = chatFriendOrChatRoomStore()
 const friendChats = ref([])
 
+/**
+ * 格式化消息发送时间
+ * @param {number} sentTime - 消息发送时间戳
+ * @returns {string} 格式化后的时间字符串
+ */
+const formatSentTime = (sentTime) => {
+  const now = new Date()
+  const sentDate = new Date(sentTime)
+  const oneDay = 24 * 60 * 60 * 1000 // 一天的毫秒数
+  if (now - sentDate < oneDay) {
+    // 如果在24小时之内，只显示时分秒
+    return sentDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+  } else if (sentDate.getFullYear() === now.getFullYear()) {
+    // 如果在今年之内，只显示月份和日期
+    return sentDate.toLocaleDateString([], { month: '2-digit', day: '2-digit' })
+  } else {
+    // 如果不是今年，则显示年月日
+    return sentDate.toLocaleDateString([], { year: 'numeric', month: '2-digit', day: '2-digit' })
+  }
+}
+
+/**
+ * 处理好友列表，获取未读消息数和最近的消息
+ */
 const handleFriendList = async () => {
   const res = await getFriendList()
   if (res.data.code === 200) {
@@ -19,11 +43,11 @@ const handleFriendList = async () => {
             count: CountRes.data.data,
           }
         } catch (error) {
+          console.log(error)
           return { ...friend, count: 0 } // 默认值为 0
         }
       }),
     )
-    // 处理每个结果
     const finalFriendList = updatedFriendList.map((result) => {
       if (result.status === 'fulfilled') {
         return result.value
@@ -31,11 +55,48 @@ const handleFriendList = async () => {
         return { ...result.value, count: 0 } // 默认值为 0
       }
     })
-    chatFriendOrChatRoom.setFriendId(finalFriendList[0].friendId)
-    friendChats.value = finalFriendList
+
+    const messageHistoryPromises = finalFriendList.map(async (friend) => {
+      try {
+        const historyRes = await messageHistory(friend.friendId, 1, 100)
+        const messages = historyRes.data.data.list
+        if (messages.length > 0) {
+          const lastMessage = messages[messages.length - 1]
+          const formattedSentTime = formatSentTime(lastMessage.sentTime)
+          return {
+            ...friend,
+            sentTime: formattedSentTime,
+            content: lastMessage.content,
+          }
+        } else {
+          return { ...friend, sentTime: null, content: null } // 默认值为 null
+        }
+      } catch (error) {
+        console.log(error)
+        return { ...friend, sentTime: null, content: null } // 默认值为 null
+      }
+    })
+
+    const finalFriendListWithMessages = await Promise.allSettled(messageHistoryPromises)
+    const finalFriendListProcessed = finalFriendListWithMessages.map((result) => {
+      if (result.status === 'fulfilled') {
+        return result.value
+      } else {
+        return { ...result.value, messages: [] } // 默认值为空数组
+      }
+    })
+
+    chatFriendOrChatRoom.setFriendId(finalFriendListProcessed[0].friendId)
+    friendChats.value = finalFriendListProcessed
+
+    console.log(friendChats.value)
   }
 }
 
+/**
+ * 处理聊天消息，更新选中的好友ID
+ * @param {number} friendId - 好友ID
+ */
 const handleChatMessage = (friendId) => {
   chatFriendOrChatRoom.setFriendId(friendId) // 更新 Pinia 状态
 }
@@ -53,10 +114,10 @@ onMounted(() => {
     <div class="chat-content">
       <div class="chat-header">
         <span class="chat-title">{{ chat.username }}</span>
-        <span class="chat-time">{{ chat.time }}</span>
+        <span class="chat-time">{{ chat.sentTime }}</span>
       </div>
       <div class="chat-message">
-        <span class="chat-text">{{ chat.message }}</span>
+        <span class="chat-text">{{ chat.content }}</span>
       </div>
     </div>
     <div class="chat-badge" v-if="chat.count > 0">{{ chat.count }}</div>
@@ -99,7 +160,7 @@ onMounted(() => {
       margin-bottom: 5px;
 
       .chat-title {
-        font-size: 14px;
+        font-size: 16px;
         font-weight: 500;
         color: #333;
       }
@@ -119,6 +180,9 @@ onMounted(() => {
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+        font-weight: 500;
+        font-size: 14px;
+        color: #989898;
       }
     }
   }

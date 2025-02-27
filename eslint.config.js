@@ -1,12 +1,23 @@
-import globals from "globals";
-import pluginJs from "@eslint/js";
-import pluginVue from "eslint-plugin-vue";
+import globals from 'globals'
+import pluginJs from '@eslint/js'
+import pluginVue from 'eslint-plugin-vue'
 
-
-/** @type {import('eslint').Linter.Config[]} */
 export default [
-  {files: ["**/*.{js,mjs,cjs,vue}"]},
-  {languageOptions: { globals: globals.browser }},
+  // 基础配置
+  {
+    files: ['**/*.{js,mjs,cjs,vue}'],
+    languageOptions: {
+      globals: { ...globals.browser }, // 合并浏览器全局变量
+    },
+  },
+  // 插件推荐配置
   pluginJs.configs.recommended,
-  ...pluginVue.configs["flat/essential"],
-];
+  ...pluginVue.configs['flat/essential'],
+  // 自定义规则（覆盖插件默认规则）
+  {
+    files: ['**/*.vue'],
+    rules: {
+      'vue/multi-word-component-names': 'off', // 确保覆盖 Vue 插件的默认规则
+    },
+  },
+]

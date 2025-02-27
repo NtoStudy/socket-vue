@@ -3,11 +3,7 @@
     <h2 class="title">{{ selectedMenu === 'friend' ? '好友通知' : '群通知' }}</h2>
     <div class="request-list">
       <!-- 动态渲染请求列表 -->
-      <div
-        v-for="(request, index) in currentRequests"
-        :key="index"
-        class="request-item"
-      >
+      <div v-for="(request, index) in currentRequests" :key="index" class="request-item">
         <div class="request-avatar">
           <img :src="request.avatarUrl" alt="avatar" />
         </div>
@@ -16,19 +12,22 @@
             <div class="request-header">
               <span class="request-name">{{ request.username }}</span>
               <span class="request-date">{{ request.createdAt }}</span>
-
             </div>
             <div class="request-message">
               <p>留言：{{ request.content }}</p>
             </div>
           </div>
           <div class="request-left">
-            <el-dropdown split-button type="primary" v-if="request.status === 0"
-                         @click="handleFriendOrRequestRequest(request,1)">
+            <el-dropdown
+              split-button
+              type="primary"
+              v-if="request.status === 0"
+              @click="handleFriendOrRequestRequest(request, 1)"
+            >
               同意
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item @click="handleFriendOrRequestRequest(request,2)">拒绝</el-dropdown-item>
+                  <el-dropdown-item @click="handleFriendOrRequestRequest(request, 2)">拒绝</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -51,14 +50,12 @@ import { chatRoomHandle } from '@/api/ChatRoom/index.js'
 const store = useFriendManagerStore()
 const { selectedMenu, friendRequests, groupRequests } = storeToRefs(store)
 
-
 // 计算当前要显示的请求列表
 const currentRequests = computed(() => {
   return selectedMenu.value === 'friend' ? friendRequests.value : groupRequests.value
 })
 
 const handleFriendOrRequestRequest = async (request, status) => {
-  console.log(request)
   if (request.relationId) {
     console.log(123)
     const res = await handleFriend(request.relationId, status)
@@ -74,14 +71,11 @@ const handleFriendOrRequestRequest = async (request, status) => {
       await store.handleGroupList()
     }
   }
-
 }
-
 
 onMounted(() => {
   store.handleFriendList()
   store.handleGroupList()
-
 })
 </script>
 
@@ -112,7 +106,9 @@ onMounted(() => {
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     padding: 10px;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition:
+      transform 0.2s,
+      box-shadow 0.2s;
 
     &:hover {
       transform: translateY(-2px);
@@ -166,7 +162,6 @@ onMounted(() => {
           color: #666;
         }
       }
-
     }
 
     .request-left {
@@ -176,7 +171,6 @@ onMounted(() => {
       margin-right: 20px;
       color: #66667a;
     }
-
   }
 }
 </style>

@@ -37,9 +37,9 @@ export default class WebSocketService {
   }
 
   // 发送消息
-  sendMessage(content, receiverId) {
+  sendMessage(type, content, receiverId, chatRoomId) {
     if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-      this.socket.send(JSON.stringify({ content, receiverId }))
+      this.socket.send(JSON.stringify({ type, content, receiverId, chatRoomId }))
     } else {
       console.error("WebSocket is not open. Can't send message.")
     }
