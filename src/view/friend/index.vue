@@ -6,8 +6,8 @@
 </template>
 
 <script setup>
-import ChatSidebar from './components/ChatSidebar.vue';
-import FriendManager from './components/FriendManager.vue';
+import ChatSidebar from './slider/index.vue'
+import FriendManager from './FriendManager/index.vue'
 </script>
 
 <style>

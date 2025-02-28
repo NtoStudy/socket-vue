@@ -101,7 +101,6 @@ const sendMessage = () => {
     // 以下是用户之间的通讯
     if (newMessage.value.trim()) {
       const message = {
-        type: 'private',
         content: newMessage.value,
         receiverId: chatFriendOrChatRoom.friendId,
         sentTime: new Date()
