@@ -2,43 +2,33 @@
   <div class="chat-list">
     <!-- 按钮拨片切换 -->
     <div class="chat-switcher">
-      <div
-          class="chat-switcher-item"
-          :class="{ active: isActive === 'friend' }"
-          @click="toggleList('friend')"
-      >
+      <div class="chat-switcher-item" :class="{ active: isActive === 'friend' }" @click="toggleList('friend')">
         好友列表
       </div>
-      <div
-          class="chat-switcher-item"
-          :class="{ active: isActive === 'group' }"
-          @click="toggleList('group')"
-      >
+      <div class="chat-switcher-item" :class="{ active: isActive === 'group' }" @click="toggleList('group')">
         群聊列表
       </div>
     </div>
     <!-- 根据切换显示不同内容 -->
-    <Friend v-if="isActive==='friend'"/>
-    <ChatRoom v-else/>
+    <Friend v-if="isActive === 'friend'" />
+    <ChatRoom v-else />
   </div>
 </template>
 
 <script setup>
-import {ref, onMounted} from "vue";
+import { ref, onMounted } from 'vue'
 import Friend from './Friend/index.vue'
 import ChatRoom from './ChatRoom/index.vue'
 
-const isActive = ref("friend"); // 初始显示好友列表
-
+const isActive = ref('friend') // 初始显示好友列表
+//TODO点击群聊转好友的时候不会默认选中第一个
 // 切换列表
 const toggleList = (type) => {
-  if (type === "friend" || type === "group") {
-    isActive.value = type === "friend" ? "friend" : "group";
+  if (type === 'friend' || type === 'group') {
+    isActive.value = type === 'friend' ? 'friend' : 'group'
   }
-};
-onMounted(() => {
-
-});
+}
+onMounted(() => {})
 </script>
 
 <style lang="scss" scoped>
@@ -85,7 +75,9 @@ onMounted(() => {
     border-radius: 8px;
     margin-bottom: 10px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition:
+      transform 0.2s,
+      box-shadow 0.2s;
 
     &:hover {
       transform: translateY(-2px);

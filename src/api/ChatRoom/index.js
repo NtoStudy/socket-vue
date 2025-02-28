@@ -87,9 +87,28 @@ export const chatRoomDelete = (chatRoomId, messageId) =>
     params: { chatRoomId, messageId },
   })
 
+/**
+ * 获取指定聊天室的消息数量
+ *
+ * @param {string} roomId - 聊天室的唯一标识符
+ * @returns {Promise} - 包含消息数量数据的Promise对象
+ */
 export const groupMessageCount = (roomId) =>
   instance({
     url: '/chat-rooms/messageCount',
     method: 'get',
     params: { roomId },
+  })
+
+/**
+ * 添加一个新的聊天室到群组
+ *
+ * @param {string} groupNumber - 群组的编号
+ * @returns {Promise} - 表示添加操作结果的Promise对象
+ */
+export const groupAddChatRoom = (groupNumber) =>
+  instance({
+    url: '/chat-rooms/addgroup',
+    method: 'post',
+    params: { groupNumber },
   })
