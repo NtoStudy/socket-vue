@@ -43,7 +43,7 @@
 <script setup>
 import { useFriendManagerStore } from '@/store/friendManager.js'
 import { storeToRefs } from 'pinia'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted } from 'vue'
 import { handleFriend } from '@/api/friend/index.js'
 import { chatRoomHandle } from '@/api/ChatRoom/index.js'
 
@@ -57,16 +57,13 @@ const currentRequests = computed(() => {
 
 const handleFriendOrRequestRequest = async (request, status) => {
   if (request.relationId) {
-    console.log(123)
     const res = await handleFriend(request.relationId, status)
     if (res.data.code === 200) {
       await store.handleFriendList()
     }
   }
   if (request.roomId) {
-    console.log(456)
     const res = await chatRoomHandle(request.roomId, status)
-    console.log(res.data)
     if (res.data.code === 200) {
       await store.handleGroupList()
     }

@@ -6,6 +6,8 @@ import { chatFriendOrChatRoomStore } from '@/store/chat.js'
 import { chatRoomDelete, chatRoomHistory } from '@/api/ChatRoom/index.js'
 import WebSocketService from '@/services/websocket'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { Microphone, VideoCamera } from '@element-plus/icons-vue'
+import { uploadMethod } from '@/api/upload/index.js'
 
 // 创建聊天室或私聊的消息列表和WebSocket服务实例
 const chatFriendOrChatRoom = chatFriendOrChatRoomStore()
@@ -63,7 +65,6 @@ const handleChatMessage = async () => {
   })
   messageWindowStatus.value = '用户'
 }
-
 /**
  * 处理群聊消息
  * @returns {Promise<void>}
@@ -96,13 +97,15 @@ onUnmounted(() => {
 })
 
 // 发送消息函数
-const sendMessage = () => {
+const sendMessage = (messageType, contentValue) => {
+  //TODO在sendMessage中调用chatRoomList和FriendList方法，实现发送消息即更新组件
   if (messageWindowStatus.value === '用户') {
     // 以下是用户之间的通讯
     if (newMessage.value.trim()) {
       const message = {
         content: newMessage.value,
         receiverId: chatFriendOrChatRoom.friendId,
+        messageType: messageType,
         sentTime: new Date()
           .toLocaleString('zh-CN', {
             year: 'numeric',
@@ -119,7 +122,7 @@ const sendMessage = () => {
       }
 
       messages.value = formatMessages([...messages.value, message])
-      websocket.sendMessage('friend', newMessage.value, chatFriendOrChatRoom.friendId, null)
+      websocket.sendMessage('friend', contentValue, chatFriendOrChatRoom.friendId, null, messageType)
       newMessage.value = ''
       nextTick(() => {
         scrollToBottom()
@@ -130,6 +133,7 @@ const sendMessage = () => {
     if (newMessage.value.trim()) {
       const message = {
         content: newMessage.value,
+        messageType: messageType,
         sentTime: new Date()
           .toLocaleString('zh-CN', {
             year: 'numeric',
@@ -146,9 +150,9 @@ const sendMessage = () => {
       }
 
       messages.value = formatMessages([...messages.value, message])
-      console.log(messages.value, 'message')
-      websocket.sendMessage('group', newMessage.value, null, chatFriendOrChatRoom.chatRoomId)
+      websocket.sendMessage('group', contentValue, null, chatFriendOrChatRoom.chatRoomId, messageType)
       newMessage.value = ''
+
       nextTick(() => {
         scrollToBottom()
       })
@@ -156,7 +160,6 @@ const sendMessage = () => {
   }
 }
 const handleRightClickMessage = (message) => {
-  console.log(message)
   // 防止默认的右键行为
   event.preventDefault()
   if (message.chatRoomId) {
@@ -167,7 +170,7 @@ const handleRightClickMessage = (message) => {
       callback: async (action) => {
         if (action === 'confirm') {
           const res = await chatRoomDelete(message.chatRoomId, message.messageId)
-          console.log(res.data)
+
           if (res.data.code === 200) {
             ElMessage.success('消息已删除')
             await handleChatRoomMessage()
@@ -198,7 +201,23 @@ const scrollToBottom = () => {
     messagesEl.scrollTop = messagesEl.scrollHeight
   }
 }
-
+const sendPicture = () => {
+  const input = document.getElementById('imageUpload')
+  input.click()
+}
+const handleImageUpload = async (event) => {
+  const files = event.target.files
+  if (files && files.length > 0) {
+    const file = files[0]
+    try {
+      const res = await uploadMethod(file)
+      newMessage.value = res.data.data
+      sendMessage('image', newMessage.value)
+    } catch (error) {
+      console.error('Upload failed:', error)
+    }
+  }
+}
 // 监听聊天对象变化，更新消息列表
 watch(
   () => chatFriendOrChatRoom.friendId,
@@ -237,18 +256,45 @@ watch(
           class="user-content"
           @contextmenu.prevent="handleRightClickMessage(message)"
         >
-          <div class="text">{{ message.content }}</div>
+          <div class="text" v-if="message.messageType === 'text'">{{ message.content }}</div>
+          <div class="images" v-else>
+            <img :src="message.content" alt="图片" width="200" height="200" />
+          </div>
           <div class="avatar">我</div>
         </div>
         <div v-else class="assistant-content" @contextmenu.prevent="handleRightClickMessage(message)">
           <div class="avatar">AI</div>
-          <div class="text">{{ message.content }}</div>
+          <div class="text" v-if="message.messageType === 'text'">{{ message.content }}</div>
+          <div class="images" v-else>
+            <img :src="message.content" alt="图片" width="200" height="200" />
+          </div>
         </div>
       </div>
     </div>
     <div class="input-area">
-      <input type="text" placeholder="输入消息" v-model="newMessage" />
-      <button @click="sendMessage">发送</button>
+      <input type="file" id="imageUpload" style="display: none" @change="handleImageUpload" />
+      <div class="icon-group">
+        <el-icon>
+          <Microphone />
+        </el-icon>
+        <el-icon @click="sendPicture">
+          <Picture />
+        </el-icon>
+        <el-icon>
+          <VideoCamera />
+        </el-icon>
+      </div>
+      <div class="input-wrapper">
+        <textarea
+          class="message-input"
+          placeholder="输入消息"
+          v-model="newMessage"
+          @keyup.enter="sendMessage('text', newMessage)"
+        ></textarea>
+        <div class="send-button-wrapper">
+          <button class="send-button" @click="sendMessage('text', newMessage)">发送</button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -318,6 +364,9 @@ watch(
         margin: 0 10px;
         word-wrap: break-word;
       }
+      .images {
+        margin: 0 10px;
+      }
 
       &.user-message .text {
         background-color: #007bff;
@@ -333,25 +382,64 @@ watch(
 
   .input-area {
     display: flex;
+    flex-direction: column;
+    align-items: flex-start;
     padding: 10px;
     background-color: #f5f5f5;
     border-top: 1px solid #e0e0e0;
 
-    input {
-      flex: 1;
-      padding: 8px;
-      border: 1px solid #e0e0e0;
-      border-radius: 4px;
-      margin-right: 10px;
+    .icon-group {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 10px;
+
+      .el-icon {
+        cursor: pointer;
+        font-size: 20px;
+        color: #666;
+
+        &:hover {
+          color: #007bff;
+        }
+      }
     }
 
-    button {
-      padding: 8px 16px;
-      background-color: #007bff;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
+    .input-wrapper {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+
+      .message-input {
+        flex: 1;
+        margin-right: 10px;
+        padding: 8px;
+        border: 1px solid #f5f5f5;
+        border-radius: 4px;
+        resize: none;
+        outline: none;
+        min-height: 40px;
+        background-color: #f5f5f5;
+      }
+
+      .send-button-wrapper {
+        display: flex;
+        justify-content: flex-end;
+
+        .send-button {
+          margin-right: 10px;
+          padding: 8px 16px;
+          width: 70px;
+          background-color: #007bff;
+          color: white;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+
+          &:hover {
+            background-color: #0056b3;
+          }
+        }
+      }
     }
   }
 }

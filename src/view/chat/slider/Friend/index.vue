@@ -2,6 +2,7 @@
 import { onMounted, ref } from 'vue'
 import { friendMessageCount, getFriendList, messageHistory } from '@/api/friend/index.js'
 import { chatFriendOrChatRoomStore } from '@/store/chat.js'
+
 const chatFriendOrChatRoom = chatFriendOrChatRoomStore()
 const friendChats = ref([])
 
@@ -62,11 +63,22 @@ const handleFriendList = async () => {
         const messages = historyRes.data.data.list
         if (messages.length > 0) {
           const lastMessage = messages[messages.length - 1]
+
+          // 格式化发送时间
           const formattedSentTime = formatSentTime(lastMessage.sentTime)
+
+          // 处理content的长度限制
+          let displayedContent = null
+
+          if (lastMessage.messageType === 'text') {
+            displayedContent = lastMessage.content ? truncateContent(lastMessage.content) : null
+          } else if (lastMessage.messageType === 'image') {
+            displayedContent = '[图片]'
+          }
           return {
             ...friend,
             sentTime: formattedSentTime,
-            content: lastMessage.content,
+            content: displayedContent,
           }
         } else {
           return { ...friend, sentTime: null, content: null } // 默认值为 null
@@ -76,6 +88,14 @@ const handleFriendList = async () => {
         return { ...friend, sentTime: null, content: null } // 默认值为 null
       }
     })
+
+    function truncateContent(content) {
+      if (content) {
+        const maxLength = 10
+        return content.length > maxLength ? content.slice(0, maxLength) + '...' : content
+      }
+      return content
+    }
 
     const finalFriendListWithMessages = await Promise.allSettled(messageHistoryPromises)
     const finalFriendListProcessed = finalFriendListWithMessages.map((result) => {
@@ -88,8 +108,6 @@ const handleFriendList = async () => {
 
     chatFriendOrChatRoom.setFriendId(finalFriendListProcessed[0].friendId)
     friendChats.value = finalFriendListProcessed
-
-    console.log(friendChats.value)
   }
 }
 

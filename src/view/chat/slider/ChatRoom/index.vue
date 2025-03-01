@@ -1,5 +1,5 @@
 <script setup>
-import { nextTick, onMounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { chatRoomHistory, chatRoomList, chatRoomUser, groupMessageCount } from '@/api/ChatRoom/index.js'
 import { chatFriendOrChatRoomStore } from '@/store/chat.js'
 
@@ -15,7 +15,6 @@ const handleChatRoomList = async () => {
     const updatedGroupList = await Promise.allSettled(
       groupChats.value.map(async (group) => {
         try {
-          // 假设有一个获取群组未读消息的方法
           const CountRes = await groupMessageCount(group.roomId)
           return {
             ...group,
@@ -35,18 +34,29 @@ const handleChatRoomList = async () => {
         return { ...result.value, count: 0 } // 默认值为 0
       }
     })
-    // 获取每个群组的消息历史
+
     const messageHistoryPromises = finalGroupList.map(async (group) => {
       try {
-        // 假设有一个获取群组消息历史的方法
         const historyRes = await chatRoomHistory(group.roomId, 1, 100)
         const messages = historyRes.data.data.list
         if (messages.length > 0) {
-          const formattedSentTime = formatSentTime(messages[messages.length - 1].sentTime)
+          const lastMessage = messages[messages.length - 1]
+
+          const formattedSentTime = formatSentTime(lastMessage.sentTime)
+
+          // 处理content的长度限制
+          let displayedContent = null
+
+          if (lastMessage.messageType === 'text') {
+            displayedContent = lastMessage.content ? truncateContent(lastMessage.content) : null
+          } else if (lastMessage.messageType === 'image') {
+            displayedContent = '[图片]'
+          }
+
           return {
             ...group,
             sentTime: formattedSentTime,
-            content: messages[messages.length - 1].content,
+            content: displayedContent,
           }
         } else {
           return { ...group, sentTime: null, content: null } // 默认值为 null
@@ -56,6 +66,15 @@ const handleChatRoomList = async () => {
         return { ...group, sentTime: null, content: null } // 默认值为 null
       }
     })
+
+    function truncateContent(content) {
+      if (content) {
+        const maxLength = 10
+        return content.length > maxLength ? content.slice(0, maxLength) + '...' : content
+      }
+      return content
+    }
+
     const finalGroupListWithMessages = await Promise.allSettled(messageHistoryPromises)
     // 更新最终的群组聊天状态
     groupChats.value = finalGroupListWithMessages.map((result) => {
@@ -88,7 +107,6 @@ const formatSentTime = (sentTime) => {
 const handleChatRoomMessage = async (roomId) => {
   friendOrChatRoomStore.setChatRoomId(roomId) // 更新 Pinia 状态
   const promise = await chatRoomUser(roomId)
-  console.log(promise.data, 'promise')
 }
 onMounted(() => {
   handleChatRoomList()

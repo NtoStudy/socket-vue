@@ -1,4 +1,5 @@
 import { useUserInfoStore } from '@/store/user.js'
+
 const useUserInfo = useUserInfoStore()
 const token = useUserInfo.token
 
@@ -37,9 +38,9 @@ export default class WebSocketService {
   }
 
   // 发送消息
-  sendMessage(type, content, receiverId, chatRoomId) {
+  sendMessage(type, content, receiverId, chatRoomId, messageType) {
     if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-      this.socket.send(JSON.stringify({ type, content, receiverId, chatRoomId }))
+      this.socket.send(JSON.stringify({ type, content, receiverId, chatRoomId, messageType }))
     } else {
       console.error("WebSocket is not open. Can't send message.")
     }
@@ -54,6 +55,7 @@ export default class WebSocketService {
 
   // 注册消息回调
   onMessage(callback) {
+    console.log(callback, 'callback')
     this.callbacks.push(callback)
   }
 
