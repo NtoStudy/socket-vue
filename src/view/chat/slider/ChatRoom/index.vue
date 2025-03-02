@@ -51,6 +51,8 @@ const handleChatRoomList = async () => {
             displayedContent = lastMessage.content ? truncateContent(lastMessage.content) : null
           } else if (lastMessage.messageType === 'image') {
             displayedContent = '[图片]'
+          } else if (lastMessage.messageType === 'video') {
+            displayedContent = '[视频]'
           }
 
           return {

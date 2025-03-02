@@ -22,3 +22,10 @@ export const uploadMethods = (files) => {
     data: formData,
   })
 }
+
+export const uploadVideo = (formData) =>
+  instance({
+    url: '/upload/chunk',
+    method: 'post',
+    data: formData,
+  })

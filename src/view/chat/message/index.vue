@@ -6,12 +6,15 @@ import { chatFriendOrChatRoomStore } from '@/store/chat.js'
 import { chatRoomDelete, chatRoomHistory } from '@/api/ChatRoom/index.js'
 import WebSocketService from '@/services/websocket'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Microphone, VideoCamera } from '@element-plus/icons-vue'
-import { uploadMethod } from '@/api/upload/index.js'
+import { Film, Microphone, VideoCamera } from '@element-plus/icons-vue'
+import { uploadMethod, uploadVideo } from '@/api/upload/index.js'
 
 // 创建聊天室或私聊的消息列表和WebSocket服务实例
 const chatFriendOrChatRoom = chatFriendOrChatRoomStore()
 const useUserInfo = useUserInfoStore()
+const fileUrl = ref('')
+const uploadProgress = ref(0) // 上传进度
+const uploading = ref(false) // 模拟 uploading 中转状态
 const messages = ref([])
 const websocket = new WebSocketService()
 const newMessage = ref('')
@@ -60,6 +63,7 @@ const handleChatMessage = async () => {
   const friendId = chatFriendOrChatRoom.friendId
   const res = await messageHistory(friendId, 1, 100)
   messages.value = formatMessages(res.data.data.list)
+
   await nextTick(() => {
     scrollToBottom()
   })
@@ -83,7 +87,11 @@ const handleChatRoomMessage = async () => {
 onMounted(() => {
   websocket.connect()
   websocket.onMessage((message) => {
-    // 将接收到的消息添加到消息列表
+    if (message.type === 'file-upload-complete') {
+      fileUrl.value = message.fileUrl
+      newMessage.value = message.fileUrl
+      sendMessage('video', fileUrl.value)
+    } // 将接收到的消息添加到消息列表
     messages.value = formatMessages([...messages.value, message])
     nextTick(() => {
       scrollToBottom()
@@ -98,7 +106,10 @@ onUnmounted(() => {
 
 // 发送消息函数
 const sendMessage = (messageType, contentValue) => {
-  //TODO在sendMessage中调用chatRoomList和FriendList方法，实现发送消息即更新组件
+  if (!contentValue.trim()) {
+    ElMessage.error('消息内容不能为空')
+    return
+  }
   if (messageWindowStatus.value === '用户') {
     // 以下是用户之间的通讯
     if (newMessage.value.trim()) {
@@ -205,6 +216,47 @@ const sendPicture = () => {
   const input = document.getElementById('imageUpload')
   input.click()
 }
+const sendVideo = () => {
+  const input = document.getElementById('videoUpload')
+  input.click()
+}
+const handleVideoUpload = async (event) => {
+  const file = event.target.files[0]
+  if (!file) return
+  const chunkSize = 1024 * 1024 // 每个分片 1MB
+  const chunks = Math.ceil(file.size / chunkSize)
+  let uploadedChunks = 0
+  uploading.value = true
+  // 将文件拆分成多个分片
+  for (let i = 0; i < chunks; i++) {
+    const start = i * chunkSize
+    const end = start + chunkSize
+    const chunk = file.slice(start, end)
+
+    const formData = new FormData()
+    formData.append('file', chunk)
+    formData.append('fileName', file.name)
+    formData.append('chunkNumber', i)
+    formData.append('totalChunks', chunks)
+    try {
+      // 使用封装后的 Axios 方法上传分片
+      await uploadVideo(formData)
+
+      uploadedChunks++
+      uploadProgress.value = Math.round((uploadedChunks / chunks) * 100)
+    } catch (error) {
+      console.log(error)
+      ElMessage.error('上传分片时出错')
+      uploading.value = false
+      return
+    }
+  }
+  // 所有分片上传完成后，清除文件输入框
+  event.target.value = null
+  ElMessage.success('视频发送成功')
+  uploading.value = false
+}
+
 const handleImageUpload = async (event) => {
   const files = event.target.files
   if (files && files.length > 0) {
@@ -256,29 +308,39 @@ watch(
           class="user-content"
           @contextmenu.prevent="handleRightClickMessage(message)"
         >
-          <div class="text" v-if="message.messageType === 'text'">{{ message.content }}</div>
-          <div class="images" v-else>
+          <div class="text" v-if="message.messageType === 'text' && message.content.trim()">{{ message.content }}</div>
+          <div class="images" v-else-if="message.messageType === 'image'">
             <img :src="message.content" alt="图片" width="200" height="200" />
+          </div>
+          <div class="video" v-else-if="message.messageType === 'video'">
+            <video :src="message.content" controls="" width="200" height="200"></video>
           </div>
           <div class="avatar">我</div>
         </div>
         <div v-else class="assistant-content" @contextmenu.prevent="handleRightClickMessage(message)">
           <div class="avatar">AI</div>
-          <div class="text" v-if="message.messageType === 'text'">{{ message.content }}</div>
-          <div class="images" v-else>
+          <div class="text" v-if="message.messageType === 'text' && message.content.trim()">{{ message.content }}</div>
+          <div class="images" v-else-if="message.messageType === 'image'">
             <img :src="message.content" alt="图片" width="200" height="200" />
+          </div>
+          <div class="video" v-else-if="message.messageType === 'video'">
+            <video :src="message.content" controls=""></video>
           </div>
         </div>
       </div>
     </div>
     <div class="input-area">
       <input type="file" id="imageUpload" style="display: none" @change="handleImageUpload" />
+      <input type="file" id="videoUpload" style="display: none" @change="handleVideoUpload" />
       <div class="icon-group">
         <el-icon>
           <Microphone />
         </el-icon>
         <el-icon @click="sendPicture">
           <Picture />
+        </el-icon>
+        <el-icon @click="sendVideo">
+          <Film />
         </el-icon>
         <el-icon>
           <VideoCamera />
@@ -295,6 +357,7 @@ watch(
           <button class="send-button" @click="sendMessage('text', newMessage)">发送</button>
         </div>
       </div>
+      <el-progress :percentage="uploadProgress" v-if="uploading" style="width: 200px; margin: 10px 0"></el-progress>
     </div>
   </div>
 </template>
@@ -364,8 +427,24 @@ watch(
         margin: 0 10px;
         word-wrap: break-word;
       }
+
       .images {
         margin: 0 10px;
+      }
+
+      .video {
+        margin: 0 10px;
+
+        video {
+          width: 100%;
+          border-radius: 8px;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+          transition: transform 0.5s ease;
+
+          &:hover {
+            transform: scale(1.02);
+          }
+        }
       }
 
       &.user-message .text {
