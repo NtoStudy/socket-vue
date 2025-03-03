@@ -1,14 +1,14 @@
 <script setup>
 import { onMounted, onUnmounted, ref, watch, nextTick } from 'vue'
-import { messageDelete, messageHistory } from '@/api/friend/index.js'
 import { useUserInfoStore } from '@/store/user.js'
 import { chatFriendOrChatRoomStore } from '@/store/chat.js'
-import { chatRoomDelete, chatRoomHistory } from '@/api/ChatRoom/index.js'
 import WebSocketService from '@/services/websocket'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Film, Microphone, VideoCamera } from '@element-plus/icons-vue'
-import { uploadMethod, uploadVideo } from '@/api/upload/index.js'
-
+import eventBus from '@/EventBus/eventBus.js'
+import { messageDelete, messageHistory } from '@/api/friend.js'
+import { chatRoomDelete, chatRoomHistory } from '@/api/chatRoom.js'
+import { uploadMethod, uploadVideo } from '@/api/upload.js'
 // 创建聊天室或私聊的消息列表和WebSocket服务实例
 const chatFriendOrChatRoom = chatFriendOrChatRoomStore()
 const useUserInfo = useUserInfoStore()
@@ -138,6 +138,7 @@ const sendMessage = (messageType, contentValue) => {
       nextTick(() => {
         scrollToBottom()
       })
+      eventBus.emit('call-handleFriendList')
     }
   } else if (messageWindowStatus.value === '群聊') {
     // 以下是群聊之间的通讯
@@ -256,7 +257,6 @@ const handleVideoUpload = async (event) => {
   ElMessage.success('视频发送成功')
   uploading.value = false
 }
-
 const handleImageUpload = async (event) => {
   const files = event.target.files
   if (files && files.length > 0) {

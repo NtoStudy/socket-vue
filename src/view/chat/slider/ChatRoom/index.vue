@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted, ref } from 'vue'
-import { chatRoomHistory, chatRoomList, chatRoomUser, groupMessageCount } from '@/api/ChatRoom/index.js'
+import { chatRoomHistory, chatRoomList, chatRoomUser, groupMessageCount } from '@/api/chatRoom.js'
 import { chatFriendOrChatRoomStore } from '@/store/chat.js'
 
 const friendOrChatRoomStore = chatFriendOrChatRoomStore()

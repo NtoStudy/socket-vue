@@ -2,9 +2,9 @@
 import { Search } from '@element-plus/icons-vue'
 import { ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { getUserInfoByNumber } from '@/api/user/index.js'
-import { chatRoomCreate } from '@/api/ChatRoom/index.js'
-import { getFriendList } from '@/api/friend/index.js'
+import { getUserInfoByNumber } from '@/api/user.js'
+import { chatRoomCreate } from '@/api/chatRoom.js'
+import { getFriendList } from '@/api/friend.js'
 
 // 响应式对象初始化
 const selectedNumber = ref(0)

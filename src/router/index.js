@@ -1,32 +1,30 @@
-import {createWebHistory, createRouter} from 'vue-router'
-
-
+import { createWebHistory, createRouter } from 'vue-router'
+//TODO 如果有登录信息，则进入main没有则Login
 const routes = [
   {
     path: '/',
-    redirect: '/main'
+    redirect: '/main',
   },
   {
     path: '/login',
-    component: () => import('../view/login/index.vue')
-
-  }, {
+    component: () => import('../view/login/index.vue'),
+  },
+  {
     path: '/main',
     component: () => import('../view/index.vue'),
     redirect: '/main/chat',
     children: [
       {
         path: 'chat',
-        component: () => import('../view/chat/index.vue')
+        component: () => import('../view/chat/index.vue'),
       },
       {
         path: 'friend',
-        component: () => import('../view/friend/index.vue')
-      }
-    ]
-  }
+        component: () => import('../view/friend/index.vue'),
+      },
+    ],
+  },
 ]
-
 
 const router = createRouter({
   history: createWebHistory(),
@@ -35,9 +33,9 @@ const router = createRouter({
     if (savedPosition) {
       return savedPosition
     } else {
-      return {top: 0}
+      return { top: 0 }
     }
-  }
+  },
 })
 
 export default router

@@ -55,7 +55,6 @@ export default class WebSocketService {
 
   // 注册消息回调
   onMessage(callback) {
-    console.log(callback, 'callback')
     this.callbacks.push(callback)
   }
 

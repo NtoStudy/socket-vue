@@ -54,7 +54,7 @@
 import { useFriendManagerStore } from '@/store/friendManager.js'
 import { ChatRound, Plus, Search, User } from '@element-plus/icons-vue'
 import { onMounted, ref } from 'vue'
-import { chatRoomNumber, friendNumber } from '@/api/notification/index.js'
+import { chatRoomNumber, friendNumber } from '@/api/notification.js'
 import search from './search/index.vue'
 import createGroup from './createGroup/index.vue'
 

@@ -1,8 +1,8 @@
 <script setup>
-import { onMounted, ref } from 'vue'
-import { friendMessageCount, getFriendList, messageHistory } from '@/api/friend/index.js'
+import { onMounted, onUnmounted, ref } from 'vue'
+import { friendMessageCount, getFriendList, messageHistory } from '@/api/friend.js'
 import { chatFriendOrChatRoomStore } from '@/store/chat.js'
-
+import eventBus from '@/EventBus/eventBus.js'
 const chatFriendOrChatRoom = chatFriendOrChatRoomStore()
 const friendChats = ref([])
 
@@ -26,7 +26,6 @@ const formatSentTime = (sentTime) => {
     return sentDate.toLocaleDateString([], { year: 'numeric', month: '2-digit', day: '2-digit' })
   }
 }
-
 /**
  * 处理好友列表，获取未读消息数和最近的消息
  */
@@ -112,7 +111,6 @@ const handleFriendList = async () => {
     friendChats.value = finalFriendListProcessed
   }
 }
-
 /**
  * 处理聊天消息，更新选中的好友ID
  * @param {number} friendId - 好友ID
@@ -120,9 +118,14 @@ const handleFriendList = async () => {
 const handleChatMessage = (friendId) => {
   chatFriendOrChatRoom.setFriendId(friendId) // 更新 Pinia 状态
 }
-
 onMounted(() => {
   handleFriendList()
+  eventBus.on('call-handleFriendList', handleFriendList)
+})
+
+onUnmounted(() => {
+  // 移除事件监听，避免内存泄漏
+  eventBus.off('call-handleFriendList', handleFriendList)
 })
 </script>
 
