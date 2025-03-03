@@ -2,30 +2,12 @@
 import { onMounted, onUnmounted, ref } from 'vue'
 import { friendMessageCount, getFriendList, messageHistory } from '@/api/friend.js'
 import { chatFriendOrChatRoomStore } from '@/store/chat.js'
+import { formatSentTime, truncateContent } from '@/view/chat/utils/messageUtils.js'
 import eventBus from '@/EventBus/eventBus.js'
+
 const chatFriendOrChatRoom = chatFriendOrChatRoomStore()
 const friendChats = ref([])
 
-/**
- * 格式化消息发送时间
- * @param {number} sentTime - 消息发送时间戳
- * @returns {string} 格式化后的时间字符串
- */
-const formatSentTime = (sentTime) => {
-  const now = new Date()
-  const sentDate = new Date(sentTime)
-  const oneDay = 24 * 60 * 60 * 1000 // 一天的毫秒数
-  if (now - sentDate < oneDay) {
-    // 如果在24小时之内，只显示时分秒
-    return sentDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
-  } else if (sentDate.getFullYear() === now.getFullYear()) {
-    // 如果在今年之内，只显示月份和日期
-    return sentDate.toLocaleDateString([], { month: '2-digit', day: '2-digit' })
-  } else {
-    // 如果不是今年，则显示年月日
-    return sentDate.toLocaleDateString([], { year: 'numeric', month: '2-digit', day: '2-digit' })
-  }
-}
 /**
  * 处理好友列表，获取未读消息数和最近的消息
  */
@@ -34,6 +16,8 @@ const handleFriendList = async () => {
   if (res.data.code === 200) {
     chatFriendOrChatRoom.setFriendId(res.data.data[0].friendId)
     friendChats.value = res.data.data
+
+    // 获取未读消息数
     const updatedFriendList = await Promise.allSettled(
       friendChats.value.map(async (friend) => {
         try {
@@ -56,6 +40,7 @@ const handleFriendList = async () => {
       }
     })
 
+    // 获取最近消息
     const messageHistoryPromises = finalFriendList.map(async (friend) => {
       try {
         const historyRes = await messageHistory(friend.friendId, 1, 100)
@@ -70,12 +55,13 @@ const handleFriendList = async () => {
           let displayedContent = null
 
           if (lastMessage.messageType === 'text') {
-            displayedContent = lastMessage.content ? truncateContent(lastMessage.content) : null
+            displayedContent = truncateContent(lastMessage.content)
           } else if (lastMessage.messageType === 'image') {
             displayedContent = '[图片]'
           } else if (lastMessage.messageType === 'video') {
             displayedContent = '[视频]'
           }
+
           return {
             ...friend,
             sentTime: formattedSentTime,
@@ -90,14 +76,6 @@ const handleFriendList = async () => {
       }
     })
 
-    function truncateContent(content) {
-      if (content) {
-        const maxLength = 10
-        return content.length > maxLength ? content.slice(0, maxLength) + '...' : content
-      }
-      return content
-    }
-
     const finalFriendListWithMessages = await Promise.allSettled(messageHistoryPromises)
     const finalFriendListProcessed = finalFriendListWithMessages.map((result) => {
       if (result.status === 'fulfilled') {
@@ -111,6 +89,7 @@ const handleFriendList = async () => {
     friendChats.value = finalFriendListProcessed
   }
 }
+
 /**
  * 处理聊天消息，更新选中的好友ID
  * @param {number} friendId - 好友ID
@@ -118,6 +97,7 @@ const handleFriendList = async () => {
 const handleChatMessage = (friendId) => {
   chatFriendOrChatRoom.setFriendId(friendId) // 更新 Pinia 状态
 }
+
 onMounted(() => {
   handleFriendList()
   eventBus.on('call-handleFriendList', handleFriendList)
@@ -146,7 +126,6 @@ onUnmounted(() => {
     <div class="chat-badge" v-if="chat.count > 0">{{ chat.count }}</div>
   </div>
 </template>
-
 <style lang="scss" scoped>
 .chat-item {
   display: flex;

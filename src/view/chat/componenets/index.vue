@@ -2,7 +2,7 @@
 import { onMounted, onUnmounted, ref, watch, nextTick } from 'vue'
 import { useUserInfoStore } from '@/store/user.js'
 import { chatFriendOrChatRoomStore } from '@/store/chat.js'
-import WebSocketService from '@/services/websocket'
+import WebSocketService from '@/services/websocket.js'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Film, Microphone, VideoCamera } from '@element-plus/icons-vue'
 import eventBus from '@/EventBus/eventBus.js'
@@ -13,8 +13,8 @@ import { uploadMethod, uploadVideo } from '@/api/upload.js'
 const chatFriendOrChatRoom = chatFriendOrChatRoomStore()
 const useUserInfo = useUserInfoStore()
 const fileUrl = ref('')
-const uploadProgress = ref(0) // 上传进度
-const uploading = ref(false) // 模拟 uploading 中转状态
+const uploadProgress = ref(0)
+const uploading = ref(false)
 const messages = ref([])
 const websocket = new WebSocketService()
 const newMessage = ref('')
@@ -292,9 +292,6 @@ watch(
 
 <template>
   <div class="chat-window">
-    <div class="header">
-      <div class="title">聊天窗口</div>
-    </div>
     <div class="messages">
       <div
         v-for="message in messages"

@@ -1,17 +1,22 @@
 <script setup>
 import { onMounted, ref } from 'vue'
-import { chatRoomHistory, chatRoomList, chatRoomUser, groupMessageCount } from '@/api/chatRoom.js'
+import { chatRoomHistory, chatRoomList, groupMessageCount } from '@/api/chatRoom.js'
 import { chatFriendOrChatRoomStore } from '@/store/chat.js'
+import { formatSentTime, truncateContent } from '@/view/chat/utils/messageUtils.js'
 
 const friendOrChatRoomStore = chatFriendOrChatRoomStore()
-
 const groupChats = ref([])
+
+/**
+ * 处理群聊列表，获取未读消息数和最近的消息
+ */
 const handleChatRoomList = async () => {
   const res = await chatRoomList()
   if (res.data.code === 200) {
     groupChats.value = res.data.data
     friendOrChatRoomStore.setChatRoomId(res.data.data[0].roomId)
-    // 增添未读消息的显示
+
+    // 获取未读消息数
     const updatedGroupList = await Promise.allSettled(
       groupChats.value.map(async (group) => {
         try {
@@ -26,7 +31,6 @@ const handleChatRoomList = async () => {
         }
       }),
     )
-    // 处理每个结果
     const finalGroupList = updatedGroupList.map((result) => {
       if (result.status === 'fulfilled') {
         return result.value
@@ -35,6 +39,7 @@ const handleChatRoomList = async () => {
       }
     })
 
+    // 获取最近消息
     const messageHistoryPromises = finalGroupList.map(async (group) => {
       try {
         const historyRes = await chatRoomHistory(group.roomId, 1, 100)
@@ -42,13 +47,14 @@ const handleChatRoomList = async () => {
         if (messages.length > 0) {
           const lastMessage = messages[messages.length - 1]
 
+          // 格式化发送时间
           const formattedSentTime = formatSentTime(lastMessage.sentTime)
 
           // 处理content的长度限制
           let displayedContent = null
 
           if (lastMessage.messageType === 'text') {
-            displayedContent = lastMessage.content ? truncateContent(lastMessage.content) : null
+            displayedContent = truncateContent(lastMessage.content)
           } else if (lastMessage.messageType === 'image') {
             displayedContent = '[图片]'
           } else if (lastMessage.messageType === 'video') {
@@ -69,16 +75,7 @@ const handleChatRoomList = async () => {
       }
     })
 
-    function truncateContent(content) {
-      if (content) {
-        const maxLength = 10
-        return content.length > maxLength ? content.slice(0, maxLength) + '...' : content
-      }
-      return content
-    }
-
     const finalGroupListWithMessages = await Promise.allSettled(messageHistoryPromises)
-    // 更新最终的群组聊天状态
     groupChats.value = finalGroupListWithMessages.map((result) => {
       if (result.status === 'fulfilled') {
         return result.value
@@ -86,30 +83,17 @@ const handleChatRoomList = async () => {
         return { ...result.value, messages: [] } // 默认值为空数组
       }
     })
-    await handleChatRoomMessage(groupChats.value[0].roomId)
   }
 }
-const formatSentTime = (sentTime) => {
-  const now = new Date()
-  const sentDate = new Date(sentTime)
-  const oneDay = 24 * 60 * 60 * 1000 // 一天的毫秒数
 
-  if (now - sentDate < oneDay) {
-    // 如果在24小时之内，只显示时分秒
-    return sentDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
-  } else if (sentDate.getFullYear() === now.getFullYear()) {
-    // 如果在今年之内，只显示月份和日期
-    return sentDate.toLocaleDateString([], { month: '2-digit', day: '2-digit' })
-  } else {
-    // 如果不是今年，则显示年月日
-    return sentDate.toLocaleDateString([], { year: 'numeric', month: '2-digit', day: '2-digit' })
-  }
-}
-//TODO区分发送者列表
-const handleChatRoomMessage = async (roomId) => {
+/**
+ * 处理聊天消息，更新选中的群聊ID
+ * @param {number} roomId - 群聊ID
+ */
+const handleChatRoomMessage = (roomId) => {
   friendOrChatRoomStore.setChatRoomId(roomId) // 更新 Pinia 状态
-  const promise = await chatRoomUser(roomId)
 }
+
 onMounted(() => {
   handleChatRoomList()
 })
