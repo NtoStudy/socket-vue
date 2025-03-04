@@ -38,7 +38,7 @@ export const handleFriend = (relationId, status) =>
 
 /**
  * 获取消息历史
- * @param {number} receiverId - 接收者ID
+ * @param {Ref<any>} receiverId - 接收者ID
  * @param {number} pageNum - 页码
  * @param {number} pageSize - 每页大小
  * @returns {Promise} - 返回获取消息历史的Promise对象

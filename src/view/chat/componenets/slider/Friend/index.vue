@@ -47,7 +47,6 @@ const handleFriendList = async () => {
         const messages = historyRes.data.data.list
         if (messages.length > 0) {
           const lastMessage = messages[messages.length - 1]
-
           // 格式化发送时间
           const formattedSentTime = formatSentTime(lastMessage.sentTime)
 
