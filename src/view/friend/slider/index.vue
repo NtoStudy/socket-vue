@@ -36,11 +36,6 @@ const groupCount = ref()
 const store = useFriendManagerStore()
 // 初始化选中的菜单项
 const selectedMenu = ref('friend')
-// 初始化对话框可见性的Ref
-const isAddDialogVisible = ref(false)
-const isCreateDialogVisible = ref(false)
-// 初始化子组件的Ref
-const childRef = ref()
 
 // 模拟好友数据
 const friendItems = ref([

@@ -1,12 +1,14 @@
 <template>
   <div class="contact-list">
-    <div class="category-tabs">
+    <div class="category-box">
+      <div class="category-tabs">
       <div class="tab" :class="{ active: activeTab === 'friends' }" @click="switchTab('friends')">
         好友
       </div>
       <div class="tab" :class="{ active: activeTab === 'groups' }" @click="switchTab('groups')">
         群聊
       </div>
+    </div>
     </div>
 
     <div v-if="activeTab === 'friends'">
@@ -67,7 +69,16 @@ const switchTab = (tab) => {
 
 <style lang="scss" scoped>
 // 分类标签样式
-.category-tabs {
+
+
+// 联系人列表样式
+.contact-list {
+  .category-box{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    .category-tabs {
+  width: 80%;
   display: flex;
   background-color: #f9f9f9;
   border-radius: 8px;
@@ -89,9 +100,8 @@ const switchTab = (tab) => {
     }
   }
 }
+  }
 
-// 联系人列表样式
-.contact-list {
   .contact-item {
     display: flex;
     justify-content: space-between;

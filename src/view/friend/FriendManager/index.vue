@@ -79,37 +79,43 @@ onMounted(() => {
 <style lang="scss" scoped>
 .friend-requests {
   width: 100%;
-  max-width: 800px;
-  margin: 0 auto;
+  height: 100%;
+  padding: 20px;
   overflow-y: auto;
+  background-color: #f9f9f9;
+  display: flex;
+  flex-direction: column;
 
   .title {
-    font-size: 18px;
-    font-weight: bold;
-    margin-bottom: 20px;
+    font-size: 22px;
+    font-weight: 600;
+    margin-bottom: 24px;
     color: #333;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #eaeaea;
   }
 
   .request-list {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 16px;
+    max-width: 900px;
+    margin: 0 auto;
+    width: 100%;
   }
 
   .request-item {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
     padding: 10px;
-    transition:
-      transform 0.2s,
-      box-shadow 0.2s;
+    transition: all 0.3s ease;
 
     &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+      transform: translateY(-3px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
     }
   }
 
@@ -117,14 +123,14 @@ onMounted(() => {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 60px;
+    margin-right: 5px;
 
     img {
-      display: flex;
-      width: 40px;
-      height: 40px;
+      width: 50px;
+      height: 50px;
       border-radius: 50%;
-      margin-right: 15px;
+      object-fit: cover;
+      border: 2px solid #f0f0f0;
     }
   }
 
@@ -132,41 +138,92 @@ onMounted(() => {
     flex: 1;
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    padding: 0 10px;
 
     .request-right {
+      flex: 1;
+      
       .request-header {
         display: flex;
-        margin-bottom: 20px;
+        align-items: center;
+        margin-bottom: 10px;
 
         .request-name {
-          font-size: 14px;
-          margin-right: 30px;
-          font-weight: 500;
+          font-size: 16px;
+          font-weight: 600;
+          margin-right: 12px;
           color: #333;
         }
 
         .request-date {
           font-size: 12px;
-          color: #666;
+          color: #999;
+          background-color: #f5f5f5;
+          padding: 2px 8px;
+          border-radius: 10px;
         }
       }
 
       .request-message {
-        margin-bottom: 10px;
+        margin-bottom: 5px;
 
         p {
-          font-size: 12px;
+          font-size: 14px;
           color: #666;
+          line-height: 1.5;
         }
       }
     }
 
     .request-left {
       display: flex;
-      justify-content: space-between;
+      justify-content: flex-end;
       align-items: center;
-      margin-right: 20px;
-      color: #66667a;
+      min-width: 100px;
+      
+      p {
+        padding: 6px 12px;
+        border-radius: 4px;
+        font-size: 14px;
+        
+        &:nth-child(1) {
+          background-color: #f0f9eb;
+          color: #67c23a;
+        }
+        
+        &:nth-child(2) {
+          background-color: #f4f4f5;
+          color: #909399;
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .friend-requests {
+    padding: 15px;
+    
+    .request-item {
+      flex-direction: column;
+      align-items: flex-start;
+      
+      .request-avatar {
+        margin-bottom: 10px;
+      }
+      
+      .request-content {
+        width: 100%;
+        flex-direction: column;
+        align-items: flex-start;
+        
+        .request-left {
+          margin-top: 15px;
+          width: 100%;
+          justify-content: flex-start;
+        }
+      }
     }
   }
 }
