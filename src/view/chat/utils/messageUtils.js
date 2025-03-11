@@ -42,37 +42,64 @@ export const truncateContent = (content) => {
   return content
 }
 
+/**
+ * 格式化消息列表，处理时间显示和时间戳显示逻辑
+ * @param {Array} messagesList - 消息列表
+ * @returns {Array} 格式化后的消息列表
+ */
 export const formatMessages = (messagesList) => {
+  if (!Array.isArray(messagesList) || messagesList.length === 0) {
+    return []
+  }
+  
   const now = new Date()
-  return messagesList.map((message, index, array) => {
+  const oneDay = 24 * 60 * 60 * 1000 // 一天的毫秒数
+  
+  // 首先保存原始时间戳用于比较
+  const messagesWithOriginalTime = messagesList.map(message => ({
+    ...message,
+    originalTimestamp: new Date(message.sentTime).getTime()
+  }))
+  
+  // 按时间排序（确保消息按时间顺序排列）
+  messagesWithOriginalTime.sort((a, b) => a.originalTimestamp - b.originalTimestamp)
+  
+  return messagesWithOriginalTime.map((message, index, array) => {
     const sentDate = new Date(message.sentTime)
-    const oneDay = 24 * 60 * 60 * 1000 // 一天的毫秒数
-
+    
+    // 格式化显示时间
     if (now - sentDate < oneDay) {
       // 如果在24小时之内，只显示时分秒
-      message.sentTime = sentDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+      message.sentTime = sentDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     } else if (sentDate.getFullYear() === now.getFullYear()) {
-      // 如果在今年之内，只显示月份和日期
+      // 如果在今年之内，显示月日时分
       message.sentTime = sentDate.toLocaleDateString([], {
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
         month: '2-digit',
         day: '2-digit',
-      })
+      }) + ' ' + sentDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     } else {
-      // 如果不是今年，则显示年月日
-      message.sentTime = sentDate.toLocaleDateString([], { year: 'numeric', month: '2-digit', day: '2-digit' })
+      // 如果不是今年，则显示年月日时分
+      message.sentTime = sentDate.toLocaleDateString([], { 
+        year: 'numeric', 
+        month: '2-digit', 
+        day: '2-digit' 
+      }) + ' ' + sentDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
-
-    if (index > 0) {
-      const currentTimestamp = sentDate.getTime()
-      const previousTimestamp = new Date(array[index - 1].sentTime).getTime()
-      const timeDifference = currentTimestamp - previousTimestamp
-      message.showTimestamp = timeDifference >= 180000
-    } else {
+    
+    // 确定是否显示时间戳
+    if (index === 0) {
+      // 第一条消息总是显示时间戳
       message.showTimestamp = true
+    } else {
+      // 计算与前一条消息的时间差（毫秒）
+      const previousTimestamp = array[index - 1].originalTimestamp
+      const currentTimestamp = message.originalTimestamp
+      const timeDifference = currentTimestamp - previousTimestamp
+      
+      // 如果时间差大于等于3分钟（180000毫秒），则显示时间戳
+      message.showTimestamp = timeDifference >= 180000
     }
+    
     return message
   })
 }

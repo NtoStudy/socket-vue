@@ -12,6 +12,5 @@ import AllChats from './AllChats/index.vue'
 .chat-list {
   overflow-y: auto;
   background-color: #f5f5f5;
-  border-radius: 8px;
 }
 </style>

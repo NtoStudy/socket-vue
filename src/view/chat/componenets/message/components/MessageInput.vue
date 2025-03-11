@@ -10,7 +10,7 @@ const uploadProgress = ref(0)
 // 响应式变量：表示上传状态（是否正在上传）
 const uploading = ref(false)
 // 响应式变量：绑定用户输入的消息
-const InputMessage = ref('')
+const inputMessage = ref('')
 // 定义一个事件发射器，用于通知父组件发送消息
 const emit = defineEmits(['send-message'])
 
@@ -85,9 +85,9 @@ const handleImageUpload = async (event) => {
 
     try {
       const res = await uploadMethod(file) // 调用上传方法
-      InputMessage.value = res.data.data // 将图片路径存储到 InputMessage 中
-      emit('send-message', { type: 'image', content: InputMessage.value }) // 发送图片消息
-      InputMessage.value = '' // 清空输入框
+      inputMessage.value = res.data.data // 将图片路径存储到 inputMessage 中
+      emit('send-message', { type: 'image', content: inputMessage.value }) // 发送图片消息
+      inputMessage.value = '' // 清空输入框
     } catch (error) {
       console.error('Upload failed:', error)
       ElMessage.error('图片上传失败') // 显示错误提示
@@ -101,9 +101,9 @@ const handleImageUpload = async (event) => {
  * 处理文本消息发送逻辑
  */
 const handleTextMessage = () => {
-  if (InputMessage.value.trim()) {
-    emit('send-message', { type: 'text', content: InputMessage.value }) // 发送文本消息
-    InputMessage.value = '' // 清空输入框
+  if (inputMessage.value.trim()) {
+    emit('send-message', { type: 'text', content: inputMessage.value })
+    inputMessage.value = '' // 清空输入框
   }
 }
 </script>
@@ -140,7 +140,7 @@ const handleTextMessage = () => {
       <textarea
         class="message-input"
         placeholder="输入消息"
-        v-model="InputMessage"
+        v-model="inputMessage"
         @keyup.enter="handleTextMessage()"
       ></textarea>
       <!-- 发送按钮 -->
