@@ -39,8 +39,8 @@
 <script setup>
 import { ChatRound, Plus, Search, User } from '@element-plus/icons-vue'
 import { ref } from 'vue'
-import search from '@/view/friend/slider/search/index.vue'
-import createGroup from '@/view/friend/slider/createGroup/index.vue'
+import search from '@/components/common/search/index.vue'
+import createGroup from '@/components/common/createGroup/index.vue'
 
 // 定义属性
 const props = defineProps({
@@ -102,7 +102,7 @@ const closeCreateDialogVisible = () => {
   border-right: 1px solid #e0e0e0;
   height: 100%;
   box-sizing: border-box;
-  width: 260px;
+  width: 300px;
 
   .sidebar-search {
     display: flex;

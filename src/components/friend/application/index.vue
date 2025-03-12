@@ -78,8 +78,8 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 .friend-requests {
-  width: 100%;
   height: 100%;
+  flex:1;
   padding: 20px;
   overflow-y: auto;
   background-color: #f9f9f9;
@@ -98,8 +98,8 @@ onMounted(() => {
   .request-list {
     display: flex;
     flex-direction: column;
-    gap: 16px;
-    max-width: 900px;
+    gap: 12px;
+    max-width: 800px;
     margin: 0 auto;
     width: 100%;
   }

@@ -3,12 +3,12 @@ import { ref, watch, nextTick, reactive, onMounted, onUnmounted } from 'vue'
 import { useUserInfoStore } from '@/store/user.js'
 import { chatFriendOrChatRoomStore } from '@/store/chat.js'
 import WebSocketService from '@/services/websocket.js'
-import MessageDisplay from './components/MessageDisplay.vue'
+import MessageDisplay from './MessageDisplay/index.vue'
 import { ElMessage } from 'element-plus'
 import { messageHistory } from '@/api/friend.js'
-import { formatMessages, formatSentTime } from '@/view/chat/utils/messageUtils.js'
+import { formatMessages, formatSentTime } from '@/utils/messageUtils.js'
 import { chatRoomHistory } from '@/api/chatRoom.js'
-import MessageInput from './components/MessageInput.vue'
+import MessageInput from './MessageInput/index.vue'
 import eventBus from '@/EventBus/eventBus.js'
 import _ from 'lodash'
 // 消息显示组件的引用，用于操作DOM
@@ -111,7 +111,7 @@ const sendMessage = ({ type, content }) => {
 /**
  * 加载更多消息
  */
- const loadMoreMessages = async () => {
+const loadMoreMessages = async () => {
   if (!pagination.hasMore || pagination.loading) return
 
   pagination.loading = true
@@ -133,9 +133,9 @@ const sendMessage = ({ type, content }) => {
       pagination.hasMore = false
     } else {
       // 过滤掉已经存在的消息，避免重复
-      const existingMessageIds = new Set(messages.value.map(msg => msg.messageId || msg.id))
-      const uniqueNewMessages = newMessages.filter(msg => !existingMessageIds.has(msg.messageId || msg.id))
-      
+      const existingMessageIds = new Set(messages.value.map((msg) => msg.messageId || msg.id))
+      const uniqueNewMessages = newMessages.filter((msg) => !existingMessageIds.has(msg.messageId || msg.id))
+
       // 只有有新消息时才更新
       if (uniqueNewMessages.length > 0) {
         // 将新消息添加到消息列表前面

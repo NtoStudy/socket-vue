@@ -7,20 +7,24 @@ const routes = [
   },
   {
     path: '/login',
-    component: () => import('../view/login/index.vue'),
+    component: () => import('../views/login/index.vue'),
   },
   {
     path: '/main',
-    component: () => import('../view/index.vue'),
+    component: () => import('../views/index.vue'),
     redirect: '/main/chat',
     children: [
       {
         path: 'chat',
-        component: () => import('../view/chat/index.vue'),
+        component: () => import('../views/chat/index.vue'),
       },
       {
         path: 'friend',
-        component: () => import('../view/friend/index.vue'),
+        component: () => import('../views/friend/index.vue'),
+      },
+      {
+        path: 'moments',
+        component: () => import('../views/moments/index.vue'),
       },
     ],
   },

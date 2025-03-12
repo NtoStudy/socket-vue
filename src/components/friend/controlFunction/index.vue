@@ -1,5 +1,5 @@
 <template>
-  <Sidebar @createGroup="handleCreateGroup" @addContact="handleAddContact" >
+  <Sidebar @createGroup="handleCreateGroup" @addContact="handleAddContact">
     <!-- 通知区域 -->
     <div class="notification-section">
       <div class="notification-item" :class="{ active: selectedMenu === 'friend' }" @click="selectMenu('friend')">
@@ -26,8 +26,8 @@
 import { useFriendManagerStore } from '@/store/friendManager.js'
 import { onMounted, ref } from 'vue'
 import { chatRoomNumber, friendNumber } from '@/api/notification.js'
-import Sidebar from './components/Sidebar.vue'
-import ContactList from './components/ContactList.vue'
+import Sidebar from '@/components/layout/HeaderSidebar/index.vue'
+import ContactList from './ContactList/index.vue'
 
 // 初始化未读消息数量的Ref
 const friendCount = ref()
@@ -81,8 +81,6 @@ const handleCreateGroup = () => {
 const handleAddContact = () => {
   console.log('好友页面处理添加好友/群')
 }
-
-
 
 // 在组件挂载时获取未读消息数量
 onMounted(() => {

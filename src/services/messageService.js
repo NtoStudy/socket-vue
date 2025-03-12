@@ -1,6 +1,6 @@
 import { messageHistory } from '@/api/friend.js'
 import { chatRoomHistory } from '@/api/chatRoom.js'
-import { formatMessages, formatSentTime } from '@/view/chat/utils/messageUtils.js'
+import { formatMessages, formatSentTime } from '@/utils/messageUtils.js'
 
 /**
  * 消息处理服务
@@ -22,7 +22,7 @@ export const messageService = {
       return []
     }
   },
-  
+
   /**
    * 获取群聊消息历史
    * @param {String} chatRoomId - 聊天室ID
@@ -39,7 +39,7 @@ export const messageService = {
       return []
     }
   },
-  
+
   /**
    * 创建消息对象
    * @param {String} type - 消息类型
@@ -56,13 +56,13 @@ export const messageService = {
       senderId,
       sentTime: formatSentTime(new Date().toISOString()),
     }
-    
+
     if (receiverId) {
       return { ...baseMessage, receiverId }
     } else if (chatRoomId) {
       return { ...baseMessage, chatRoomId }
     }
-    
+
     return baseMessage
-  }
+  },
 }

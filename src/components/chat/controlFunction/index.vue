@@ -1,5 +1,5 @@
 <template>
-  <Sidebar @createGroup="handleCreateGroup" @addContact="handleAddContact"  >
+  <Sidebar @createGroup="handleCreateGroup" @addContact="handleAddContact">
     <div class="chat-list">
       <AllChats />
     </div>
@@ -8,7 +8,7 @@
 
 <script setup>
 import AllChats from './AllChats/index.vue'
-import Sidebar from '@/view/friend/slider/components/sidebar.vue'
+import Sidebar from '@/components/layout/HeaderSidebar/index.vue'
 
 // 处理创建群聊事件 - 确保不接收事件参数
 const handleCreateGroup = () => {

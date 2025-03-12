@@ -3,7 +3,7 @@ import { onMounted, onUnmounted, ref } from 'vue'
 import { friendMessageCount, getFriendList, messageHistory } from '@/api/friend.js'
 import { chatRoomHistory, chatRoomList, groupMessageCount } from '@/api/chatRoom.js'
 import { chatFriendOrChatRoomStore } from '@/store/chat.js'
-import { formatSentTime, truncateContent } from '@/view/chat/utils/messageUtils.js'
+import { formatSentTime, truncateContent } from '@/utils/messageUtils.js'
 import eventBus from '@/EventBus/eventBus.js'
 
 const chatFriendOrChatRoom = chatFriendOrChatRoomStore()
