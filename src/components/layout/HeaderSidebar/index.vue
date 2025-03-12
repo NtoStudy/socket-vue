@@ -2,26 +2,25 @@
   <div class="sidebar">
     <div class="sidebar-search">
       <el-input :prefix-icon="Search" :placeholder="searchPlaceholder" style="width: 80%" />
-      <el-popover placement="bottom" trigger="click">
-        <template #reference>
-          <el-button :icon="Plus" />
-        </template>
-        <el-menu>
-          <!-- 修改点击事件处理 -->
-          <el-menu-item @click="handleCreateGroup" style="height: 30px">
-            <el-icon>
+      
+      <!-- 替换el-popover为自定义下拉菜单 -->
+      <div class="custom-dropdown">
+        <el-button :icon="Plus" @click="toggleDropdown" />
+        <div class="dropdown-menu" v-show="isDropdownVisible">
+          <div @click="handleCreateGroup" class="dropdown-item">
+            <el-icon class="dropdown-icon">
               <ChatRound />
             </el-icon>
-            创建群聊
-          </el-menu-item>
-          <el-menu-item @click="handleAddContact" style="height: 30px">
-            <el-icon>
+            <span class="dropdown-text">创建群聊</span>
+          </div>
+          <div @click="handleAddContact" class="dropdown-item">
+            <el-icon class="dropdown-icon">
               <User />
             </el-icon>
-            加好友/群
-          </el-menu-item>
-        </el-menu>
-      </el-popover>
+            <span class="dropdown-text">加好友/群</span>
+          </div>
+        </div>
+      </div>
     </div>
     <slot></slot>
 
@@ -38,7 +37,7 @@
 
 <script setup>
 import { ChatRound, Plus, Search, User } from '@element-plus/icons-vue'
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import search from '@/components/common/search/index.vue'
 import createGroup from '@/components/common/createGroup/index.vue'
 
@@ -58,11 +57,27 @@ const isAddDialogVisible = ref(false)
 const isCreateDialogVisible = ref(false)
 // 初始化子组件的Ref
 const childRef = ref()
+// 下拉菜单可见性
+const isDropdownVisible = ref(false)
+
+// 切换下拉菜单显示状态
+const toggleDropdown = () => {
+  isDropdownVisible.value = !isDropdownVisible.value
+}
+
+// 点击外部关闭下拉菜单
+const handleClickOutside = (event) => {
+  const dropdown = document.querySelector('.custom-dropdown')
+  if (dropdown && !dropdown.contains(event.target) && isDropdownVisible.value) {
+    isDropdownVisible.value = false
+  }
+}
 
 // 处理创建群聊点击事件
 const handleCreateGroup = () => {
   try {
     isCreateDialogVisible.value = true
+    isDropdownVisible.value = false // 关闭下拉菜单
     // 安全地调用子组件方法
     if (childRef.value && typeof childRef.value.handleFriendList === 'function') {
       childRef.value.handleFriendList()
@@ -78,6 +93,7 @@ const handleCreateGroup = () => {
 const handleAddContact = () => {
   try {
     isAddDialogVisible.value = true
+    isDropdownVisible.value = false // 关闭下拉菜单
     // 发出事件
     emit('addContact')
   } catch (error) {
@@ -94,6 +110,15 @@ const closeAddDialogVisible = () => {
 const closeCreateDialogVisible = () => {
   isCreateDialogVisible.value = false
 }
+
+// 添加和移除点击事件监听器
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside)
+})
 </script>
 
 <style lang="scss" scoped>
@@ -108,6 +133,59 @@ const closeCreateDialogVisible = () => {
     display: flex;
     padding: 10px;
     justify-content: space-around;
+  }
+}
+
+/* 自定义下拉菜单样式 */
+.custom-dropdown {
+  position: relative;
+  
+  .dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 120px;
+    background-color: white;
+    border-radius: 4px;
+    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+    z-index: 10;
+    margin-top: 5px;
+    padding: 5px 0;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: -5px;
+      right: 10px;
+      width: 10px;
+      height: 10px;
+      background-color: white;
+      transform: rotate(45deg);
+      box-shadow: -2px -2px 5px rgba(0, 0, 0, 0.03);
+    }
+  }
+  
+  .dropdown-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      background-color: #f5f7fa;
+    }
+    
+    .dropdown-icon {
+      font-size: 16px;
+      margin-right: 8px;
+      color: #606266;
+    }
+    
+    .dropdown-text {
+      font-size: 14px;
+      color: #606266;
+    }
   }
 }
 </style>

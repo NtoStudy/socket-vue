@@ -26,6 +26,10 @@ const routes = [
         path: 'moments',
         component: () => import('../views/moments/index.vue'),
       },
+      {
+        path: 'settings',
+        component: () => import('../views/setting/index.vue'),
+      },
     ],
   },
 ]
