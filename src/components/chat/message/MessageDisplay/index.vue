@@ -5,7 +5,7 @@ import { messageDelete } from '@/api/friend.js'
 import { useUserInfoStore } from '@/store/user.js'
 import { ref, onMounted, watch } from 'vue'
 import { Loading } from '@element-plus/icons-vue'
-
+//TODO由于滚动页面导致的查询的pageSize和pageNumber会一直变化
 // 初始化用户信息存储
 const useUserInfo = useUserInfoStore()
 const messagesContainer = ref(null)

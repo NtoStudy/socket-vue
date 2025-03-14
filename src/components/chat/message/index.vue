@@ -122,9 +122,12 @@ const loadMoreMessages = async () => {
 
     if (messageWindowStatus.value === '用户' && chatFriendOrChatRoom.friendId) {
       const res = await messageHistory(chatFriendOrChatRoom.friendId, pagination.page, pagination.size)
+      console.log(res.data)
       newMessages = formatMessages(res.data.data.list)
     } else if (messageWindowStatus.value === '群聊' && chatFriendOrChatRoom.chatRoomId) {
       const res = await chatRoomHistory(chatFriendOrChatRoom.chatRoomId, pagination.page, pagination.size)
+      console.log(res.data)
+
       newMessages = formatMessages(res.data.data.list)
     }
 
