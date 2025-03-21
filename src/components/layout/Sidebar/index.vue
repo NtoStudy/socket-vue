@@ -61,13 +61,14 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, markRaw, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { Setting, ChatDotRound, User, PictureFilled } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import UserProfileCard from '@/components/common/UserProfileCard/index.vue'
 import StatusSelector from '@/components/common/StatusSelector/index.vue'
 import ProfileEditor from '@/components/common/ProfileEditor/index.vue'
+import { useUserInfoStore } from '@/store/user.js'
 
 const router = useRouter()
 const route = useRoute()
@@ -76,26 +77,14 @@ const route = useRoute()
 const activeRoute = computed(() => route.path)
 
 // 用户信息
-const userInfo = ref({
-  qqNumber: '2943343011',
-  likes: '9999',
-  username: '阿宝',
-  signature: '爱在黄昏日落时',
-  location: '中国',
-  tags: [
-    { name: 'Tag 1', type: 'primary' },
-    { name: 'Tag 2', type: 'success' },
-    { name: 'Tag 3', type: 'info' },
-    { name: 'Tag 4', type: 'warning' },
-    { name: 'Tag 5', type: 'danger' },
-  ],
-})
+const userInfo = ref(useUserInfoStore().userInfo)
 
 // 侧边栏项目数据
+// 使用 markRaw 包装图标组件
 const sidebarItems = ref([
-  { icon: ChatDotRound, badge: false, route: '/main/chat', tooltip: '聊天' },
-  { icon: User, badge: false, route: '/main/friend', tooltip: '联系人' },
-  { icon: PictureFilled, badge: false, route: '/main/moments', tooltip: '朋友圈' },
+  { icon: markRaw(ChatDotRound), badge: false, route: '/main/chat', tooltip: '聊天' },
+  { icon: markRaw(User), badge: false, route: '/main/friend', tooltip: '联系人' },
+  { icon: markRaw(PictureFilled), badge: false, route: '/main/moments', tooltip: '朋友圈' },
 ])
 
 // 用户头像
@@ -126,15 +115,7 @@ const allStatuses = ref([
 
 // 编辑资料相关
 const showEditProfileDialog = ref(false)
-const profileForm = ref({
-  nickname: '.',
-  signature: '爱在黄昏日落时',
-  gender: 'male',
-  birthday: '1988-01-01',
-  country: 'china',
-  province: '',
-  city: '',
-})
+const profileForm = ref(useUserInfoStore().userInfo)
 
 // 路由跳转处理
 const handleRoute = (path) => {
@@ -164,9 +145,16 @@ const handleSendMessage = () => {
 
 // 保存用户资料
 const saveProfile = (formData) => {
-  console.log('保存用户资料:', formData)
   ElMessage.success('资料保存成功')
+  useUserInfoStore().setUserInfo(formData)
 }
+console.log(useUserInfoStore().userInfo)
+watch(
+  () => useUserInfoStore().userInfo,
+  () => {
+    userInfo.value = useUserInfoStore().userInfo
+  },
+)
 </script>
 
 <style lang="scss" scoped>
@@ -183,8 +171,8 @@ const saveProfile = (formData) => {
   .sidebar-header {
     display: flex;
     align-items: center;
-    margin-bottom: 30px;
     position: relative;
+    justify-content: center; // 添加水平居中
 
     .avatar-container {
       position: relative;
@@ -251,7 +239,6 @@ const saveProfile = (formData) => {
   .sidebar-footer {
     width: 100%;
     display: flex;
-    justify-content: center;
 
     .sidebar-item {
       display: flex;
@@ -279,10 +266,12 @@ const saveProfile = (formData) => {
   }
 
   .sidebar-body {
+    display: flex;
     flex-direction: column;
     align-items: center;
     gap: 15px;
     flex: 1;
+    padding-top: 15px;
 
     .sidebar-item.active {
       background-color: #e6f7ff;
@@ -304,7 +293,11 @@ const saveProfile = (formData) => {
   }
 
   .sidebar-footer {
-    margin-bottom: 20px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-top: auto; // 将footer推到底部
+    padding-bottom: 20px; // 改用padding替代margin
   }
 }
 

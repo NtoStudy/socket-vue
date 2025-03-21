@@ -6,7 +6,7 @@
       </div>
       <div class="profile-info">
         <div class="likes-count">{{ userInfo.username }}</div>
-        <div class="qq-number">{{ userInfo.qqNumber }}</div>
+        <div class="qq-number">{{ userInfo.number }}</div>
       </div>
 
       <!-- 新增点赞按钮 -->
@@ -14,14 +14,14 @@
         <el-icon>
           <Trophy />
         </el-icon>
-        <span class="like-count">{{ userInfo.likes }}</span>
+        <span class="like-count">{{ userInfo.likeCount }}</span>
       </div>
     </div>
 
     <!-- 在线状态 -->
     <div class="profile-status">
       <div class="status-dot" :class="currentStatus.class"></div>
-      <span>{{ currentStatus.label }}</span>
+      <span>{{ currentStatus.customStatus }}</span>
     </div>
 
     <!-- 个人信息列表 -->
@@ -32,13 +32,13 @@
       </div>
       <div class="profile-item">
         <div class="item-label">所在地</div>
-        <div class="item-value">{{ userInfo.location }}</div>
+        <div class="item-value">{{ userInfo.city }}</div>
       </div>
       <div class="profile-item">
         <div class="item-label">兴趣爱好</div>
         <div class="item-value link">
-          <el-tag v-for="tag in userInfo.tags" :key="tag.name" closable :type="tag.type">
-            {{ tag.name }}
+          <el-tag v-for="tag in hobbies" :key="tag.name" closable :type="tag.type">
+            {{ tag }}
           </el-tag>
         </div>
       </div>
@@ -54,24 +54,11 @@
 
 <script setup>
 import { Trophy } from '@element-plus/icons-vue'
+import { computed, ref } from 'vue'
 
-defineProps({
+const props = defineProps({
   userInfo: {
     type: Object,
-    default: () => ({
-      qqNumber: '2943343011',
-      likes: '9999',
-      username: '阿宝',
-      signature: '爱在黄昏日落时',
-      location: '中国',
-      tags: [
-        { name: 'Tag 1', type: 'primary' },
-        { name: 'Tag 2', type: 'success' },
-        { name: 'Tag 3', type: 'info' },
-        { name: 'Tag 4', type: 'warning' },
-        { name: 'Tag 5', type: 'danger' },
-      ],
-    }),
   },
   currentStatus: {
     type: Object,
@@ -82,8 +69,11 @@ defineProps({
     default: '',
   },
 })
-
 const emit = defineEmits(['edit-profile', 'send-message', 'like'])
+console.log(props.userInfo, 'user')
+const hobbies = computed(() => {
+  return props.userInfo.hobbies.split(',').filter((item) => item.trim() !== '')
+})
 
 // 处理点赞事件
 const handleLike = () => {

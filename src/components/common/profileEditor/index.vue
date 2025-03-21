@@ -10,9 +10,11 @@
       <!-- 头像编辑区域 -->
       <div class="avatar-edit-section">
         <div class="avatar-wrapper">
-          <img :src="modelValue.avatar || ''" alt="用户头像" class="edit-avatar" />
+          <img :src="modelValue.avatarUrl || ''" alt="用户头像" class="edit-avatar" />
           <div class="avatar-overlay">
-            <el-icon><Plus /></el-icon>
+            <el-icon>
+              <Plus />
+            </el-icon>
           </div>
         </div>
       </div>
@@ -20,9 +22,9 @@
       <!-- 表单区域 -->
       <el-form :model="formData" label-width="70px" class="profile-form">
         <el-form-item label="昵称">
-          <el-input v-model="formData.nickname" maxlength="36">
+          <el-input v-model="formData.username" maxlength="36">
             <template #append>
-              <span class="input-counter">{{ formData.nickname.length }}/36</span>
+              <span class="input-counter">{{ formData.username?.length || 0 }}/36</span>
             </template>
           </el-input>
         </el-form-item>
@@ -42,6 +44,7 @@
           <el-select v-model="formData.gender" placeholder="请选择">
             <el-option label="男" value="male"></el-option>
             <el-option label="女" value="female"></el-option>
+            <el-option label="未知" value="unknown"></el-option>
           </el-select>
         </el-form-item>
 
@@ -55,11 +58,29 @@
           ></el-date-picker>
         </el-form-item>
 
-        <el-form-item label="国家">
-          <el-select v-model="formData.country" placeholder="请选择">
-            <el-option label="中国" value="china"></el-option>
-            <el-option label="其他" value="other"></el-option>
-          </el-select>
+        <el-form-item label="兴趣爱好" class="hobbies-form-item">
+          <div class="tags-container">
+            <el-tag
+              v-for="tag in dynamicTags"
+              :key="tag"
+              closable
+              :disable-transitions="false"
+              @close="handleClose(tag)"
+              class="tag-item"
+            >
+              {{ tag }}
+            </el-tag>
+            <el-input
+              v-if="inputVisible"
+              ref="InputRef"
+              v-model="inputValue"
+              size="small"
+              @keyup.enter="handleInputConfirm"
+              @blur="handleInputConfirm"
+              class="tag-input"
+            />
+            <el-button v-else class="button-new-tag" size="small" @click="showInput">+ 添加标签</el-button>
+          </div>
         </el-form-item>
 
         <el-form-item label="省份">
@@ -96,27 +117,24 @@
 import { ref, computed, watch, reactive } from 'vue'
 import { Plus } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
+import { nextTick } from 'vue'
+import { ElInput } from 'element-plus'
+import { postUsersUpdate } from '@/api/user.js'
 
+const inputValue = ref('')
+const dynamicTags = ref([])
+const inputVisible = ref(false)
+const InputRef = ref()
+const isSubmitting = ref(false)
 const props = defineProps({
   modelValue: {
     type: Object,
-    default: () => ({
-      nickname: '.',
-      signature: '爱在黄昏日落时',
-      gender: 'male',
-      birthday: '1988-01-01',
-      country: 'china',
-      province: '',
-      city: '',
-      avatar: '',
-    }),
   },
   visible: {
     type: Boolean,
     default: false,
   },
 })
-
 const emit = defineEmits(['update:modelValue', 'update:visible', 'save'])
 
 // 表单数据
@@ -185,11 +203,65 @@ const handleCancel = () => {
 }
 
 // 保存用户资料
-const handleSave = () => {
-  emit('update:modelValue', { ...formData })
-  emit('save', formData)
-  dialogVisible.value = false
-  ElMessage.success('资料保存成功')
+const handleSave = async () => {
+  if (isSubmitting.value) return
+  isSubmitting.value = true
+  // 准备要提交的数据
+  const submitData = {
+    ...formData,
+    // 确保兴趣爱好标签被正确格式化
+    hobbies: dynamicTags.value.join(','),
+  }
+  const res = await postUsersUpdate(submitData)
+  if (res.data.code === 200) {
+    console.log(res.data)
+    emit('update:modelValue', { ...submitData })
+    emit('save', submitData)
+    dialogVisible.value = false
+    ElMessage.success('资料保存成功')
+    isSubmitting.value = false
+    // useUserInfoStore().setUserInfo(res.data.data)
+  }
+}
+
+watch(
+  () => props.modelValue,
+  (newVal) => {
+    if (newVal) {
+      Object.assign(formData, newVal)
+
+      // 处理兴趣爱好字符串转数组
+      if (newVal.hobbies) {
+        // 如果是字符串，按逗号分割
+        if (typeof newVal.hobbies === 'string') {
+          dynamicTags.value = newVal.hobbies.split(',').filter((item) => item.trim() !== '')
+        }
+        // 如果已经是数组，直接使用
+        else if (Array.isArray(newVal.hobbies)) {
+          dynamicTags.value = [...newVal.hobbies]
+        }
+      }
+    }
+  },
+  { deep: true, immediate: true },
+)
+const handleClose = (tag) => {
+  dynamicTags.value.splice(dynamicTags.value.indexOf(tag), 1)
+}
+
+const showInput = () => {
+  inputVisible.value = true
+  nextTick(() => {
+    InputRef.value.input.focus()
+  })
+}
+
+const handleInputConfirm = () => {
+  if (inputValue.value) {
+    dynamicTags.value.push(inputValue.value)
+  }
+  inputVisible.value = false
+  inputValue.value = ''
 }
 </script>
 
@@ -274,6 +346,31 @@ const handleSave = () => {
 
     .el-form-item {
       margin-bottom: 15px;
+    }
+
+    /* 添加兴趣爱好样式 */
+    .hobbies-form-item {
+      .tags-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .tag-item {
+        margin-right: 0;
+      }
+
+      .tag-input {
+        width: 90px;
+        margin-right: 8px;
+        vertical-align: bottom;
+      }
+
+      .button-new-tag {
+        height: 32px;
+        padding: 0 10px;
+      }
     }
   }
 }
