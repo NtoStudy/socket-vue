@@ -1,5 +1,4 @@
 import { createWebHistory, createRouter } from 'vue-router'
-//TODO 如果有登录信息，则进入main没有则Login
 const routes = [
   {
     path: '/',

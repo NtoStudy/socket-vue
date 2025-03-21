@@ -17,7 +17,12 @@
     </div>
 
     <!-- 联系人列表组件 -->
-    <ContactList :friendItems="friendItems" :groupItems="groupItems" @tabChange="handleTabChange" />
+    <ContactList
+      :friendItems="friendItems"
+      :groupItems="groupItems"
+      @tabChange="handleTabChange"
+      @selectFriend="handleSelectFriend"
+    />
   </Sidebar>
 </template>
 
@@ -28,6 +33,7 @@ import { onMounted, ref } from 'vue'
 import { chatRoomNumber, friendNumber } from '@/api/notification.js'
 import Sidebar from '@/components/layout/HeaderSidebar/index.vue'
 import ContactList from './ContactList/index.vue'
+import { getFriendGroupList } from '@/api/friendGroups.js'
 
 // 初始化未读消息数量的Ref
 const friendCount = ref()
@@ -38,13 +44,17 @@ const store = useFriendManagerStore()
 const selectedMenu = ref('friend')
 
 // 模拟好友数据
-const friendItems = ref([
-  { name: '我的设备', count: 1 },
-  { name: '特别关心', count: '0/1' },
-  { name: '干净的圈子', count: '243/435' },
-  { name: '大美女', count: '0/0' },
-])
+const friendItems = ref([])
 
+const FriendGroupList = async () => {
+  const res = await getFriendGroupList()
+  console.log(res.data.data)
+  friendItems.value = res.data.data
+}
+const handleSelectFriend = (friend) => {
+  console.log('选择了好友:', friend)
+  // 这里可以添加跳转到聊天页面或其他操作
+}
 // 模拟群聊数据，按照图片中的样式
 const groupItems = ref([
   { name: '置顶群聊', count: 3 },
@@ -76,7 +86,6 @@ const handleRequestCount = async () => {
 const handleCreateGroup = () => {
   console.log('好友页面处理创建群聊')
 }
-
 // 处理添加好友/群事件
 const handleAddContact = () => {
   console.log('好友页面处理添加好友/群')
@@ -85,6 +94,7 @@ const handleAddContact = () => {
 // 在组件挂载时获取未读消息数量
 onMounted(() => {
   handleRequestCount()
+  FriendGroupList()
 })
 </script>
 

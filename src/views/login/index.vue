@@ -40,7 +40,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { nextTick, ref } from 'vue'
 import { userInfoByJwt, userLogin, userRegister } from '@/api/user.js' // 添加 userRegister 引入
 import { useRouter } from 'vue-router'
 import { useUserInfoStore } from '@/store/user.js'
@@ -63,10 +63,12 @@ const handleLogin = async () => {
   const res = await userLogin(form.value.number, form.value.password)
   userInfoStore.setToken(res.data.data)
   if (res.data.code === 200) {
-    const response = await userInfoByJwt()
-    console.log(response.data.data)
-    userInfoStore.setUserInfo(response.data.data)
-    await router.push('/main')
+    await nextTick(async () => {
+      const response = await userInfoByJwt()
+      console.log(response.data.data)
+      userInfoStore.setUserInfo(response.data.data)
+      await router.push('/main')
+    })
   }
 }
 

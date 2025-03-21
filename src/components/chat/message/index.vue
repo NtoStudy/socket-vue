@@ -28,7 +28,7 @@ const websocket = new WebSocketService()
 // 分页参数
 const pagination = reactive({
   page: 1,
-  size: 20,
+  size: 50,
   hasMore: true,
   loading: false,
 })
@@ -156,6 +156,7 @@ const loadMoreMessages = async () => {
   }
 }
 const throttledLoadMoreMessages = _.throttle(loadMoreMessages, 1000)
+
 /**
  * 处理用户聊天消息
  * @returns {Promise<void>}
@@ -173,17 +174,25 @@ const handleChatMessage = async (newFriendId) => {
 
   try {
     const res = await messageHistory(newFriendId, pagination.page, pagination.size)
-    messages.value = formatMessages(res.data.data.list)
+    // 设置消息窗口状态
     messageWindowStatus.value = '用户'
 
-    // 如果消息数量小于页面大小，说明没有更多消息了
-    if (res.data.data.list.length < pagination.size) {
-      pagination.hasMore = false
-    }
+    // 使用setTimeout确保DOM完全更新后再设置消息和滚动
+    setTimeout(() => {
+      messages.value = formatMessages(res.data.data.list)
 
-    await nextTick(() => {
-      messageDisplayRef.value?.scrollToBottom()
-    })
+      // 如果消息数量小于页面大小，说明没有更多消息了
+      if (res.data.data.list.length < pagination.size) {
+        pagination.hasMore = false
+      }
+
+      // 再次使用setTimeout确保消息渲染后再滚动
+      setTimeout(() => {
+        if (messageDisplayRef.value) {
+          messageDisplayRef.value.scrollToBottom()
+        }
+      }, 50)
+    }, 0)
   } catch (error) {
     console.error('加载好友消息失败:', error)
     ElMessage.error('加载消息失败')
@@ -207,17 +216,25 @@ const handleChatRoomMessage = async (newChatRoomId) => {
 
   try {
     const res = await chatRoomHistory(newChatRoomId, pagination.page, pagination.size)
-    messages.value = formatMessages(res.data.data.list)
+    // 设置消息窗口状态
     messageWindowStatus.value = '群聊'
 
-    // 如果消息数量小于页面大小，说明没有更多消息了
-    if (res.data.data.list.length < pagination.size) {
-      pagination.hasMore = false
-    }
+    // 使用setTimeout确保DOM完全更新后再设置消息和滚动
+    setTimeout(() => {
+      messages.value = formatMessages(res.data.data.list)
 
-    await nextTick(() => {
-      messageDisplayRef.value?.scrollToBottom()
-    })
+      // 如果消息数量小于页面大小，说明没有更多消息了
+      if (res.data.data.list.length < pagination.size) {
+        pagination.hasMore = false
+      }
+
+      // 再次使用setTimeout确保消息渲染后再滚动
+      setTimeout(() => {
+        if (messageDisplayRef.value) {
+          messageDisplayRef.value.scrollToBottom()
+        }
+      }, 50)
+    }, 0)
   } catch (error) {
     console.error('加载群聊消息失败:', error)
     ElMessage.error('加载消息失败')
