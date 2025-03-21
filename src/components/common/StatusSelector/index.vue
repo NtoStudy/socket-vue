@@ -98,7 +98,6 @@ const props = defineProps({
     default: false,
   },
 })
-console.log(props.statusOptions, 'statusOptions')
 const emit = defineEmits(['update:visible', 'update:modelValue', 'toggle-custom-input', 'set-custom-status'])
 
 const customStatusText = ref('')
@@ -108,7 +107,6 @@ const handleStatusChange = async (status) => {
   const res = await postUsersUpdate({
     status: status.label,
   })
-  console.log(res.data)
   if (res.data.code === 200) {
     // 更新状态
     emit('update:modelValue', status)

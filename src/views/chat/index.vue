@@ -1,12 +1,12 @@
 <template>
   <div class="chat-container">
-    <slider />
+    <ChatSlider />
     <message />
   </div>
 </template>
 
 <script setup>
-import slider from '@/components/chat/controlFunction/index.vue'
+import ChatSlider from '@/components/chat/controlFunction/index.vue'
 import message from '@/components/chat/message/index.vue'
 </script>
 

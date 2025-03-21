@@ -1,12 +1,12 @@
 <template>
   <div class="friend-manager-view">
-    <ChatSidebar />
+    <FriendSidebar />
     <FriendManager />
   </div>
 </template>
 
 <script setup>
-import ChatSidebar from '@/components/friend/controlFunction/index.vue'
+import FriendSidebar from '@/components/friend/controlFunction/index.vue'
 import FriendManager from '@/components/friend/application/index.vue'
 </script>
 

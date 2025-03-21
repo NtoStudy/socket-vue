@@ -5,8 +5,8 @@
         <img :src="userAvatar || ''" alt="用户头像" class="profile-avatar" />
       </div>
       <div class="profile-info">
-        <div class="likes-count">{{ userInfo.username }}</div>
-        <div class="qq-number">{{ userInfo.number }}</div>
+        <div class="likes-count">{{ userInfo?.username || '未知用户' }}</div>
+        <div class="qq-number">{{ userInfo?.number || '' }}</div>
       </div>
 
       <!-- 新增点赞按钮 -->
@@ -14,45 +14,51 @@
         <el-icon>
           <Trophy />
         </el-icon>
-        <span class="like-count">{{ userInfo.likeCount }}</span>
+        <span class="like-count">{{ userInfo?.likeCount || 0 }}</span>
       </div>
     </div>
 
     <!-- 在线状态 -->
     <div class="profile-status">
       <div class="status-dot" :class="statusClass"></div>
-      <span>{{ currentStatus.label }}</span>
+      <span>{{ currentStatus?.label || '在线' }}</span>
     </div>
-
     <!-- 个人信息列表 -->
     <div class="profile-details">
       <div class="profile-item">
         <div class="item-label">签名</div>
-        <div class="item-value">{{ userInfo.signature }}</div>
+        <div class="item-value">{{ userInfo?.signature || '这个人很懒，什么都没留下' }}</div>
       </div>
       <div class="profile-item">
         <div class="item-label">所在地</div>
-        <div class="item-value">{{ userInfo.city }}</div>
+        <div class="item-value">{{ userInfo?.city || '未知' }}</div>
       </div>
       <div class="profile-item">
         <div class="item-label">兴趣爱好</div>
         <div class="item-value link">
-          <el-tag v-for="tag in hobbies" :key="tag.name" closable :type="tag.type">
-            {{ tag }}
-          </el-tag>
+          <template v-if="hobbies.length > 0">
+            <el-tag v-for="tag in hobbies" :key="tag" closable :type="tag.type">
+              {{ tag }}
+            </el-tag>
+          </template>
+          <span v-else>暂无兴趣爱好</span>
         </div>
       </div>
     </div>
 
-    <!-- 底部按钮 -->
+    <!-- 底部按钮区域使用插槽 -->
     <div class="profile-actions">
-      <el-button class="action-btn edit-btn" @click="$emit('edit-profile')">编辑资料</el-button>
-      <el-button class="action-btn message-btn" type="primary" @click="$emit('send-message')">发消息</el-button>
+      <!-- 默认插槽内容 -->
+      <slot>
+        <el-button class="action-btn edit-btn" @click="$emit('edit-profile')">编辑资料</el-button>
+        <el-button class="action-btn message-btn" type="primary" @click="$emit('send-message')">发消息</el-button>
+      </slot>
     </div>
   </div>
 </template>
 
 <script setup>
+//TODO 在sidebar, profile-editor, UserProfileCard有样式，以及状态很多代码复用，后续优化
 import { Trophy } from '@element-plus/icons-vue'
 import { computed } from 'vue'
 
@@ -62,17 +68,18 @@ const props = defineProps({
   },
   currentStatus: {
     type: Object,
-    required: true,
   },
   userAvatar: {
     type: String,
     default: '',
   },
 })
-console.log(props.currentStatus, 'currentStatus')
 const emit = defineEmits(['edit-profile', 'send-message', 'like'])
-console.log(props.userInfo, 'user')
 const hobbies = computed(() => {
+  // 检查 userInfo 和 hobbies 是否存在
+  if (!props.userInfo || !props.userInfo.hobbies) {
+    return []
+  }
   return props.userInfo.hobbies.split(',').filter((item) => item.trim() !== '')
 })
 

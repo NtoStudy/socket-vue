@@ -3,14 +3,18 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { chatRoomDelete } from '@/api/chatRoom.js'
 import { messageDelete } from '@/api/friend.js'
 import { useUserInfoStore } from '@/store/user.js'
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import { Loading } from '@element-plus/icons-vue'
+import UserProfileCard from '@/components/common/UserProfileCard/index.vue'
+import { chatFriendOrChatRoomStore } from '@/store/chat.js'
+import { getUsersInfoById, putUsersLike } from '@/api/user.js'
 //TODO由于滚动页面导致的查询的pageSize和pageNumber会一直变化
 // 初始化用户信息存储
 const useUserInfo = useUserInfoStore()
 const messagesContainer = ref(null)
 const isScrolledToBottom = ref(true)
-
+const friendOrChatRoom = chatFriendOrChatRoomStore()
+const friendInfo = ref()
 /**
  * 处理右键点击消息事件
  * @param {Object} message - 被点击的消息对象
@@ -117,7 +121,6 @@ const props = defineProps({
 })
 
 // 定义组件事件
-const emit = defineEmits(['load-more', 'message-deleted'])
 
 // 监听消息变化，如果用户在底部，则自动滚动到底部
 watch(
@@ -141,13 +144,88 @@ onMounted(() => {
 defineExpose({
   scrollToBottom,
 })
+
+const handleLike = async () => {
+  const res = await putUsersLike(friendInfo.value.userId)
+  console.log(res.data)
+  if (res.data.code === 200) {
+    // 此时点赞成功，应该更新点赞状态
+    await getFriendInfo()
+  }
+}
+// 添加用户状态相关数据
+const currentStatus = computed(() => {
+  return {
+    id: '1',
+    label: useUserInfo.userInfo.status || '在线',
+  }
+})
+
+// 添加状态样式类的计算方式
+const statusClass = computed(() => {
+  const labelMap = {
+    在线: 'status-online',
+    Q我吧: 'status-happy',
+    离开: 'status-away',
+    忙碌: 'status-busy',
+    请勿打扰: 'status-dnd',
+    隐身: 'status-invisible',
+    我的电量: 'status-battery',
+    听歌中: 'status-music',
+    做好事: 'status-working',
+    出去浪: 'status-travel',
+    被掏空: 'status-empty',
+    今日步数: 'status-steps',
+    今日天气: 'status-weather',
+    我crush了: 'status-crush',
+  }
+  return labelMap[currentStatus.value.label] || 'status-online'
+})
+
+// ... 现有代码 ...
+
+// 更新组件事件
+const emit = defineEmits(['load-more', 'message-deleted', 'edit-profile', 'send-message'])
+
+const getFriendInfo = async () => {
+  try {
+    // 确保 friendId 存在
+    if (!friendOrChatRoom.friendId) {
+      console.log('没有有效的 friendId')
+      return
+    }
+
+    const res = await getUsersInfoById(friendOrChatRoom.friendId)
+    if (res.data && res.data.data) {
+      friendInfo.value = res.data.data
+    } else {
+      console.error('获取好友信息失败:', res)
+    }
+  } catch (error) {
+    console.error('加载好友消息失败:', error)
+    // 设置默认值，防止渲染错误
+    friendInfo.value = { username: '未知用户', number: '', status: '在线' }
+  }
+}
+// 只有当 friendId 存在时才调用
+watch(
+  () => friendOrChatRoom.friendId,
+  (newVal) => {
+    if (newVal) {
+      getFriendInfo()
+    }
+  },
+  { immediate: true },
+)
 </script>
 
 <template>
   <div class="messages" ref="messagesContainer">
     <!-- 加载中提示 -->
     <div v-if="loading" class="loading-indicator">
-      <el-icon class="is-loading"><Loading /></el-icon>
+      <el-icon class="is-loading">
+        <Loading />
+      </el-icon>
       <span>加载更多消息...</span>
     </div>
 
@@ -172,10 +250,34 @@ defineExpose({
           <!-- 使用懒加载加载视频 -->
           <video :src="message.content" controls height="200" preload="metadata" @error="handleVideoError"></video>
         </div>
-        <div class="avatar">我</div>
+
+        <!-- 用户头像使用弹出框 -->
+        <el-popover placement="left" :width="300" trigger="click" popper-class="user-profile-popover">
+          <template #reference>
+            <div class="avatar">我</div>
+          </template>
+          <UserProfileCard :user-info="useUserInfo.userInfo" :current-status="currentStatus" :user-avatar="''">
+            <el-button class="action-btn call-btn" type="primary"> 发消息</el-button>
+          </UserProfileCard>
+        </el-popover>
       </div>
       <div v-else class="assistant-content" @contextmenu="(event) => handleRightClickMessage(message, event)">
-        <div class="avatar">AI</div>
+        <!-- 对方头像使用弹出框 -->
+        <el-popover placement="right" :width="300" trigger="click" popper-class="user-profile-popover">
+          <template #reference>
+            <div class="avatar">AI</div>
+          </template>
+          <UserProfileCard
+            @like="handleLike"
+            :user-info="friendInfo"
+            :current-status="{ id: '1', label: '在线' }"
+            :user-avatar="''"
+          >
+            <el-button class="action-btn call-btn"> 音视频通话</el-button>
+            <el-button type="primary"> 发消息</el-button>
+          </UserProfileCard>
+        </el-popover>
+
         <div class="text" v-if="message.messageType === 'text'">{{ message.content }}</div>
         <div class="images" v-else-if="message.messageType === 'image'">
           <!-- 使用懒加载加载图片 -->
@@ -319,6 +421,64 @@ defineExpose({
     &.assistant-message .text {
       background-color: #f0f0f0;
       color: #333333;
+    }
+  }
+}
+
+:deep(.user-profile-popover) {
+  padding: 0;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+  .el-popper__arrow {
+    display: none;
+  }
+}
+
+.avatar {
+  min-width: 40px;
+  height: 40px;
+  background-color: #e0e0e0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: bold;
+  color: #666666;
+  flex-shrink: 0;
+  cursor: pointer; // 添加指针样式表明可点击
+  transition: transform 0.2s;
+
+  &:hover {
+    transform: scale(1.05);
+  }
+}
+
+:deep(.profile-actions) {
+  .call-btn {
+    flex: 1;
+    height: 36px;
+    margin-right: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .el-icon {
+      margin-right: 4px;
+    }
+  }
+
+  .message-btn {
+    flex: 1;
+    height: 36px;
+    background-color: #1890ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .el-icon {
+      margin-right: 4px;
     }
   }
 }

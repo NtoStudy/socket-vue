@@ -66,9 +66,27 @@ export const getUserInfoByNumber = (number) =>
     },
   })
 
+export const getUsersInfoById = (userId) =>
+  instance({
+    url: '/users/infoById',
+    method: 'get',
+    params: {
+      userId,
+    },
+  })
+
 export const postUsersUpdate = (userData) =>
   instance({
     url: '/users/update',
     method: 'post',
     data: userData,
+  })
+
+export const putUsersLike = (friendId) =>
+  instance({
+    url: '/users/like',
+    method: 'put',
+    params: {
+      friendId,
+    },
   })
