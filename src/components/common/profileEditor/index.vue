@@ -120,6 +120,7 @@ import { ElMessage } from 'element-plus'
 import { nextTick } from 'vue'
 import { ElInput } from 'element-plus'
 import { postUsersUpdate } from '@/api/user.js'
+import { useUserInfoStore } from '@/store/user.js'
 
 const inputValue = ref('')
 const dynamicTags = ref([])
@@ -214,13 +215,11 @@ const handleSave = async () => {
   }
   const res = await postUsersUpdate(submitData)
   if (res.data.code === 200) {
-    console.log(res.data)
     emit('update:modelValue', { ...submitData })
     emit('save', submitData)
     dialogVisible.value = false
-    ElMessage.success('资料保存成功')
+    useUserInfoStore().setUserInfo(submitData)
     isSubmitting.value = false
-    // useUserInfoStore().setUserInfo(res.data.data)
   }
 }
 

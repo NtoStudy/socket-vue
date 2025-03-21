@@ -20,8 +20,8 @@
 
     <!-- 在线状态 -->
     <div class="profile-status">
-      <div class="status-dot" :class="currentStatus.class"></div>
-      <span>{{ currentStatus.customStatus }}</span>
+      <div class="status-dot" :class="statusClass"></div>
+      <span>{{ currentStatus.label }}</span>
     </div>
 
     <!-- 个人信息列表 -->
@@ -54,7 +54,7 @@
 
 <script setup>
 import { Trophy } from '@element-plus/icons-vue'
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 
 const props = defineProps({
   userInfo: {
@@ -69,12 +69,33 @@ const props = defineProps({
     default: '',
   },
 })
+console.log(props.currentStatus, 'currentStatus')
 const emit = defineEmits(['edit-profile', 'send-message', 'like'])
 console.log(props.userInfo, 'user')
 const hobbies = computed(() => {
   return props.userInfo.hobbies.split(',').filter((item) => item.trim() !== '')
 })
 
+// 根据状态ID或标签动态计算样式类
+const statusClass = computed(() => {
+  const labelMap = {
+    在线: 'status-online',
+    Q我吧: 'status-happy',
+    离开: 'status-away',
+    忙碌: 'status-busy',
+    请勿打扰: 'status-dnd',
+    隐身: 'status-invisible',
+    我的电量: 'status-battery',
+    听歌中: 'status-music',
+    做好事: 'status-working',
+    出去浪: 'status-travel',
+    被掏空: 'status-empty',
+    今日步数: 'status-steps',
+    今日天气: 'status-weather',
+    我crush了: 'status-crush',
+  }
+  return labelMap[props.currentStatus.label] || 'status-online'
+})
 // 处理点赞事件
 const handleLike = () => {
   emit('like')

@@ -64,6 +64,7 @@ const handleLogin = async () => {
   userInfoStore.setToken(res.data.data)
   if (res.data.code === 200) {
     const response = await userInfoByJwt()
+    console.log(response.data.data)
     userInfoStore.setUserInfo(response.data.data)
     await router.push('/main')
   }

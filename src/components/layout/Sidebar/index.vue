@@ -6,7 +6,7 @@
           <template #reference>
             <div class="avatar-wrapper">
               <img :src="userAvatar" alt="Logo" class="logo" />
-              <div class="status-indicator" :class="currentStatus.class" @click.stop="showStatusPopup = true"></div>
+              <div class="status-indicator" :class="statusClass" @click.stop="showStatusPopup = true"></div>
             </div>
           </template>
           <UserProfileCard
@@ -93,24 +93,47 @@ const userAvatar = ref('')
 // 用户状态相关
 const showStatusPopup = ref(false)
 const showCustomInput = ref(false)
-const currentStatus = ref({ id: 'online', label: '在线', class: 'status-online' })
+const currentStatus = ref({
+  id: '1',
+  label: useUserInfoStore().userInfo.status || '在线',
+})
+// 修改状态样式类的计算方式
+const statusClass = computed(() => {
+  const labelMap = {
+    在线: 'status-online',
+    Q我吧: 'status-happy',
+    离开: 'status-away',
+    忙碌: 'status-busy',
+    请勿打扰: 'status-dnd',
+    隐身: 'status-invisible',
+    我的电量: 'status-battery',
+    听歌中: 'status-music',
+    做好事: 'status-working',
+    出去浪: 'status-travel',
+    被掏空: 'status-empty',
+    今日步数: 'status-steps',
+    今日天气: 'status-weather',
+    我crush了: 'status-crush',
+  }
+  return labelMap[currentStatus.value.label] || 'status-online'
+})
 
 // 所有状态列表
 const allStatuses = ref([
-  { id: 'online', label: '在线', class: 'status-online' },
-  { id: 'happy', label: 'Q我吧', class: 'status-happy' },
-  { id: 'away', label: '离开', class: 'status-away' },
-  { id: 'busy', label: '忙碌', class: 'status-busy' },
-  { id: 'dnd', label: '请勿打扰', class: 'status-dnd' },
-  { id: 'invisible', label: '隐身', class: 'status-invisible' },
-  { id: 'battery', label: '我的电量', class: 'status-battery' },
-  { id: 'music', label: '听歌中', class: 'status-music' },
-  { id: 'working', label: '做好事', class: 'status-working' },
-  { id: 'travel', label: '出去浪', class: 'status-travel' },
-  { id: 'empty', label: '被掏空', class: 'status-empty' },
-  { id: 'steps', label: '今日步数', class: 'status-steps' },
-  { id: 'weather', label: '今日天气', class: 'status-weather' },
-  { id: 'crush', label: '我crush了', class: 'status-crush' },
+  { id: '1', label: '在线' },
+  { id: '2', label: 'Q我吧' },
+  { id: '3', label: '离开' },
+  { id: '4', label: '忙碌' },
+  { id: '5', label: '请勿打扰' },
+  { id: '6', label: '隐身' },
+  { id: '7', label: '我的电量' },
+  { id: '8', label: '听歌中' },
+  { id: '9', label: '做好事' },
+  { id: '10', label: '出去浪' },
+  { id: '11', label: '被掏空' },
+  { id: '12', label: '今日步数' },
+  { id: '13', label: '今日天气' },
+  { id: '14', label: '我crush了' },
 ])
 
 // 编辑资料相关
@@ -124,10 +147,10 @@ const handleRoute = (path) => {
 
 // 处理自定义状态设置
 const handleSetCustomStatus = (statusText) => {
+  console.log('设置自定义状态:', statusText)
   currentStatus.value = {
     id: 'custom',
     label: statusText,
-    class: 'status-custom',
   }
   showStatusPopup.value = false
   showCustomInput.value = false
@@ -144,16 +167,35 @@ const handleSendMessage = () => {
 }
 
 // 保存用户资料
-const saveProfile = (formData) => {
+const saveProfile = () => {
   ElMessage.success('资料保存成功')
-  useUserInfoStore().setUserInfo(formData)
 }
-console.log(useUserInfoStore().userInfo)
 watch(
   () => useUserInfoStore().userInfo,
   () => {
     userInfo.value = useUserInfoStore().userInfo
   },
+)
+
+// 添加对用户状态的监听
+watch(
+  () => useUserInfoStore().userInfo.status,
+  (newStatus) => {
+    if (newStatus) {
+      // 找到匹配的状态对象
+      const matchedStatus = allStatuses.value.find((s) => s.label === newStatus)
+      if (matchedStatus) {
+        currentStatus.value = matchedStatus
+      } else {
+        // 如果没有匹配的预设状态，则设为自定义状态
+        currentStatus.value = {
+          id: 'custom',
+          label: newStatus,
+        }
+      }
+    }
+  },
+  { immediate: true },
 )
 </script>
 

@@ -8,7 +8,7 @@
       <div class="status-popup">
         <!-- 当前状态显示区域 -->
         <div class="current-status-section">
-          <div class="status-icon large" :class="modelValue.class"></div>
+          <div class="status-icon large" :class="getStatusClass(modelValue.label)"></div>
           <span class="status-text">{{ modelValue.label }}</span>
         </div>
 
@@ -31,9 +31,9 @@
               :key="status.id"
               class="status-item"
               :class="{ active: modelValue.id === status.id }"
-              @click="$emit('update:modelValue', status)"
+              @click="handleStatusChange(status)"
             >
-              <div class="status-icon" :class="status.class"></div>
+              <div class="status-icon" :class="getStatusClass(status.label)"></div>
               <span class="status-text">{{ status.label }}</span>
             </div>
           </div>
@@ -55,7 +55,31 @@
 <script setup>
 import { ref } from 'vue'
 import { Plus } from '@element-plus/icons-vue'
+import { postUsersUpdate } from '@/api/user.js'
+import { ElMessage } from 'element-plus'
+import { useUserInfoStore } from '@/store/user.js'
 
+const userStore = useUserInfoStore()
+const getStatusClass = (label) => {
+  const labelMap = {
+    在线: 'status-online',
+    Q我吧: 'status-happy',
+    离开: 'status-away',
+    忙碌: 'status-busy',
+    请勿打扰: 'status-dnd',
+    隐身: 'status-invisible',
+    我的电量: 'status-battery',
+    听歌中: 'status-music',
+    做好事: 'status-working',
+    出去浪: 'status-travel',
+    被掏空: 'status-empty',
+    今日步数: 'status-steps',
+    今日天气: 'status-weather',
+    我crush了: 'status-crush',
+  }
+
+  return labelMap[label] || 'status-custom'
+}
 const props = defineProps({
   visible: {
     type: Boolean,
@@ -74,10 +98,29 @@ const props = defineProps({
     default: false,
   },
 })
-
+console.log(props.statusOptions, 'statusOptions')
 const emit = defineEmits(['update:visible', 'update:modelValue', 'toggle-custom-input', 'set-custom-status'])
 
 const customStatusText = ref('')
+
+// 添加状态更新处理函数
+const handleStatusChange = async (status) => {
+  const res = await postUsersUpdate({
+    status: status.label,
+  })
+  console.log(res.data)
+  if (res.data.code === 200) {
+    // 更新状态
+    emit('update:modelValue', status)
+    userStore.userInfo = {
+      ...userStore.userInfo,
+      status: status.label,
+    }
+    ElMessage.success('状态更新成功')
+  } else {
+    ElMessage.error('状态更新失败')
+  }
+}
 
 const setCustomStatus = () => {
   if (customStatusText.value.trim()) {
