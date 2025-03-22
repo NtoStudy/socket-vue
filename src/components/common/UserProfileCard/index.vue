@@ -23,6 +23,7 @@
       <div class="status-dot" :class="statusClass"></div>
       <span>{{ currentStatus?.label || '在线' }}</span>
     </div>
+    <slot name="remark"></slot>
     <!-- 个人信息列表 -->
     <div class="profile-details">
       <div class="profile-item">
