@@ -22,6 +22,10 @@
       :groupItems="groupItems"
       @tabChange="handleTabChange"
       @selectFriend="handleSelectFriend"
+      @selectGroupChat="handleSelectGroupChat"
+      @add-group="handleAddGroup"
+      @delete-group="handleDeleteGroup"
+      @rename-group="handleRenameGroup"
     />
   </Sidebar>
 </template>
@@ -29,15 +33,19 @@
 <script setup>
 //TODO处理当前页面发消息跳转到消息页面的问题
 import { useFriendManagerStore } from '@/store/friendManager.js'
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { chatRoomNumber, friendNumber } from '@/api/notification.js'
 import Sidebar from '@/components/layout/HeaderSidebar/index.vue'
 import ContactList from './ContactList/index.vue'
-import { getFriendGroupList } from '@/api/friendGroups.js'
+import { createFriendGroup, deleteFriendGroup, getFriendGroupList, updateFriendGroup } from '@/api/friendGroups.js'
 
 // 初始化未读消息数量的Ref
 const friendCount = ref()
 const groupCount = ref()
+const pinnedCount = ref()
+const createCount = ref()
+const manageCount = ref()
+const joinCount = ref()
 // 初始化Pinia store
 const store = useFriendManagerStore()
 // 初始化选中的菜单项
@@ -48,7 +56,6 @@ const friendItems = ref([])
 
 const FriendGroupList = async () => {
   const res = await getFriendGroupList()
-  console.log(res.data.data)
   friendItems.value = res.data.data
 }
 const handleSelectFriend = (friend) => {
@@ -56,14 +63,16 @@ const handleSelectFriend = (friend) => {
   // 这里可以添加跳转到聊天页面或其他操作
 }
 // 模拟群聊数据，按照图片中的样式
-const groupItems = ref([
-  { name: '置顶群聊', count: 3 },
-  { name: '未命名的群聊', count: 2 },
-  { name: '我创建的群聊', count: 17 },
-  { name: '我管理的群聊', count: 11 },
-  { name: '我加入的群聊', count: 58 },
+const groupItems = computed(() => [
+  { name: '置顶群聊', count: pinnedCount.value },
+  { name: '我创建的群聊', count: createCount.value },
+  { name: '我管理的群聊', count: manageCount.value },
+  { name: '我加入的群聊', count: joinCount.value },
 ])
-
+const handleSelectGroupChat = (group) => {
+  console.log('选择了群聊:', group)
+  // 这里可以添加跳转到群聊页面或其他操作
+}
 // 处理标签切换
 const handleTabChange = (tab) => {
   console.log('当前标签:', tab)
@@ -89,6 +98,29 @@ const handleCreateGroup = () => {
 // 处理添加好友/群事件
 const handleAddContact = () => {
   console.log('好友页面处理添加好友/群')
+}
+
+const handleAddGroup = async (name) => {
+  const res = await createFriendGroup(name)
+  console.log(res.data)
+  if (res.data.code === 200) {
+    await FriendGroupList()
+  }
+}
+const handleDeleteGroup = async (currentGroup) => {
+  const res = await deleteFriendGroup(currentGroup.groupId)
+  console.log(res.data)
+  if (res.data.code === 200) {
+    await FriendGroupList()
+  }
+}
+const handleRenameGroup = async (currentGroup) => {
+  console.log('重命名分组', currentGroup)
+  const res = await updateFriendGroup(currentGroup.groupId, currentGroup.newName)
+  console.log(res.data)
+  if (res.data.code === 200) {
+    await FriendGroupList()
+  }
 }
 
 // 在组件挂载时获取未读消息数量

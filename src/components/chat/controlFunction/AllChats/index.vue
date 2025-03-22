@@ -24,6 +24,7 @@ const isActive = (chat) => {
 const handleFriendList = async () => {
   const res = await getFriendList()
   if (res.data.code === 200) {
+    console.log(res.data.data)
     const friendData = res.data.data
 
     // 获取未读消息数

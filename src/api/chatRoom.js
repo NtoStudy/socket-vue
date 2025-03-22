@@ -112,3 +112,27 @@ export const groupAddChatRoom = (groupNumber) =>
     method: 'post',
     params: { groupNumber },
   })
+
+export const chatRoomsPinnedGroup = () =>
+  instance({
+    url: '/chat-rooms/pinnedGroup',
+    method: 'get',
+  })
+
+export const chatRoomsCreateGroup = () =>
+  instance({
+    url: '/chat-rooms/createGroup',
+    method: 'get',
+  })
+
+export const chatRoomsManageGroup = () =>
+  instance({
+    url: '/chat-rooms/manageGroup',
+    method: 'get',
+  })
+
+export const chatRoomsJoinGroup = () =>
+  instance({
+    url: '/chat-rooms/joinGroup',
+    method: 'get',
+  })
