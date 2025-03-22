@@ -19,10 +19,8 @@
     </div>
 
     <!-- 在线状态 -->
-    <div class="profile-status">
-      <div class="status-dot" :class="statusClass"></div>
-      <span>{{ currentStatus?.label || '在线' }}</span>
-    </div>
+    <StatusIndicator :status="currentStatus" />
+
     <slot name="remark"></slot>
     <!-- 个人信息列表 -->
     <div class="profile-details">
@@ -62,6 +60,7 @@
 //TODO 在sidebar, profile-editor, UserProfileCard有样式，以及状态很多代码复用，后续优化
 import { Trophy } from '@element-plus/icons-vue'
 import { computed } from 'vue'
+import StatusIndicator from '@/components/common/StatusIndicator/index.vue'
 
 const props = defineProps({
   userInfo: {
@@ -75,6 +74,7 @@ const props = defineProps({
     default: '',
   },
 })
+
 const emit = defineEmits(['edit-profile', 'send-message', 'like'])
 const hobbies = computed(() => {
   // 检查 userInfo 和 hobbies 是否存在
@@ -84,26 +84,6 @@ const hobbies = computed(() => {
   return props.userInfo.hobbies.split(',').filter((item) => item.trim() !== '')
 })
 
-// 根据状态ID或标签动态计算样式类
-const statusClass = computed(() => {
-  const labelMap = {
-    在线: 'status-online',
-    Q我吧: 'status-happy',
-    离开: 'status-away',
-    忙碌: 'status-busy',
-    请勿打扰: 'status-dnd',
-    隐身: 'status-invisible',
-    我的电量: 'status-battery',
-    听歌中: 'status-music',
-    做好事: 'status-working',
-    出去浪: 'status-travel',
-    被掏空: 'status-empty',
-    今日步数: 'status-steps',
-    今日天气: 'status-weather',
-    我crush了: 'status-crush',
-  }
-  return labelMap[props.currentStatus.label] || 'status-online'
-})
 // 处理点赞事件
 const handleLike = () => {
   emit('like')
@@ -159,54 +139,7 @@ const handleLike = () => {
   }
 }
 
-.profile-status {
-  display: flex;
-  align-items: center;
-  padding: 12px 16px;
-
-  .status-dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    margin-right: 8px;
-
-    &.status-online {
-      background-color: #4caf50;
-    }
-
-    &.status-happy {
-      background-color: #ffeb3b;
-    }
-
-    &.status-away {
-      background-color: #ffc107;
-    }
-
-    &.status-busy {
-      background-color: #f44336;
-    }
-
-    &.status-dnd {
-      background-color: #f44336;
-    }
-
-    &.status-invisible {
-      background-color: #9e9e9e;
-    }
-
-    &.status-custom,
-    &.status-battery,
-    &.status-music,
-    &.status-working,
-    &.status-travel,
-    &.status-empty,
-    &.status-steps,
-    &.status-weather,
-    &.status-crush {
-      background-color: #2196f3;
-    }
-  }
-}
+// 删除了重复的状态样式，现在从status.scss导入
 
 .profile-details {
   padding: 16px;

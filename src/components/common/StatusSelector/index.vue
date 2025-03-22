@@ -58,29 +58,10 @@ import { Plus } from '@element-plus/icons-vue'
 import { postUsersUpdate } from '@/api/user.js'
 import { ElMessage } from 'element-plus'
 import { useUserInfoStore } from '@/store/user.js'
-
+import { getStatusClass } from '@/utils/statusUtils.js'
 const userStore = useUserInfoStore()
-const getStatusClass = (label) => {
-  const labelMap = {
-    在线: 'status-online',
-    Q我吧: 'status-happy',
-    离开: 'status-away',
-    忙碌: 'status-busy',
-    请勿打扰: 'status-dnd',
-    隐身: 'status-invisible',
-    我的电量: 'status-battery',
-    听歌中: 'status-music',
-    做好事: 'status-working',
-    出去浪: 'status-travel',
-    被掏空: 'status-empty',
-    今日步数: 'status-steps',
-    今日天气: 'status-weather',
-    我crush了: 'status-crush',
-  }
 
-  return labelMap[label] || 'status-custom'
-}
-const props = defineProps({
+defineProps({
   visible: {
     type: Boolean,
     default: false,
@@ -129,6 +110,8 @@ const setCustomStatus = () => {
 </script>
 
 <style lang="scss" scoped>
+@use '@/assets/status.scss';
+
 .custom-popup-overlay {
   position: fixed;
   top: 0;
@@ -198,42 +181,6 @@ const setCustomStatus = () => {
       background-color: #4caf50;
       position: relative;
       z-index: 1;
-
-      &.status-online {
-        background-color: #4caf50;
-      }
-
-      &.status-happy {
-        background-color: #ffeb3b;
-      }
-
-      &.status-away {
-        background-color: #ffc107;
-      }
-
-      &.status-busy {
-        background-color: #f44336;
-      }
-
-      &.status-dnd {
-        background-color: #f44336;
-      }
-
-      &.status-invisible {
-        background-color: #9e9e9e;
-      }
-
-      &.status-custom,
-      &.status-battery,
-      &.status-music,
-      &.status-working,
-      &.status-travel,
-      &.status-empty,
-      &.status-steps,
-      &.status-weather,
-      &.status-crush {
-        background-color: #2196f3;
-      }
     }
 
     .status-text {
@@ -286,71 +233,6 @@ const setCustomStatus = () => {
       display: flex;
       align-items: center;
       justify-content: center;
-
-      &.custom-icon {
-        background-color: #e0e0e0;
-        color: #666;
-      }
-
-      &.status-online {
-        background-color: #4caf50;
-      }
-
-      &.status-happy {
-        background-color: #ffeb3b;
-      }
-
-      &.status-away {
-        background-color: #ffc107;
-      }
-
-      &.status-busy {
-        background-color: #f44336;
-      }
-
-      &.status-dnd {
-        background-color: #f44336;
-      }
-
-      &.status-invisible {
-        background-color: #9e9e9e;
-      }
-
-      &.status-battery {
-        background-color: #8bc34a;
-      }
-
-      &.status-music {
-        background-color: #ff5722;
-      }
-
-      &.status-working {
-        background-color: #ff9800;
-      }
-
-      &.status-travel {
-        background-color: #03a9f4;
-      }
-
-      &.status-empty {
-        background-color: #9c27b0;
-      }
-
-      &.status-steps {
-        background-color: #ffeb3b;
-      }
-
-      &.status-weather {
-        background-color: #00bcd4;
-      }
-
-      &.status-crush {
-        background-color: #e91e63;
-      }
-
-      &.status-custom {
-        background-color: #2196f3;
-      }
     }
 
     .status-text {

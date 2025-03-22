@@ -69,7 +69,7 @@ import UserProfileCard from '@/components/common/UserProfileCard/index.vue'
 import StatusSelector from '@/components/common/StatusSelector/index.vue'
 import ProfileEditor from '@/components/common/ProfileEditor/index.vue'
 import { useUserInfoStore } from '@/store/user.js'
-
+import { getStatusClass } from '@/utils/statusUtils.js'
 const router = useRouter()
 const route = useRoute()
 
@@ -99,23 +99,7 @@ const currentStatus = ref({
 })
 // 修改状态样式类的计算方式
 const statusClass = computed(() => {
-  const labelMap = {
-    在线: 'status-online',
-    Q我吧: 'status-happy',
-    离开: 'status-away',
-    忙碌: 'status-busy',
-    请勿打扰: 'status-dnd',
-    隐身: 'status-invisible',
-    我的电量: 'status-battery',
-    听歌中: 'status-music',
-    做好事: 'status-working',
-    出去浪: 'status-travel',
-    被掏空: 'status-empty',
-    今日步数: 'status-steps',
-    今日天气: 'status-weather',
-    我crush了: 'status-crush',
-  }
-  return labelMap[currentStatus.value.label] || 'status-online'
+  return getStatusClass(currentStatus.value.label)
 })
 
 // 所有状态列表
@@ -200,6 +184,8 @@ watch(
 </script>
 
 <style lang="scss" scoped>
+@use '@/assets/status.scss';
+
 .sidebar {
   width: 60px;
   background-color: #f5f5f5;
@@ -239,39 +225,6 @@ watch(
           border-radius: 50%;
           border: 2px solid #f5f5f5;
           cursor: pointer;
-
-          &.status-online {
-            background-color: #4caf50;
-          }
-
-          &.status-away {
-            background-color: #ffc107;
-          }
-
-          &.status-busy,
-          &.status-dnd {
-            background-color: #f44336;
-          }
-
-          &.status-invisible {
-            background-color: #9e9e9e;
-          }
-
-          &.status-happy {
-            background-color: #ffeb3b;
-          }
-
-          &.status-custom,
-          &.status-battery,
-          &.status-music,
-          &.status-working,
-          &.status-travel,
-          &.status-empty,
-          &.status-steps,
-          &.status-weather,
-          &.status-crush {
-            background-color: #2196f3;
-          }
         }
       }
     }

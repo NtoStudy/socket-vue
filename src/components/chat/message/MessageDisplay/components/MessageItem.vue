@@ -10,7 +10,7 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['image-error', 'video-error', 'right-click'])
+const emit = defineEmits(['right-click'])
 
 // 处理右键点击
 const handleRightClick = (event) => {
@@ -35,19 +35,12 @@ const handleRightClick = (event) => {
 
       <!-- 图片消息 -->
       <div class="images" v-else-if="message.messageType === 'image'">
-        <img
-          :src="message.content"
-          alt="图片"
-          :width="isCurrentUser ? 'auto' : '200'"
-          height="200"
-          loading="lazy"
-          @error="handleImageError"
-        />
+        <img :src="message.content" alt="图片" :width="isCurrentUser ? 'auto' : '200'" height="200" loading="lazy" />
       </div>
 
       <!-- 视频消息 -->
       <div class="video" v-else-if="message.messageType === 'video'">
-        <video :src="message.content" controls="" height="200" preload="metadata" @error="handleVideoError"></video>
+        <video :src="message.content" controls="" height="200" preload="metadata"></video>
       </div>
     </div>
 

@@ -245,8 +245,6 @@ defineExpose({
         v-if="message.senderId === useUserInfo.userInfo.userId"
         :message="message"
         :is-current-user="true"
-        @image-error="handleImageError"
-        @video-error="handleVideoError"
         @right-click="handleRightClickMessage"
       >
         <template #avatar>

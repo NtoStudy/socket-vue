@@ -13,7 +13,6 @@ const props = defineProps({
   },
   currentStatus: {
     type: Object,
-    default: () => ({ id: '1', label: '在线' }),
   },
   remark: {
     type: String,
