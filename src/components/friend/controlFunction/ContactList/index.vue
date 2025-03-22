@@ -59,7 +59,7 @@ const dialogType = ref('add')
 const groupName = ref('')
 
 // 定义属性
-const props = defineProps({
+defineProps({
   friendItems: {
     type: Array,
     default: () => [],

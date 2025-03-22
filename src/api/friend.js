@@ -73,3 +73,10 @@ export const friendMessageCount = (relationId) =>
     method: 'get',
     params: { relationId },
   })
+
+export const postFriendsRemark = (friendId, remark) =>
+  instance({
+    url: '/friends/remark',
+    method: 'post',
+    params: { friendId, remark },
+  })
