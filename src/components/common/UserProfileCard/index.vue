@@ -57,7 +57,6 @@
 </template>
 
 <script setup>
-//TODO 在sidebar, profile-editor, UserProfileCard有样式，以及状态很多代码复用，后续优化
 import { Trophy } from '@element-plus/icons-vue'
 import { computed } from 'vue'
 import StatusIndicator from '@/components/common/StatusIndicator/index.vue'

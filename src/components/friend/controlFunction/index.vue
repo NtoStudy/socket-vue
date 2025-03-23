@@ -31,7 +31,6 @@
 </template>
 
 <script setup>
-//TODO处理当前页面发消息跳转到消息页面的问题
 import { useFriendManagerStore } from '@/store/friendManager.js'
 import { computed, onMounted, ref } from 'vue'
 import { chatRoomNumber, friendNumber } from '@/api/notification.js'

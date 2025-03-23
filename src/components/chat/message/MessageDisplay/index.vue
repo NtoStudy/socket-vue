@@ -3,10 +3,10 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { chatRoomDelete } from '@/api/chatRoom.js'
 import { messageDelete, postFriendsRemark } from '@/api/friend.js'
 import { useUserInfoStore } from '@/store/user.js'
-import { ref, onMounted, watch, computed } from 'vue'
+import { ref, onMounted, watch, computed, nextTick, onUnmounted } from 'vue'
 import { Loading } from '@element-plus/icons-vue'
 import { chatFriendOrChatRoomStore } from '@/store/chat.js'
-import { getUsersInfoById, putUsersLike } from '@/api/user.js'
+import { putUsersLike } from '@/api/user.js'
 import MessageItem from '@/components/chat/message/MessageDisplay/components/MessageItem.vue'
 import AvatarItem from '@/components/chat/message/MessageDisplay/components/AvatarItem.vue'
 import { handleRightClickMessage } from '@/utils/messageUtils.js'
@@ -34,10 +34,9 @@ const emit = defineEmits(['load-more', 'message-deleted', 'edit-profile', 'send-
 
 // 初始化状态变量
 const useUserInfo = useUserInfoStore()
-const friendOrChatRoom = chatFriendOrChatRoomStore()
+const chatStore = chatFriendOrChatRoomStore()
 const messagesContainer = ref(null)
 const isScrolledToBottom = ref(true)
-const friendInfo = ref()
 const remark = ref('')
 const isEditingRemark = ref(false)
 
@@ -63,6 +62,7 @@ const scrollToBottom = () => {
  * 处理滚动事件
  */
 const handleScroll = () => {
+  // 防止事件冲突
   if (!messagesContainer.value) return
 
   // 检测是否滚动到顶部，触发加载更多
@@ -91,43 +91,15 @@ const handleMessageRightClick = (message, event) => {
     chatRoomDelete,
   )
 }
-// 好友信息相关方法
-/**
- * 获取好友信息
- */
-//TODO优化到pinia中
-const getFriendInfo = async () => {
-  try {
-    if (!friendOrChatRoom.friendId) {
-      console.log('没有有效的 friendId')
-      return
-    }
-
-    const res = await getUsersInfoById(friendOrChatRoom.friendId)
-    if (res.data && res.data.data) {
-      friendInfo.value = res.data.data.users
-      // 设置备注，如果API返回了备注信息
-      remark.value = res.data.data.remark || ''
-    } else {
-      console.error('获取好友信息失败:', res)
-    }
-  } catch (error) {
-    console.error('加载好友消息失败:', error)
-    // 设置默认值，防止渲染错误
-    friendInfo.value = { username: '未知用户', number: '', status: '在线' }
-    remark.value = ''
-  }
-}
 
 /**
  * 处理点赞
  */
 const handleLike = async () => {
-  const res = await putUsersLike(friendInfo.value.userId)
-  console.log(res.data)
+  const res = await putUsersLike(chatStore.friendInfo.userId)
   if (res.data.code === 200) {
     // 此时点赞成功，应该更新点赞状态
-    await getFriendInfo()
+    await chatStore.getFriendInfo(chatStore.friendId)
   }
 }
 
@@ -143,14 +115,14 @@ const handleRemarkEdit = () => {
  */
 const handleRemarkSave = async () => {
   try {
-    const res = await postFriendsRemark(friendOrChatRoom.friendId, remark.value)
+    const res = await postFriendsRemark(chatStore.friendId, remark.value)
     console.log(res.data)
     // 模拟API调用成功
     ElMessage.success('备注已更新')
     isEditingRemark.value = false
 
     // 更新好友信息
-    await getFriendInfo()
+    await chatStore.getFriendInfo(chatStore.friendId)
   } catch (error) {
     console.error('更新备注失败:', error)
     ElMessage.error('更新备注失败')
@@ -160,37 +132,44 @@ const handleRemarkSave = async () => {
 // 生命周期钩子和监听器
 onMounted(() => {
   if (messagesContainer.value) {
-    messagesContainer.value.addEventListener('scroll', handleScroll)
+    messagesContainer.value.addEventListener('scroll', handleScroll, { passive: true })
+    nextTick(() => {
+      scrollToBottom()
+    })
   }
 })
-
+onUnmounted(() => {
+  if (messagesContainer.value) {
+    messagesContainer.value.removeEventListener('scroll', handleScroll)
+  }
+})
 // 监听消息变化，如果用户在底部，则自动滚动到底部
 watch(
   () => props.messages,
-  () => {
-    if (isScrolledToBottom.value) {
-      setTimeout(scrollToBottom, 50)
+  (newVal, oldVal) => {
+    if (isScrolledToBottom.value || !oldVal || newVal.length > oldVal.length) {
+      nextTick(() => {
+        scrollToBottom()
+      })
     }
   },
-  { deep: true },
+  { deep: true, immediate: true },
 )
 
-// 只有当 friendId 存在时才调用
+// 监听好友信息变化，更新备注
 watch(
-  () => friendOrChatRoom.friendId,
+  () => chatStore.friendInfo,
   (newVal) => {
-    if (newVal) {
-      getFriendInfo()
+    if (newVal && newVal.remark !== undefined) {
+      remark.value = newVal.remark || ''
     }
   },
   { immediate: true },
 )
-
 // 定义组件暴露的方法
 defineExpose({
   scrollToBottom,
 })
-//TODO这里面的message经过了好几个组件之间的通讯，
 </script>
 
 <template>
@@ -227,7 +206,7 @@ defineExpose({
         <template #avatar>
           <AvatarItem
             :is-current-user="false"
-            :user-info="friendInfo"
+            :user-info="chatStore.friendInfo"
             :current-status="{ id: '1', label: '在线' }"
             :remark="remark"
             :is-editing-remark="isEditingRemark"
@@ -247,11 +226,22 @@ defineExpose({
 .messages {
   flex: 1;
   padding: 10px;
-  overflow-y: auto;
+  overflow-y: auto !important;
   position: relative;
   scroll-behavior: smooth;
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
 
-  // 加载指示器
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+
   .loading-indicator {
     position: sticky;
     top: 0;
@@ -272,7 +262,6 @@ defineExpose({
     }
   }
 
-  // 消息项样式
   .message {
     display: flex;
     flex-direction: column;
@@ -280,7 +269,6 @@ defineExpose({
     margin-bottom: 15px;
     width: 100%;
 
-    // 时间戳样式
     .timestamp {
       font-size: 12px;
       color: #999999;
@@ -292,7 +280,6 @@ defineExpose({
   }
 }
 
-// 用户资料弹出框样式
 :deep(.user-profile-popover) {
   padding: 0;
   border-radius: 8px;

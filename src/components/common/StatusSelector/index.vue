@@ -53,7 +53,6 @@
 </template>
 
 <script setup>
-//TODO当前状态显示错误
 import { ref } from 'vue'
 import { Plus } from '@element-plus/icons-vue'
 import { postUsersUpdate } from '@/api/user.js'
@@ -179,7 +178,6 @@ const setCustomStatus = () => {
       height: 36px;
       border-radius: 50%;
       margin-bottom: 10px;
-      background-color: #4caf50;
       position: relative;
       z-index: 1;
     }

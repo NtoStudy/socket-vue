@@ -12,7 +12,6 @@ const props = defineProps({
     default: false,
   },
 })
-console.log('props', props.isTop)
 // 定义组件的事件
 const emit = defineEmits(['close', 'topChange', 'deleteChatHistory', 'deleteFriend'])
 

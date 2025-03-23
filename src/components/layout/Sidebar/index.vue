@@ -147,7 +147,7 @@ const handleEditProfile = () => {
 
 // 处理发送消息
 const handleSendMessage = () => {
-  router.push('/main/chat')
+  console.log('发送消息')
 }
 
 // 保存用户资料

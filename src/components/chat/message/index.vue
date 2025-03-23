@@ -24,13 +24,14 @@ const websocket = new WebSocketService()
 const {
   messages,
   messageWindowStatus,
+  clearMessages,
+  pagination,
   handleWebSocketMessage,
   loadFriendMessages,
   loadChatRoomMessages,
   throttledLoadMoreMessages,
   handleMessageDeleted,
   sendMessage,
-  clearMessages,
 } = useChatMessages(messageDisplayRef)
 
 // 抽屉相关状态
@@ -118,6 +119,13 @@ onMounted(() => {
   websocket.connect()
   // 监听WebSocket消息
   websocket.onMessage(onWebSocketMessage)
+  if (chatStore.friendId) {
+    clearMessages()
+    loadFriendMessages(chatStore.friendId)
+  } else if (chatStore.chatRoomId) {
+    clearMessages()
+    loadChatRoomMessages(chatStore.chatRoomId)
+  }
 })
 
 // 在组件卸载时执行
@@ -167,7 +175,7 @@ watch(
     <MessageDisplay
       :messages="messages"
       :messageWindowStatus="messageWindowStatus"
-      :loading="false"
+      :loading="pagination.loading"
       @load-more="throttledLoadMoreMessages(chatStore)"
       @message-deleted="handleMessageDeleted"
       ref="messageDisplayRef"

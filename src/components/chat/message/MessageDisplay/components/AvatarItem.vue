@@ -85,12 +85,12 @@ const handleRemarkSave = () => {
           </div>
         </div>
       </template>
-      <el-button class="action-btn call-btn"> 音视频通话</el-button>
-      <el-button type="primary"> 发消息</el-button>
+      <el-button class="action-btn"> 音视频通话</el-button>
+      <el-button class="action-btn" type="primary"> 发消息</el-button>
     </UserProfileCard>
 
     <UserProfileCard v-else :user-info="userInfo" :current-status="currentStatus" :user-avatar="''">
-      <el-button class="action-btn call-btn" type="primary"> 发消息</el-button>
+      <el-button class="action-btn" type="primary"> 发消息</el-button>
     </UserProfileCard>
   </el-popover>
 </template>
@@ -161,6 +161,18 @@ const handleRemarkSave = () => {
     .el-input {
       width: 100%;
     }
+  }
+}
+.action-btn {
+  flex: 1;
+  height: 36px;
+
+  &.edit-btn {
+    margin-right: 8px;
+  }
+
+  &.message-btn {
+    background-color: #1890ff;
   }
 }
 </style>

@@ -1,13 +1,13 @@
-import { nextTick, reactive, ref } from 'vue'
+import { nextTick, reactive, shallowRef } from 'vue'
 import { chatService } from '@/services/chatService.js'
 import { formatMessages } from '@/utils/messageUtils.js'
 import _ from 'lodash'
 
 export function useChatMessages(messageDisplayRef) {
-  // 存储消息的响应式数组
-  const messages = ref([])
+  // 使用 shallowRef 存储消息，减少深层响应式监听
+  const messages = shallowRef([])
   // 消息窗口状态的响应式变量
-  const messageWindowStatus = ref('')
+  const messageWindowStatus = shallowRef('')
 
   // 分页参数
   const pagination = reactive({
@@ -16,6 +16,14 @@ export function useChatMessages(messageDisplayRef) {
     hasMore: true,
     loading: false,
   })
+
+  /**
+   * 更新消息列表，确保触发响应式更新
+   * @param {Array} newMessages - 新的消息列表
+   */
+  const updateMessages = (newMessages) => {
+    messages.value = [...newMessages]
+  }
 
   /**
    * 重置分页参数
@@ -37,7 +45,9 @@ export function useChatMessages(messageDisplayRef) {
     }
 
     // 将接收到的消息添加到消息列表
-    messages.value = formatMessages([...messages.value, message])
+    const formattedMessages = formatMessages([...messages.value, message])
+    updateMessages(formattedMessages)
+
     // 更新DOM后滚动到底部
     nextTick(() => {
       messageDisplayRef.value?.scrollToBottom()
@@ -53,26 +63,33 @@ export function useChatMessages(messageDisplayRef) {
   const loadFriendMessages = async (friendId) => {
     if (!friendId) return
 
-    // 重置分页参数
-    resetPagination()
+    // 设置加载状态
+    pagination.loading = true
 
-    // 设置消息窗口状态
-    messageWindowStatus.value = '用户'
+    try {
+      // 重置分页参数
+      resetPagination()
 
-    // 获取消息历史
-    const newMessages = await chatService.handleFriendMessages(friendId, pagination)
+      // 设置消息窗口状态
+      messageWindowStatus.value = '用户'
 
-    // 使用setTimeout确保DOM完全更新后再设置消息和滚动
-    setTimeout(() => {
-      messages.value = newMessages
+      // 获取消息历史
+      const newMessages = await chatService.handleFriendMessages(friendId, pagination)
 
-      // 再次使用setTimeout确保消息渲染后再滚动
-      setTimeout(() => {
+      // 更新消息
+      updateMessages(newMessages)
+
+      // 确保DOM更新后再滚动
+      nextTick(() => {
         if (messageDisplayRef.value) {
           messageDisplayRef.value.scrollToBottom()
         }
-      }, 50)
-    }, 0)
+      })
+    } catch (error) {
+      console.error('加载好友消息失败:', error)
+    } finally {
+      pagination.loading = false
+    }
   }
 
   /**
@@ -82,39 +99,75 @@ export function useChatMessages(messageDisplayRef) {
   const loadChatRoomMessages = async (chatRoomId) => {
     if (!chatRoomId) return
 
-    // 重置分页参数
-    resetPagination()
+    // 设置加载状态
+    pagination.loading = true
 
-    // 设置消息窗口状态
-    messageWindowStatus.value = '群聊'
+    try {
+      // 重置分页参数
+      resetPagination()
 
-    // 获取消息历史
-    const newMessages = await chatService.handleChatRoomMessages(chatRoomId, pagination)
+      // 设置消息窗口状态
+      messageWindowStatus.value = '群聊'
 
-    // 使用setTimeout确保DOM完全更新后再设置消息和滚动
-    setTimeout(() => {
-      messages.value = newMessages
+      // 获取消息历史
+      const newMessages = await chatService.handleChatRoomMessages(chatRoomId, pagination)
 
-      // 再次使用setTimeout确保消息渲染后再滚动
-      setTimeout(() => {
+      // 更新消息
+      updateMessages(newMessages)
+
+      // 确保DOM更新后再滚动
+      nextTick(() => {
         if (messageDisplayRef.value) {
           messageDisplayRef.value.scrollToBottom()
         }
-      }, 50)
-    }, 0)
+      })
+    } catch (error) {
+      console.error('加载群聊消息失败:', error)
+    } finally {
+      pagination.loading = false
+    }
   }
 
   /**
    * 加载更多消息
+   * @param {Object} chatStore - 聊天状态存储
    */
   const loadMoreMessages = async (chatStore) => {
-    const type = messageWindowStatus.value === '用户' ? 'friend' : 'group'
-    const id = type === 'friend' ? chatStore.friendId : chatStore.chatRoomId
+    // 如果正在加载或没有更多消息，则返回
+    if (pagination.loading || !pagination.hasMore) return
 
-    messages.value = await chatService.loadMoreMessages(type, id, pagination, messages.value)
+    pagination.loading = true
+
+    try {
+      // 增加页码
+      pagination.page += 1
+
+      // 根据当前聊天类型加载消息
+      let olderMessages = []
+      if (chatStore.friendId) {
+        olderMessages = await chatService.handleFriendMessages(chatStore.friendId, pagination)
+      } else if (chatStore.chatRoomId) {
+        olderMessages = await chatService.handleChatRoomMessages(chatStore.chatRoomId, pagination)
+      }
+
+      // 如果没有获取到消息，说明没有更多了
+      if (olderMessages.length === 0) {
+        pagination.hasMore = false
+        return
+      }
+
+      // 合并消息，确保不重复
+      const newMessages = [...olderMessages, ...messages.value]
+      updateMessages(newMessages)
+      console.log('加载完成，消息数量:', newMessages.length)
+    } catch (error) {
+      console.error('加载更多消息失败:', error)
+    } finally {
+      pagination.loading = false
+    }
   }
 
-  // 使用节流函数优化加载更多消息的性能
+  // 使用节流函数包装加载更多消息的函数，避免频繁调用
   const throttledLoadMoreMessages = (chatStore) => _.throttle(() => loadMoreMessages(chatStore), 1000)()
 
   /**
@@ -123,7 +176,8 @@ export function useChatMessages(messageDisplayRef) {
    */
   const handleMessageDeleted = (deletedMessage) => {
     // 从消息列表中移除被删除的消息
-    messages.value = messages.value.filter((msg) => msg.messageId !== deletedMessage.messageId)
+    const filteredMessages = messages.value.filter((msg) => msg.messageId !== deletedMessage.messageId)
+    updateMessages(filteredMessages)
   }
 
   /**
@@ -146,7 +200,8 @@ export function useChatMessages(messageDisplayRef) {
 
     if (message) {
       // 更新消息列表
-      messages.value = formatMessages([...messages.value, message])
+      const formattedMessages = formatMessages([...messages.value, message])
+      updateMessages(formattedMessages)
 
       // 更新DOM后滚动到底部
       nextTick(() => {
@@ -159,7 +214,7 @@ export function useChatMessages(messageDisplayRef) {
    * 清空消息列表
    */
   const clearMessages = () => {
-    messages.value = []
+    updateMessages([])
   }
 
   /**

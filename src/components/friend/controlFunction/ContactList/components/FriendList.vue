@@ -23,12 +23,14 @@
           @click="$emit('select-friend', friend)"
         >
           <div class="friend-avatar">
-            <img :src="friend.avatar || ''" alt="头像" />
-            <div class="status-dot" :class="getStatusClass(friend.status)"></div>
+            <img :src="friend.users.avatar || ''" alt="头像" />
+            <div class="status-dot" :class="getStatusClass(friend.users.status)"></div>
           </div>
           <div class="friend-info">
-            <div class="friend-name">{{ friend.username }}</div>
-            <div class="friend-signature">{{ friend.signature || '这个人很懒，什么都没留下' }}</div>
+            <div class="friend-name">
+              {{ friend.users.username }} <span v-if="friend.remark"> ({{ friend.remark }})</span>
+            </div>
+            <div class="friend-signature">{{ friend.users.signature || '这个人很懒，什么都没留下' }}</div>
           </div>
         </div>
         <div class="empty-tip" v-if="!friendGroupMap[item.groupId] || friendGroupMap[item.groupId].length === 0">
@@ -44,6 +46,7 @@ import { ref, reactive } from 'vue'
 import { ArrowRight } from '@element-plus/icons-vue'
 import { getFriendGroupFriendList } from '@/api/friendGroups.js'
 import { getUsersInfoById } from '@/api/user.js'
+import { getStatusClass } from '@/utils/statusUtils.js'
 
 defineProps({
   friendItems: {
@@ -71,17 +74,6 @@ const toggleGroup = (group) => {
   } else {
     expandedGroups.value.splice(index, 1)
   }
-}
-
-// 获取状态样式类 //TODO处理这个样式
-const getStatusClass = (status) => {
-  const statusMap = {
-    在线: 'status-online',
-    离开: 'status-away',
-    忙碌: 'status-busy',
-    隐身: 'status-invisible',
-  }
-  return statusMap[status] || 'status-offline'
 }
 
 // 加载好友分组列表
@@ -117,6 +109,8 @@ const onContextMenu = (event, group) => {
 </script>
 
 <style lang="scss" scoped>
+@use '@/assets/status.scss';
+
 .contact-item {
   display: flex;
   justify-content: space-between;
@@ -189,22 +183,6 @@ const onContextMenu = (event, group) => {
         height: 10px;
         border-radius: 50%;
         border: 2px solid #fff;
-
-        &.status-online {
-          background-color: #4caf50;
-        }
-        &.status-away {
-          background-color: #ff9800;
-        }
-        &.status-busy {
-          background-color: #f44336;
-        }
-        &.status-invisible {
-          background-color: #9e9e9e;
-        }
-        &.status-offline {
-          background-color: #bdbdbd;
-        }
       }
     }
 
