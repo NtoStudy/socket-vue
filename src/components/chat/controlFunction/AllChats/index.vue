@@ -1,169 +1,35 @@
 <script setup>
 import { onMounted, onUnmounted, ref } from 'vue'
-import { friendMessageCount, getFriendList, messageHistory } from '@/api/friend.js'
-import { chatRoomHistory, chatRoomList, groupMessageCount } from '@/api/chatRoom.js'
+import { getFriendList } from '@/api/friend.js'
+import { chatRoomList } from '@/api/chatRoom.js'
 import { chatFriendOrChatRoomStore } from '@/store/chat.js'
-import { formatSentTime, truncateContent } from '@/utils/messageUtils.js'
 import eventBus from '@/EventBus/eventBus.js'
+import { isActive, processFriendList, processChatRoomList, combineAndSortChats } from '@/utils/ChatListUtils.js'
 
+// 状态管理
 const chatFriendOrChatRoom = chatFriendOrChatRoomStore()
 const allChats = ref([])
 
-// 判断聊天项是否被选中
-const isActive = (chat) => {
-  if (chat.chatType === 'friend') {
-    return chatFriendOrChatRoom.friendId === chat.friendId && chatFriendOrChatRoom.chatRoomId === null
-  } else {
-    return chatFriendOrChatRoom.chatRoomId === chat.roomId && chatFriendOrChatRoom.friendId === null
-  }
-}
-
 /**
  * 处理好友列表数据
+ * @returns {Promise<Array>} - 处理后的好友列表
  */
 const handleFriendList = async () => {
   const res = await getFriendList()
   if (res.data.code === 200) {
-    const friendData = res.data.data
-
-    // 获取未读消息数
-    const updatedFriendList = await Promise.allSettled(
-      friendData.map(async (friend) => {
-        try {
-          const CountRes = await friendMessageCount(friend.relationId)
-          return {
-            ...friend,
-            count: CountRes.data.data,
-            chatType: 'friend', // 添加类型标识
-          }
-        } catch (error) {
-          console.log(error)
-          return { ...friend, count: 0, chatType: 'friend' }
-        }
-      }),
-    )
-
-    const finalFriendList = updatedFriendList.map((result) => {
-      if (result.status === 'fulfilled') {
-        return result.value
-      } else {
-        return { ...result.value, count: 0 }
-      }
-    })
-
-    // 获取最近消息
-    const messageHistoryPromises = finalFriendList.map(async (friend) => {
-      try {
-        const historyRes = await messageHistory(friend.friendId, 1, 100)
-        const messages = historyRes.data.data.list
-        if (messages.length > 0) {
-          const lastMessage = messages[messages.length - 1]
-          // 格式化发送时间
-          const formattedSentTime = formatSentTime(lastMessage.sentTime)
-          const timestamp = new Date(lastMessage.sentTime).getTime() // 用于排序的时间戳
-
-          // 处理content的长度限制
-          let displayedContent = null
-
-          if (lastMessage.messageType === 'text') {
-            displayedContent = truncateContent(lastMessage.content)
-          } else if (lastMessage.messageType === 'image') {
-            displayedContent = '[图片]'
-          } else if (lastMessage.messageType === 'video') {
-            displayedContent = '[视频]'
-          }
-
-          return {
-            ...friend,
-            sentTime: formattedSentTime,
-            timestamp: timestamp,
-            content: displayedContent,
-          }
-        } else {
-          return { ...friend, sentTime: null, content: null, timestamp: 0 }
-        }
-      } catch (error) {
-        console.log(error)
-        return { ...friend, sentTime: null, content: null, timestamp: 0 }
-      }
-    })
-
-    return await Promise.allSettled(messageHistoryPromises)
+    return await processFriendList(res.data.data)
   }
   return []
 }
 
 /**
  * 处理群聊列表数据
+ * @returns {Promise<Array>} - 处理后的群聊列表
  */
 const handleChatRoomList = async () => {
   const res = await chatRoomList()
   if (res.data.code === 200) {
-    const groupData = res.data.data
-
-    // 获取未读消息数
-    const updatedGroupList = await Promise.allSettled(
-      groupData.map(async (group) => {
-        try {
-          const CountRes = await groupMessageCount(group.roomId)
-          return {
-            ...group,
-            count: CountRes.data.data,
-            chatType: 'group', // 添加类型标识
-          }
-        } catch (error) {
-          console.log(error)
-          return { ...group, count: 0, chatType: 'group' }
-        }
-      }),
-    )
-
-    const finalGroupList = updatedGroupList.map((result) => {
-      if (result.status === 'fulfilled') {
-        return result.value
-      } else {
-        return { ...result.value, count: 0 }
-      }
-    })
-
-    // 获取最近消息
-    const messageHistoryPromises = finalGroupList.map(async (group) => {
-      try {
-        const historyRes = await chatRoomHistory(group.roomId, 1, 100)
-        const messages = historyRes.data.data.list
-        if (messages.length > 0) {
-          const lastMessage = messages[messages.length - 1]
-          // 格式化发送时间
-          const formattedSentTime = formatSentTime(lastMessage.sentTime)
-          const timestamp = new Date(lastMessage.sentTime).getTime() // 用于排序的时间戳
-
-          // 处理content的长度限制
-          let displayedContent = null
-
-          if (lastMessage.messageType === 'text') {
-            displayedContent = truncateContent(lastMessage.content)
-          } else if (lastMessage.messageType === 'image') {
-            displayedContent = '[图片]'
-          } else if (lastMessage.messageType === 'video') {
-            displayedContent = '[视频]'
-          }
-
-          return {
-            ...group,
-            sentTime: formattedSentTime,
-            timestamp: timestamp,
-            content: displayedContent,
-          }
-        } else {
-          return { ...group, sentTime: null, content: null, timestamp: 0 }
-        }
-      } catch (error) {
-        console.log(error)
-        return { ...group, sentTime: null, content: null, timestamp: 0 }
-      }
-    })
-
-    return await Promise.allSettled(messageHistoryPromises)
+    return await processChatRoomList(res.data.data)
   }
   return []
 }
@@ -177,40 +43,8 @@ const loadAllChats = async () => {
     const friendResults = await handleFriendList()
     const groupResults = await handleChatRoomList()
 
-    // 合并数据
-    const friendChats = friendResults
-      .map((result) => (result.status === 'fulfilled' ? result.value : null))
-      .filter((item) => item !== null)
-
-    const groupChats = groupResults
-      .map((result) => (result.status === 'fulfilled' ? result.value : null))
-      .filter((item) => item !== null)
-
-    // 合并所有聊天
-    const combinedChats = [...friendChats, ...groupChats]
-
-    // 修改排序逻辑：先按置顶状态排序，再按时间戳排序
-    combinedChats.sort((a, b) => {
-      // 首先比较置顶状态
-      const aPinned = a.isPinned === 1
-      const bPinned = b.isPinned === 1
-
-      if (aPinned && !bPinned) {
-        return -1 // a置顶，b不置顶，a排在前面
-      }
-
-      if (!aPinned && bPinned) {
-        return 1 // a不置顶，b置顶，b排在前面
-      }
-
-      // 如果置顶状态相同，则按时间戳排序
-      return (b.timestamp || 0) - (a.timestamp || 0)
-    })
-
-    allChats.value = combinedChats
-
-    // 如果有聊天记录，默认选中第一个
-    // ... 现有代码保持不变 ...
+    // 使用工具函数合并和排序聊天
+    allChats.value = combineAndSortChats(friendResults, groupResults)
   } catch (error) {
     console.error('加载聊天列表失败:', error)
   }
@@ -218,6 +52,7 @@ const loadAllChats = async () => {
 
 /**
  * 处理聊天项点击
+ * @param {Object} chat - 被点击的聊天项
  */
 const handleChatItemClick = (chat) => {
   if (chat.chatType === 'friend') {
@@ -228,6 +63,8 @@ const handleChatItemClick = (chat) => {
     chatFriendOrChatRoom.setFriendId(null) // 清除好友选中状态
   }
 }
+
+// ===== 生命周期钩子 =====
 
 onMounted(() => {
   loadAllChats()
@@ -246,7 +83,7 @@ onUnmounted(() => {
       v-for="(chat, index) in allChats"
       :key="index"
       @click="handleChatItemClick(chat)"
-      :class="{ active: isActive(chat), pinned: chat.isPinned === 1 }"
+      :class="{ active: isActive(chat, chatFriendOrChatRoom), pinned: chat.isPinned === 1 }"
     >
       <div class="chat-avatar">
         <img :src="chat.avatarUrl" alt="avatar" />
@@ -275,41 +112,58 @@ onUnmounted(() => {
   width: 100%;
   height: 100%;
   overflow-y: auto;
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+  }
 }
 
 .chat-item {
   display: flex;
   align-items: center;
   padding: 12px 16px;
-  background-color: #fafafa; // 默认背景色，比选中状态白一点
+  background-color: #fafafa;
   border-bottom: 1px solid #f0f0f0;
-  transition: background-color 0.2s;
+  transition: all 0.2s ease;
   cursor: pointer;
   position: relative;
 
   &.pinned {
-    background-color: #f0f7ff; // 置顶项的背景色
+    background-color: #f0f7ff;
+
+    &:hover {
+      background-color: #e6f1ff;
+    }
+
+    &.active {
+      background-color: #d9ebff;
+    }
   }
 
   &:hover {
-    background-color: #f2f2f2; // 悬浮状态背景色
+    background-color: #f2f2f2;
   }
 
   &.active {
-    background-color: #ebebeb; // 选中状态背景色
+    background-color: #ebebeb;
   }
 
   .chat-avatar {
     position: relative;
     margin-right: 12px;
-    background-color: #52c41a;
-    border-radius: 6px;
+    flex-shrink: 0;
 
     img {
       width: 45px;
       height: 45px;
-      border-radius: 4px; // 方形带微弱圆角
+      border-radius: 4px;
       object-fit: cover;
+      background-color: #f0f0f0;
     }
 
     .chat-type-badge {
@@ -325,6 +179,7 @@ onUnmounted(() => {
       font-size: 9px;
       font-weight: bold;
       border: 1px solid #fff;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 
       &.friend {
         background-color: #1890ff;
@@ -340,7 +195,7 @@ onUnmounted(() => {
 
   .chat-content {
     flex: 1;
-    min-width: 0; // 确保文本可以正确截断
+    min-width: 0;
     overflow: hidden;
 
     .chat-header {
@@ -351,13 +206,14 @@ onUnmounted(() => {
 
       .chat-title {
         font-size: 16px;
-        font-weight: 400;
-        color: #000;
+        font-weight: 500;
+        color: #333;
         margin-right: 8px;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
         max-width: 70%;
+
         .pin-icon {
           font-size: 12px;
           color: #1890ff;
@@ -367,38 +223,42 @@ onUnmounted(() => {
 
       .chat-time {
         font-size: 12px;
-        color: #b2b2b2;
-        flex-shrink: 0;
+        color: #999;
+        white-space: nowrap;
       }
     }
 
     .chat-message {
-      font-size: 13px;
-      color: #888;
-      margin-bottom: 0;
+      display: flex;
+      align-items: center;
 
       .chat-text {
+        font-size: 13px;
+        color: #666;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        display: block;
+        max-width: 100%;
       }
     }
   }
 
   .chat-badge {
-    min-width: 16px;
-    height: 16px;
-    padding: 0 5px;
-    background-color: #ff4d4d;
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 9px;
+    background-color: #ff4d4f;
     color: #fff;
-    border-radius: 8px;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: bold;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-left: 8px;
+    padding: 0 5px;
+    transform: scale(0.9);
   }
 }
 </style>

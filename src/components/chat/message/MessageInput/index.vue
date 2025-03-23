@@ -1,16 +1,15 @@
 <script setup>
-import { Film, Microphone, MoreFilled, VideoCamera } from '@element-plus/icons-vue'
+import { ref } from 'vue'
 import { uploadMethod, uploadVideo } from '@/api/upload.js'
-
-import { ElMessage } from 'element-plus' // 引入 Element Plus 的消息提示组件
-import { ref } from 'vue' // 引入 Vue 的响应式变量
+import { ElMessage } from 'element-plus'
+import ToolBar from './components/ToolBar.vue'
+import TextArea from './components/TextArea.vue'
+import UploadProgress from './components/UploadProgress.vue'
 
 // 响应式变量：记录文件上传进度
 const uploadProgress = ref(0)
 // 响应式变量：表示上传状态（是否正在上传）
 const uploading = ref(false)
-// 响应式变量：绑定用户输入的消息
-const inputMessage = ref('')
 // 定义一个事件发射器，用于通知父组件发送消息
 const emit = defineEmits(['send-message', 'open-more-options'])
 
@@ -85,9 +84,8 @@ const handleImageUpload = async (event) => {
 
     try {
       const res = await uploadMethod(file) // 调用上传方法
-      inputMessage.value = res.data.data // 将图片路径存储到 inputMessage 中
-      emit('send-message', { type: 'image', content: inputMessage.value }) // 发送图片消息
-      inputMessage.value = '' // 清空输入框
+      const imageUrl = res.data.data // 将图片路径存储
+      emit('send-message', { type: 'image', content: imageUrl }) // 发送图片消息
     } catch (error) {
       console.error('Upload failed:', error)
       ElMessage.error('图片上传失败') // 显示错误提示
@@ -98,15 +96,16 @@ const handleImageUpload = async (event) => {
 }
 
 /**
- * 处理文本消息发送逻辑
+ * 处理文本消息发送
+ * @param {String} message - 文本消息内容
  */
-const handleTextMessage = () => {
-  if (inputMessage.value.trim()) {
-    emit('send-message', { type: 'text', content: inputMessage.value })
-    inputMessage.value = '' // 清空输入框
-  }
+const handleSendTextMessage = (message) => {
+  emit('send-message', { type: 'text', content: message })
 }
 
+/**
+ * 处理更多选项按钮点击
+ */
 const handleMoreOptions = () => {
   emit('open-more-options')
 }
@@ -118,50 +117,15 @@ const handleMoreOptions = () => {
     <input type="file" id="imageUpload" style="display: none" @change="handleImageUpload" />
     <!-- 隐藏的视频上传文件输入框 -->
     <input type="file" id="videoUpload" style="display: none" @change="handleVideoUpload" />
-    <!-- 图标按钮组 -->
-    <div class="toolbar">
-      <div class="icon-group">
-        <!-- 语音输入图标（未绑定事件） -->
-        <el-icon>
-          <Microphone />
-        </el-icon>
-        <!-- 图片上传图标 -->
-        <el-icon @click="sendPicture">
-          <Picture />
-          <!-- 需要引入对应的图标组件-->
-        </el-icon>
-        <!-- 视频上传图标 -->
-        <el-icon @click="sendVideo">
-          <Film />
-        </el-icon>
-        <!-- 视频通话图标（未绑定事件） -->
-        <el-icon>
-          <VideoCamera />
-        </el-icon>
-      </div>
 
-      <div class="more-options">
-        <el-icon @click="handleMoreOptions">
-          <MoreFilled />
-        </el-icon>
-      </div>
-    </div>
-    <!-- 输入框与发送按钮 -->
-    <div class="input-wrapper">
-      <!-- 消息输入框 -->
-      <textarea
-        class="message-input"
-        placeholder="输入消息"
-        v-model="inputMessage"
-        @keyup.enter="handleTextMessage()"
-      ></textarea>
-      <!-- 发送按钮 -->
-      <div class="send-button-wrapper">
-        <button class="send-button" @click="handleTextMessage()">发送</button>
-      </div>
-    </div>
-    <!-- 上传进度条 -->
-    <el-progress :percentage="uploadProgress" v-if="uploading" style="width: 200px; margin: 10px 0"></el-progress>
+    <!-- 工具栏组件 -->
+    <ToolBar @send-picture="sendPicture" @send-video="sendVideo" @more-options="handleMoreOptions" />
+
+    <!-- 文本输入区域组件 -->
+    <TextArea @send-message="handleSendTextMessage" />
+
+    <!-- 上传进度组件 -->
+    <UploadProgress :percentage="uploadProgress" :show="uploading" />
   </div>
 </template>
 
@@ -173,78 +137,5 @@ const handleMoreOptions = () => {
   padding: 10px;
   background-color: #f5f5f5;
   border-top: 1px solid #e0e0e0;
-
-  .toolbar {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-    margin-bottom: 10px;
-  }
-
-  .icon-group {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 10px;
-
-    .el-icon {
-      cursor: pointer;
-      font-size: 20px;
-      color: #666;
-
-      &:hover {
-        color: #007bff;
-      }
-    }
-  }
-
-  .more-options {
-    .el-icon {
-      cursor: pointer;
-      font-size: 20px;
-      color: #666;
-
-      &:hover {
-        color: #007bff;
-      }
-    }
-  }
-
-  .input-wrapper {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-
-    .message-input {
-      flex: 1;
-      margin-right: 10px;
-      padding: 8px;
-      border: 1px solid #f5f5f5;
-      border-radius: 4px;
-      resize: none;
-      outline: none;
-      min-height: 40px;
-      background-color: #f5f5f5;
-    }
-
-    .send-button-wrapper {
-      display: flex;
-      justify-content: flex-end;
-
-      .send-button {
-        margin-right: 10px;
-        padding: 8px 16px;
-        width: 70px;
-        background-color: #007bff;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-
-        &:hover {
-          background-color: #0056b3;
-        }
-      }
-    }
-  }
 }
 </style>

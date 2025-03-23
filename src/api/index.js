@@ -1,6 +1,5 @@
 import axios from 'axios'
 import { useUserInfoStore } from '@/store/user.js'
-
 const userStore = useUserInfoStore()
 const token = userStore?.token
 

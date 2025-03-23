@@ -9,6 +9,7 @@ import { chatFriendOrChatRoomStore } from '@/store/chat.js'
 import { getUsersInfoById, putUsersLike } from '@/api/user.js'
 import MessageItem from '@/components/chat/message/MessageDisplay/components/MessageItem.vue'
 import AvatarItem from '@/components/chat/message/MessageDisplay/components/AvatarItem.vue'
+import { handleRightClickMessage } from '@/utils/messageUtils.js'
 //TODO由于滚动页面导致的查询的pageSize和pageNumber会一直变化
 //TODO一进入页面总是会突然一下发送很多请求，后续优化
 
@@ -75,57 +76,26 @@ const handleScroll = () => {
 }
 
 /**
- * 处理右键点击消息事件
+ * 处理右键点击消息事件的包装函数
  * @param {Object} message - 被点击的消息对象
+ * @param {Event} event - 鼠标事件对象
  */
-const handleRightClickMessage = (message, event) => {
-  // 防止默认的右键行为
-  event.preventDefault()
-  /**
-   * 删除消息函数
-   * @param {String} messageId - 消息ID
-   * @param {String} chatRoomId - 聊天室ID，如果消息属于聊天室则提供
-   */
-  const deleteMessage = async (messageId, chatRoomId) => {
-    try {
-      let res
-      if (chatRoomId) {
-        // 如果是聊天室消息，调用聊天室消息删除API
-        res = await chatRoomDelete(chatRoomId, messageId)
-      } else {
-        // 如果是个人消息，调用个人消息删除API
-        res = await messageDelete(messageId)
-      }
-      if (res.data.code === 200) {
-        // 消息删除成功，显示成功提示
-        ElMessage.success('消息已删除')
-        // 触发消息删除事件
-        emit('message-deleted', message)
-      }
-    } catch (error) {
-      // 消息删除失败，显示错误提示
-      console.error('删除消息时出错:', error)
-      ElMessage.error('删除消息失败')
-    }
-  }
-
-  // 弹出确认框，确认是否删除消息
-  ElMessageBox.confirm('确定要删除该消息吗？', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    callback: async (action) => {
-      if (action === 'confirm') {
-        // 确认删除，调用删除消息函数
-        await deleteMessage(message.messageId, message.chatRoomId)
-      }
-    },
-  })
+const handleMessageRightClick = (message, event) => {
+  handleRightClickMessage(
+    message,
+    event,
+    (deletedMessage) => emit('message-deleted', deletedMessage),
+    ElMessage,
+    ElMessageBox,
+    messageDelete,
+    chatRoomDelete,
+  )
 }
-
 // 好友信息相关方法
 /**
  * 获取好友信息
  */
+//TODO优化到pinia中
 const getFriendInfo = async () => {
   try {
     if (!friendOrChatRoom.friendId) {
@@ -245,7 +215,7 @@ defineExpose({
         v-if="message.senderId === useUserInfo.userInfo.userId"
         :message="message"
         :is-current-user="true"
-        @right-click="handleRightClickMessage"
+        @right-click="handleMessageRightClick"
       >
         <template #avatar>
           <!-- 使用 AvatarItem 组件替换原来的头像弹出框 -->
@@ -253,7 +223,7 @@ defineExpose({
         </template>
       </MessageItem>
 
-      <MessageItem v-else :message="message" :is-current-user="false" @right-click="handleRightClickMessage">
+      <MessageItem v-else :message="message" :is-current-user="false" @right-click="handleMessageRightClick">
         <template #avatar>
           <AvatarItem
             :is-current-user="false"

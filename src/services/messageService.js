@@ -8,7 +8,7 @@ import { formatMessages, formatSentTime } from '@/utils/messageUtils.js'
 export const messageService = {
   /**
    * 获取好友消息历史
-   * @param {String} friendId - 好友ID
+   * @param {Number} friendId - 好友ID
    * @param {Number} page - 页码
    * @param {Number} size - 每页数量
    * @returns {Promise<Array>} - 格式化后的消息数组
@@ -25,7 +25,7 @@ export const messageService = {
 
   /**
    * 获取群聊消息历史
-   * @param {String} chatRoomId - 聊天室ID
+   * @param {Number} chatRoomId - 聊天室ID
    * @param {Number} page - 页码
    * @param {Number} size - 每页数量
    * @returns {Promise<Array>} - 格式化后的消息数组

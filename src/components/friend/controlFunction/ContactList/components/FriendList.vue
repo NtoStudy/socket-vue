@@ -73,7 +73,7 @@ const toggleGroup = (group) => {
   }
 }
 
-// 获取状态样式类
+// 获取状态样式类 //TODO处理这个样式
 const getStatusClass = (status) => {
   const statusMap = {
     在线: 'status-online',

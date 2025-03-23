@@ -146,7 +146,7 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['select-group-chat'])
+defineEmits(['select-group-chat'])
 
 const expandedGroups = ref([])
 const groupChatMap = reactive({
