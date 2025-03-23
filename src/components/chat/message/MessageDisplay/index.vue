@@ -128,7 +128,6 @@ const handleRightClickMessage = (message, event) => {
  */
 const getFriendInfo = async () => {
   try {
-    // 确保 friendId 存在
     if (!friendOrChatRoom.friendId) {
       console.log('没有有效的 friendId')
       return
@@ -221,6 +220,7 @@ watch(
 defineExpose({
   scrollToBottom,
 })
+//TODO这里面的message经过了好几个组件之间的通讯，
 </script>
 
 <template>
@@ -253,14 +253,7 @@ defineExpose({
         </template>
       </MessageItem>
 
-      <MessageItem
-        v-else
-        :message="message"
-        :is-current-user="false"
-        @image-error="handleImageError"
-        @video-error="handleVideoError"
-        @right-click="handleRightClickMessage"
-      >
+      <MessageItem v-else :message="message" :is-current-user="false" @right-click="handleRightClickMessage">
         <template #avatar>
           <AvatarItem
             :is-current-user="false"

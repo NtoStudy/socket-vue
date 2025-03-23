@@ -1,21 +1,23 @@
 <script setup>
-import { ref, watch, nextTick, reactive, onMounted, onUnmounted } from 'vue'
+import { ref, watch, nextTick, reactive, onMounted, onUnmounted, computed } from 'vue'
 import { useUserInfoStore } from '@/store/user.js'
 import { chatFriendOrChatRoomStore } from '@/store/chat.js'
 import WebSocketService from '@/services/websocket.js'
 import MessageDisplay from './MessageDisplay/index.vue'
 import { ElMessage } from 'element-plus'
-import { messageHistory } from '@/api/friend.js'
+import { messageHistory, postFriendPin } from '@/api/friend.js'
 import { formatMessages, formatSentTime } from '@/utils/messageUtils.js'
 import { chatRoomHistory } from '@/api/chatRoom.js'
 import MessageInput from './MessageInput/index.vue'
 import eventBus from '@/EventBus/eventBus.js'
 import _ from 'lodash'
+import { getUsersInfoById } from '@/api/user.js'
 // 消息显示组件的引用，用于操作DOM
 const messageDisplayRef = ref(null)
 // 使用聊天状态管理store
 const chatFriendOrChatRoom = chatFriendOrChatRoomStore()
 const useUserInfo = useUserInfoStore()
+console.log(chatFriendOrChatRoom)
 // 用于存储文件URL的响应式变量
 const fileUrl = ref('')
 // 存储消息的响应式数组
@@ -279,6 +281,85 @@ watch(
     }
   },
 )
+
+const drawerVisible = ref(false)
+const friendInfo = ref({})
+const getFriendInfo = async () => {
+  if (!chatFriendOrChatRoom.friendId) {
+    console.log('没有有效的 friendId')
+    return
+  }
+
+  const res = await getUsersInfoById(chatFriendOrChatRoom.friendId)
+  if (res.data.code === 200) {
+    friendInfo.value = res.data.data
+    console.log(friendInfo.value, 'feawjdiwji')
+    // 设置标志位为false，表示这是初始化操作
+    isUserAction.value = false
+    if (res.data.data.isPinned === 1) {
+      isTop.value = true
+    } else {
+      isTop.value = false
+    }
+    // 重置标志位，允许后续用户操作触发watch
+    setTimeout(() => {
+      isUserAction.value = true
+    }, 0)
+  }
+}
+
+const isTop = ref()
+const muteNotifications = ref()
+const blockUser = ref()
+const isUserAction = ref(false)
+
+/**
+ * 处理打开更多选项抽屉
+ */
+const handleOpenMoreOptions = () => {
+  drawerVisible.value = true
+}
+
+/**
+ * 处理删除聊天记录点击
+ */
+const handleDeleteChatHistory = () => {
+  // 实现删除聊天记录功能
+  console.log('删除聊天记录')
+  // 可以弹出确认对话框
+}
+
+/**
+ * 处理举报用户点击
+ */
+const handleDeleteFriend = () => {
+  // 实现举报用户功能
+  console.log('删除好友')
+  // 可以跳转到举报页面或打开举报表单
+}
+
+watch(
+  () => isTop.value,
+  async (val) => {
+    // 只有当标志位为true时才执行API调用
+    if (isUserAction.value) {
+      if (val) {
+        const res = await postFriendPin(chatFriendOrChatRoom.friendId, 1)
+        console.log(res.data)
+      } else {
+        const res = await postFriendPin(chatFriendOrChatRoom.friendId, 0)
+        console.log(res.data)
+      }
+    }
+  },
+)
+
+watch(
+  () => chatFriendOrChatRoom.friendId,
+  async () => {
+    await getFriendInfo()
+  },
+)
 </script>
 
 <template>
@@ -293,7 +374,61 @@ watch(
       ref="messageDisplayRef"
     />
     <!-- 消息输入组件 -->
-    <MessageInput @send-message="sendMessage" />
+    <MessageInput @send-message="sendMessage" @open-more-options="handleOpenMoreOptions" />
+
+    <!-- 更多选项抽屉 -->
+    <el-drawer
+      v-model="drawerVisible"
+      :show-close="false"
+      direction="rtl"
+      size="300px"
+      :modal-class="'chat-drawer-modal'"
+      :with-header="false"
+      :close-on-click-modal="true"
+      :close-on-press-escape="true"
+    >
+      <div class="drawer-content">
+        <!-- 选项列表 -->
+        <div class="option-list">
+          <!-- 置顶选项 -->
+          <div class="option-item with-switch">
+            <div class="option-info">
+              <span class="option-text">设为置顶</span>
+            </div>
+            <el-switch v-model="isTop" @change="isUserAction = true" />
+          </div>
+
+          <!-- 消息免打扰选项 -->
+          <div class="option-item with-switch">
+            <div class="option-info">
+              <span class="option-text">消息免打扰</span>
+            </div>
+            <el-switch v-model="muteNotifications" />
+          </div>
+
+          <!-- 屏蔽此人选项 -->
+          <div class="option-item with-switch">
+            <div class="option-info">
+              <span class="option-text">屏蔽此人</span>
+            </div>
+            <el-switch v-model="blockUser" />
+          </div>
+
+          <!-- 删除聊天记录选项 -->
+          <div class="option-item danger" @click="handleDeleteChatHistory">
+            <div class="option-info">
+              <span class="option-text">删除聊天记录</span>
+            </div>
+          </div>
+
+          <div class="option-item delete" @click="handleDeleteFriend">
+            <div class="option-info">
+              <span>删除好友</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </el-drawer>
   </div>
 </template>
 
@@ -306,5 +441,81 @@ watch(
   justify-content: space-between;
   background-color: #ffffff;
   border-left: 1px solid #e0e0e0;
+}
+
+.drawer-content {
+  padding: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  .option-list {
+    .option-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px;
+      border-bottom: 1px solid #f0f0f0;
+      cursor: pointer;
+
+      &:hover {
+        background-color: #f9f9f9;
+      }
+
+      &.with-switch {
+        cursor: default;
+      }
+
+      &.danger {
+        .option-text {
+          color: #f56c6c;
+        }
+      }
+
+      &.delete {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: #ff4d4d;
+      }
+
+      .option-info {
+        display: flex;
+        align-items: center;
+
+        .option-text {
+          font-size: 15px;
+          color: #333;
+        }
+      }
+
+      .el-icon {
+        color: #909399;
+        font-size: 16px;
+      }
+    }
+  }
+
+  .report-section {
+    margin-top: auto;
+    padding: 20px 16px;
+    border-top: 1px solid #f0f0f0;
+
+    .report-link {
+      color: #409eff;
+      font-size: 14px;
+      text-align: center;
+      cursor: pointer;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
+// 自定义抽屉背景
+:deep(.chat-drawer-modal) {
+  background-color: rgba(0, 0, 0, 0.3);
 }
 </style>

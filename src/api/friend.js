@@ -80,3 +80,10 @@ export const postFriendsRemark = (friendId, remark) =>
     method: 'post',
     params: { friendId, remark },
   })
+
+export const postFriendPin = (friendId, status) =>
+  instance({
+    url: '/friends/togglePin',
+    method: 'put',
+    params: { friendId, status },
+  })

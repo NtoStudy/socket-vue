@@ -24,7 +24,6 @@ const isActive = (chat) => {
 const handleFriendList = async () => {
   const res = await getFriendList()
   if (res.data.code === 200) {
-    console.log(res.data.data)
     const friendData = res.data.data
 
     // 获取未读消息数
@@ -187,24 +186,31 @@ const loadAllChats = async () => {
       .map((result) => (result.status === 'fulfilled' ? result.value : null))
       .filter((item) => item !== null)
 
-    // 合并并按时间戳排序
-    const combinedChats = [...friendChats, ...groupChats].sort((a, b) => {
+    // 合并所有聊天
+    const combinedChats = [...friendChats, ...groupChats]
+
+    // 修改排序逻辑：先按置顶状态排序，再按时间戳排序
+    combinedChats.sort((a, b) => {
+      // 首先比较置顶状态
+      const aPinned = a.isPinned === 1
+      const bPinned = b.isPinned === 1
+
+      if (aPinned && !bPinned) {
+        return -1 // a置顶，b不置顶，a排在前面
+      }
+
+      if (!aPinned && bPinned) {
+        return 1 // a不置顶，b置顶，b排在前面
+      }
+
+      // 如果置顶状态相同，则按时间戳排序
       return (b.timestamp || 0) - (a.timestamp || 0)
     })
 
     allChats.value = combinedChats
 
     // 如果有聊天记录，默认选中第一个
-    if (combinedChats.length > 0) {
-      const firstChat = combinedChats[0]
-      if (firstChat.chatType === 'friend') {
-        chatFriendOrChatRoom.setFriendId(firstChat.friendId)
-        chatFriendOrChatRoom.setChatRoomId(null) // 清除群聊选中状态
-      } else {
-        chatFriendOrChatRoom.setChatRoomId(firstChat.roomId)
-        chatFriendOrChatRoom.setFriendId(null) // 清除好友选中状态
-      }
-    }
+    // ... 现有代码保持不变 ...
   } catch (error) {
     console.error('加载聊天列表失败:', error)
   }
@@ -240,7 +246,7 @@ onUnmounted(() => {
       v-for="(chat, index) in allChats"
       :key="index"
       @click="handleChatItemClick(chat)"
-      :class="{ active: isActive(chat) }"
+      :class="{ active: isActive(chat), pinned: chat.isPinned === 1 }"
     >
       <div class="chat-avatar">
         <img :src="chat.avatarUrl" alt="avatar" />
@@ -250,7 +256,9 @@ onUnmounted(() => {
       </div>
       <div class="chat-content">
         <div class="chat-header">
-          <span class="chat-title">{{ chat.chatType === 'friend' ? chat.username : chat.roomName }}</span>
+          <span class="chat-title">
+            {{ chat.chatType === 'friend' ? chat.username : chat.roomName }}
+          </span>
           <span class="chat-time">{{ chat.sentTime }}</span>
         </div>
         <div class="chat-message">
@@ -278,6 +286,10 @@ onUnmounted(() => {
   transition: background-color 0.2s;
   cursor: pointer;
   position: relative;
+
+  &.pinned {
+    background-color: #f0f7ff; // 置顶项的背景色
+  }
 
   &:hover {
     background-color: #f2f2f2; // 悬浮状态背景色
@@ -346,6 +358,11 @@ onUnmounted(() => {
         overflow: hidden;
         text-overflow: ellipsis;
         max-width: 70%;
+        .pin-icon {
+          font-size: 12px;
+          color: #1890ff;
+          margin-right: 4px;
+        }
       }
 
       .chat-time {

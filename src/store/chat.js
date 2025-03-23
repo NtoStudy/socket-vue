@@ -1,5 +1,5 @@
-import {defineStore} from "pinia";
-import {ref} from "vue";
+import { defineStore } from 'pinia'
+import { ref } from 'vue'
 
 export const chatFriendOrChatRoomStore = defineStore('chatFriendOrChatRoom', () => {
   const friendId = ref()
@@ -10,10 +10,11 @@ export const chatFriendOrChatRoomStore = defineStore('chatFriendOrChatRoom', () 
   const setChatRoomId = (newChatRoomId) => {
     chatRoomId.value = newChatRoomId
   }
+
   return {
     friendId,
     chatRoomId,
     setFriendId,
-    setChatRoomId
+    setChatRoomId,
   }
 })

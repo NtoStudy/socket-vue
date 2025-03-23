@@ -5,6 +5,7 @@
   border-radius: 50%;
   margin-right: 8px;
 }
+
 .status-online {
   background-color: #4caf50;
 }
@@ -30,41 +31,41 @@
 }
 
 .status-custom {
-  background-color: #2196f3; // 保留原来的蓝色
+  background-color: #2196f3;
 }
 
 .status-battery {
-  background-color: #8bc34a; // 绿色，代表电池
+  background-color: #8bc34a;
 }
 
 .status-music {
-  background-color: #9c27b0; // 紫色，代表音乐
+  background-color: #9c27b0;
 }
 
 .status-working {
-  background-color: #ff9800; // 橙色，代表工作
+  background-color: #ff9800;
 }
 
 .status-travel {
-  background-color: #03a9f4; // 浅蓝色，代表旅行
+  background-color: #03a9f4;
 }
 
 .status-empty {
-  background-color: #607d8b; // 灰蓝色，代表空虚
+  background-color: #607d8b;
 }
 
 .status-steps {
-  background-color: #cddc39; // 黄绿色，代表步数
+  background-color: #cddc39;
 }
 
 .status-weather {
-  background-color: #00bcd4; // 青色，代表天气
+  background-color: #00bcd4;
 }
 
 .status-crush {
-  background-color: #e91e63; // 粉红色，代表crush
+  background-color: #e91e63;
 }
-// 状态容器样式
+
 .profile-status {
   display: flex;
   align-items: center;

@@ -1,5 +1,5 @@
 <script setup>
-import { Film, Microphone, VideoCamera } from '@element-plus/icons-vue'
+import { Film, Microphone, MoreFilled, VideoCamera } from '@element-plus/icons-vue'
 import { uploadMethod, uploadVideo } from '@/api/upload.js'
 
 import { ElMessage } from 'element-plus' // 引入 Element Plus 的消息提示组件
@@ -12,7 +12,7 @@ const uploading = ref(false)
 // 响应式变量：绑定用户输入的消息
 const inputMessage = ref('')
 // 定义一个事件发射器，用于通知父组件发送消息
-const emit = defineEmits(['send-message'])
+const emit = defineEmits(['send-message', 'open-more-options'])
 
 /**
  * 触发文件选择框点击事件（图片上传）
@@ -106,6 +106,10 @@ const handleTextMessage = () => {
     inputMessage.value = '' // 清空输入框
   }
 }
+
+const handleMoreOptions = () => {
+  emit('open-more-options')
+}
 </script>
 
 <template>
@@ -115,24 +119,32 @@ const handleTextMessage = () => {
     <!-- 隐藏的视频上传文件输入框 -->
     <input type="file" id="videoUpload" style="display: none" @change="handleVideoUpload" />
     <!-- 图标按钮组 -->
-    <div class="icon-group">
-      <!-- 语音输入图标（未绑定事件） -->
-      <el-icon>
-        <Microphone />
-      </el-icon>
-      <!-- 图片上传图标 -->
-      <el-icon @click="sendPicture">
-        <Picture />
-        <!-- 需要引入对应的图标组件-->
-      </el-icon>
-      <!-- 视频上传图标 -->
-      <el-icon @click="sendVideo">
-        <Film />
-      </el-icon>
-      <!-- 视频通话图标（未绑定事件） -->
-      <el-icon>
-        <VideoCamera />
-      </el-icon>
+    <div class="toolbar">
+      <div class="icon-group">
+        <!-- 语音输入图标（未绑定事件） -->
+        <el-icon>
+          <Microphone />
+        </el-icon>
+        <!-- 图片上传图标 -->
+        <el-icon @click="sendPicture">
+          <Picture />
+          <!-- 需要引入对应的图标组件-->
+        </el-icon>
+        <!-- 视频上传图标 -->
+        <el-icon @click="sendVideo">
+          <Film />
+        </el-icon>
+        <!-- 视频通话图标（未绑定事件） -->
+        <el-icon>
+          <VideoCamera />
+        </el-icon>
+      </div>
+
+      <div class="more-options">
+        <el-icon @click="handleMoreOptions">
+          <MoreFilled />
+        </el-icon>
+      </div>
     </div>
     <!-- 输入框与发送按钮 -->
     <div class="input-wrapper">
@@ -162,11 +174,30 @@ const handleTextMessage = () => {
   background-color: #f5f5f5;
   border-top: 1px solid #e0e0e0;
 
+  .toolbar {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 10px;
+  }
+
   .icon-group {
     display: flex;
     gap: 12px;
     margin-bottom: 10px;
 
+    .el-icon {
+      cursor: pointer;
+      font-size: 20px;
+      color: #666;
+
+      &:hover {
+        color: #007bff;
+      }
+    }
+  }
+
+  .more-options {
     .el-icon {
       cursor: pointer;
       font-size: 20px;
