@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import { getUsersInfoById } from '@/api/user.js'
 import { ElMessage } from 'element-plus'
 import { postFriendPin } from '@/api/friend.js'
+import { chatRoomInfoById } from '@/api/chatRoom.js'
 
 export const chatFriendOrChatRoomStore = defineStore(
   'chatFriendOrChatRoom',
@@ -14,6 +15,7 @@ export const chatFriendOrChatRoomStore = defineStore(
     // 好友信息相关状态
     const friendInfo = ref({})
     const isTop = ref(false)
+    const groupInfo = ref({})
 
     /**
      * 设置好友ID
@@ -39,6 +41,7 @@ export const chatFriendOrChatRoomStore = defineStore(
       chatRoomId.value = newChatRoomId
       // 如果设置了新的聊天室ID，清空好友信息
       if (newChatRoomId) {
+        getGroupInfo(newChatRoomId)
         friendInfo.value = {}
         isTop.value = false
       }
@@ -59,6 +62,24 @@ export const chatFriendOrChatRoomStore = defineStore(
         if (res.data.code === 200) {
           friendInfo.value = res.data.data
           isTop.value = res.data.data.isPinned === 1
+        }
+      } catch (error) {
+        console.error('获取好友信息失败:', error)
+        ElMessage.error('获取好友信息失败')
+      }
+    }
+
+    const getGroupInfo = async (roomId) => {
+      if (!roomId) {
+        console.log('没有有效的 groupId')
+        return
+      }
+
+      try {
+        const res = await chatRoomInfoById(roomId)
+        console.log(res.data, 'edwafwad')
+        if (res.data.code === 200) {
+          groupInfo.value = res.data.data
         }
       } catch (error) {
         console.error('获取好友信息失败:', error)
@@ -94,10 +115,12 @@ export const chatFriendOrChatRoomStore = defineStore(
       chatRoomId,
       friendInfo,
       isTop,
+      groupInfo,
       setFriendId,
       setChatRoomId,
       getFriendInfo,
       updateTopStatus,
+      getGroupInfo,
     }
   },
   {

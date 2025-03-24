@@ -48,6 +48,13 @@ export const chatRoomList = () =>
     method: 'get',
   })
 
+export const chatRoomInfoById = (roomId) =>
+  instance({
+    url: '/chat-rooms/getById',
+    method: 'get',
+    params: { roomId },
+  })
+
 /**
  * 获取聊天室用户列表
  * @param {number} roomId - 聊天室ID
