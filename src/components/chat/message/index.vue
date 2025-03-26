@@ -209,8 +209,12 @@ const handleGroupDrawerClose = () => {
 /**
  * 处理群聊置顶状态变更
  */
-const handleGroupTopChange = async () => {
-  console.log('群聊置顶状态变更')
+const handleGroupTopChange = async (value) => {
+  const success = await chatStore.updateGroupTopStatus(value)
+  console.log('更新群聊置顶状态成功', success)
+  if (success) {
+    // 可以在这里添加其他逻辑，如刷新群聊列表等
+  }
 }
 
 /**
@@ -310,6 +314,7 @@ const handleChangeJoinMethod = async () => {
     <GroupChatOptionsDrawer
       :visible="groupDrawerVisible"
       :groupInfo="groupInfo"
+      :isGroupTop="chatStore.isGroupTop"
       @close="handleGroupDrawerClose"
       @topChange="handleGroupTopChange"
       @deleteChatHistory="handleDeleteGroupChatHistory"

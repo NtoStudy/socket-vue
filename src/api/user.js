@@ -43,16 +43,6 @@ export const userInfoByJwt = () =>
   })
 
 /**
- * 用户登出函数
- * @returns {Promise} - 返回登出请求的Promise对象
- */
-export const userLogout = () =>
-  instance({
-    url: '/users/logout',
-    method: 'post',
-  })
-
-/**
  * 获取用户信息函数
  * @param {string} number - 用户ID
  * @returns {Promise} - 返回获取用户信息请求的Promise对象
@@ -63,6 +53,16 @@ export const getUserInfoByNumber = (number) =>
     method: 'get',
     params: {
       number,
+    },
+  })
+
+export const getUsersInfoInChatRoom = (userId, roomId) =>
+  instance({
+    url: '/users/userInfoByIdInGroup',
+    method: 'get',
+    params: {
+      userId,
+      roomId,
     },
   })
 

@@ -1,0 +1,227 @@
+.drawer-content {
+  padding: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  .group-header {
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #f0f0f0;
+    background-color: #f9f9f9;
+
+    .group-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-right: 12px;
+      flex-shrink: 0;
+
+      img {
+        width: 100%;
+        height: 100%;
+        background-color: #ff4d4d;
+
+        object-fit: cover;
+      }
+    }
+
+    .group-info {
+      flex: 1;
+      overflow: hidden;
+
+      .group-name {
+        font-size: 18px;
+        font-weight: 500;
+        margin-bottom: 4px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .group-id {
+        font-size: 12px;
+        color: #999;
+      }
+    }
+  }
+
+  .group-members-section {
+    padding: 16px;
+    border-bottom: 1px solid #f0f0f0;
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: 12px;
+      color: #333;
+    }
+
+    .members-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+
+      .member-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        cursor: pointer;
+
+        &.add-member {
+          .member-avatar {
+            background-color: #f5f5f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            .el-icon {
+              font-size: 20px;
+              color: #999;
+            }
+          }
+        }
+
+        .member-avatar {
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          overflow: hidden;
+          margin-bottom: 4px;
+
+          img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+          }
+        }
+
+        .member-name {
+          font-size: 12px;
+          color: #666;
+          width: 100%;
+          text-align: center;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+      }
+    }
+  }
+
+  .divider {
+    height: 8px;
+    background-color: #f5f5f5;
+  }
+
+  .option-list {
+    padding: 0 0 20px 0;
+
+    .section-title {
+      padding: 12px 16px;
+      font-size: 16px;
+      font-weight: 500;
+      color: #333;
+      background-color: #f9f9f9;
+
+      &.danger-title {
+        color: #f56c6c;
+      }
+    }
+
+    .option-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px;
+      border-bottom: 1px solid #f0f0f0;
+      cursor: pointer;
+      &.input-option {
+        flex-direction: column;
+        align-items: flex-start;
+        cursor: default;
+
+        &:hover {
+          background-color: transparent;
+        }
+
+        .option-label {
+          font-size: 14px;
+          margin-bottom: 8px;
+        }
+
+        .option-input {
+          width: 100%;
+        }
+      }
+
+      &:hover {
+        background-color: #f9f9f9;
+      }
+
+      &.with-switch {
+        cursor: default;
+      }
+
+      &.danger {
+        .option-text {
+          color: #f56c6c;
+        }
+      }
+
+      &.delete {
+        .option-text {
+          color: #ff4d4f;
+          font-weight: 500;
+        }
+      }
+
+      .option-info {
+        display: flex;
+        align-items: center;
+
+        .option-icon {
+          margin-right: 10px;
+          font-size: 18px;
+        }
+
+        .option-text {
+          font-size: 14px;
+        }
+      }
+    }
+  }
+}
+
+// 自定义抽屉样式
+:deep(.el-drawer) {
+  background-color: #fff;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+:deep(.el-drawer__body) {
+  padding: 0;
+  overflow: hidden;
+}
+
+:deep(.el-scrollbar) {
+  height: 100%;
+}
+
+:deep(.el-scrollbar__wrap) {
+  overflow-x: hidden;
+}
+
+:deep(.el-select) {
+  width: 120px;
+}
+
+:deep(.el-select .el-input__inner) {
+  height: 32px;
+}
+
+:deep(.el-switch) {
+  --el-switch-on-color: #409eff;
+}

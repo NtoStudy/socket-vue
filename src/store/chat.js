@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import { getUsersInfoById } from '@/api/user.js'
 import { ElMessage } from 'element-plus'
 import { postFriendPin } from '@/api/friend.js'
-import { chatRoomInfoById } from '@/api/chatRoom.js'
+import { chatRoomInfoById, setChatRoomPinned } from '@/api/chatRoom.js'
 
 export const chatFriendOrChatRoomStore = defineStore(
   'chatFriendOrChatRoom',
@@ -16,6 +16,7 @@ export const chatFriendOrChatRoomStore = defineStore(
     const friendInfo = ref({})
     const isTop = ref(false)
     const groupInfo = ref({})
+    const isGroupTop = ref(false)
 
     /**
      * 设置好友ID
@@ -80,9 +81,10 @@ export const chatFriendOrChatRoomStore = defineStore(
 
       try {
         const res = await chatRoomInfoById(roomId)
-        console.log(res.data, 'edwafwad')
+        console.log(res.data.data, 'edwafwad')
         if (res.data.code === 200) {
-          groupInfo.value = res.data.data
+          groupInfo.value = res.data.data.chatRooms
+          isGroupTop.value = res.data.data.isPinned === 1
         }
       } catch (error) {
         console.error('获取好友信息失败:', error)
@@ -113,17 +115,43 @@ export const chatFriendOrChatRoomStore = defineStore(
       return false
     }
 
+    /**
+     * 更新群聊置顶状态
+     * @param {Boolean} value - 新的置顶状态
+     */
+    const updateGroupTopStatus = async (value) => {
+      if (!chatRoomId.value) return false
+
+      try {
+        const status = value ? 1 : 0
+        const res = await setChatRoomPinned(chatRoomId.value, status)
+        console.log(res.data, 'edwafwad')
+        if (res.data.code === 200) {
+          isGroupTop.value = value
+          ElMessage.success(value ? '已置顶群聊' : '已取消置顶')
+          return true
+        }
+      } catch (error) {
+        console.error('更新群聊置顶状态失败:', error)
+        ElMessage.error('操作失败，请稍后重试')
+      }
+
+      return false
+    }
+
     return {
       friendId,
       chatRoomId,
       friendInfo,
       isTop,
+      isGroupTop,
       groupInfo,
       setFriendId,
       setChatRoomId,
       getFriendInfo,
       updateTopStatus,
       getGroupInfo,
+      updateGroupTopStatus,
     }
   },
   {
