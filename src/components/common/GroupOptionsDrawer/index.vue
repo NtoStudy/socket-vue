@@ -40,12 +40,9 @@ const emit = defineEmits([
   'topChange',
   'exitGroup',
   'dissolveGroup',
-  'viewGroupInfo',
-  'manageMembers',
   'changeGroupName',
   'changeGroupNotice',
-  'muteAll',
-  'changeJoinMethod',
+  'changeGroupNickName',
 ])
 
 // 使用计算属性处理抽屉可见性
@@ -78,7 +75,6 @@ const getChatRoomUser = async () => {
         return 0
       })
   }
-  console.log('groupMembers', groupMembers.value)
 }
 
 /**
@@ -129,8 +125,8 @@ const handleDissolveGroup = () => {
 }
 
 // 添加本地状态来跟踪群昵称和群名称
-const myNickname = ref(props.groupInfo?.myNickname || '')
-const groupName = ref(props.groupInfo?.roomName || '')
+const myNickname = ref(props.groupInfo?.nickname || '')
+const groupName = ref(props.groupInfo.chatRooms?.roomName || '')
 
 // 监听 props 变化，更新本地状态
 watch(
@@ -152,26 +148,10 @@ watch(
 )
 
 /**
- * 处理我的本群昵称变更
- * @param {String} value - 新的昵称
- */
-const handleNicknameChange = (value) => {
-  myNickname.value = value
-}
-
-/**
  * 保存我的本群昵称
  */
 const saveMyNickname = () => {
   emit('changeGroupNickName', myNickname.value)
-}
-
-/**
- * 处理群名称变更
- * @param {String} value - 新的群名称
- */
-const handleGroupNameChange = (value) => {
-  groupName.value = value
 }
 
 /**
@@ -189,14 +169,13 @@ const handleChangeGroupNotice = () => {
 const addGroupMember = () => {
   console.log('添加群成员')
 }
-/**
- * 处理全员禁言状态变更
- * @param {Boolean} value - 新的禁言状态
- */
-const handleMuteAll = (value) => {
-  emit('muteAll', value)
-}
 
+const nicknamePlaceholder = computed(() => {
+  return myNickname.value ? myNickname.value : '我的群昵称'
+})
+const groupNamePlaceholder = computed(() => {
+  return groupName.value ? groupName.value : '群聊名称'
+})
 onMounted(() => {
   getChatRoomUser()
 })
@@ -266,23 +245,13 @@ watch(
           <!-- 我的本群昵称 -->
           <div class="option-item input-option">
             <div class="option-label">我的本群昵称</div>
-            <el-input
-              v-model="myNickname"
-              placeholder="填写我在本群的昵称"
-              @change="handleNicknameChange"
-              @blur="saveMyNickname"
-            />
+            <el-input v-model="myNickname" :placeholder="nicknamePlaceholder" @blur="saveMyNickname" />
           </div>
 
           <!-- 修改群名称 -->
           <div class="option-item input-option">
             <div class="option-label">群聊昵称</div>
-            <el-input
-              v-model="groupName"
-              placeholder="填写群名称"
-              @change="handleGroupNameChange"
-              @blur="saveGroupName"
-            />
+            <el-input v-model="groupName" :placeholder="groupNamePlaceholder" @blur="saveGroupName" />
           </div>
 
           <!-- 修改群公告 -->
@@ -291,14 +260,6 @@ watch(
               <span class="option-text">设置群公告</span>
             </div>
             <el-icon><ArrowRight /></el-icon>
-          </div>
-
-          <!-- 全员禁言 -->
-          <div class="option-item with-switch">
-            <div class="option-info">
-              <span class="option-text">全员禁言</span>
-            </div>
-            <el-switch :model-value="groupInfo.muteAll" @change="handleMuteAll" />
           </div>
 
           <!-- 退出群聊 -->

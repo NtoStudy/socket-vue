@@ -57,7 +57,6 @@ export const chatFriendOrChatRoomStore = defineStore(
      */
     const getFriendInfo = async (id) => {
       if (!id) {
-        console.log('没有有效的 friendId')
         return
       }
 
@@ -81,9 +80,8 @@ export const chatFriendOrChatRoomStore = defineStore(
 
       try {
         const res = await chatRoomInfoById(roomId)
-        console.log(res.data.data, 'edwafwad')
         if (res.data.code === 200) {
-          groupInfo.value = res.data.data.chatRooms
+          groupInfo.value = res.data.data
           isGroupTop.value = res.data.data.isPinned === 1
         }
       } catch (error) {
@@ -125,7 +123,6 @@ export const chatFriendOrChatRoomStore = defineStore(
       try {
         const status = value ? 1 : 0
         const res = await setChatRoomPinned(chatRoomId.value, status)
-        console.log(res.data, 'edwafwad')
         if (res.data.code === 200) {
           isGroupTop.value = value
           ElMessage.success(value ? '已置顶群聊' : '已取消置顶')

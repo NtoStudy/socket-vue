@@ -11,6 +11,7 @@ import { ElMessage } from 'element-plus'
 import GroupChatOptionsDrawer from '@/components/common/GroupOptionsDrawer/index.vue'
 import { computed } from 'vue'
 import eventBus from '@/EventBus/eventBus.js'
+import { changeChatRoomName, updateChatRoomNickname } from '@/api/chatRoom.js'
 
 // 消息显示组件的引用，用于操作DOM
 const messageDisplayRef = ref(null)
@@ -173,7 +174,6 @@ const groupDrawerVisible = ref(false)
 
 // 群聊信息
 const groupInfo = computed(() => {
-  console.log('chatStore.chatRoomInfo', chatStore.groupInfo)
   return chatStore.groupInfo || {}
 })
 
@@ -211,17 +211,17 @@ const handleGroupDrawerClose = () => {
  */
 const handleGroupTopChange = async (value) => {
   const success = await chatStore.updateGroupTopStatus(value)
-  console.log('更新群聊置顶状态成功', success)
   if (success) {
     // 可以在这里添加其他逻辑，如刷新群聊列表等
   }
 }
 
 /**
- * 处理删除群聊历史记录
+ * 修改我的本群昵称
  */
-const handleDeleteGroupChatHistory = async () => {
-  console.log('删除群聊历史记录')
+const handleChangeGroupNickName = async (value) => {
+  const res = await updateChatRoomNickname(value, chatStore.chatRoomId)
+  console.log('修改群昵称结果', res.data)
 }
 
 /**
@@ -239,26 +239,12 @@ const handleDissolveGroup = async () => {
 }
 
 /**
- * 处理查看群信息
- */
-const handleViewGroupInfo = () => {
-  // 实现查看群信息的逻辑
-  console.log('查看群信息')
-}
-
-/**
- * 处理管理群成员
- */
-const handleManageMembers = () => {
-  // 实现管理群成员的逻辑
-  console.log('管理群成员')
-}
-
-/**
  * 处理修改群名称
  */
-const handleChangeGroupName = () => {
+const handleChangeGroupName = async (value) => {
   console.log('修改群名称')
+  const res = await changeChatRoomName(chatStore.chatRoomId, value)
+  console.log(res.data)
 }
 
 /**
@@ -266,20 +252,6 @@ const handleChangeGroupName = () => {
  */
 const handleChangeGroupNotice = () => {
   console.log('修改群公告')
-}
-
-/**
- * 处理全员禁言状态变更
- */
-const handleMuteAll = async () => {
-  console.log('全员禁言状态变更')
-}
-
-/**
- * 处理入群方式变更
- */
-const handleChangeJoinMethod = async () => {
-  console.log('入群方式变更')
 }
 </script>
 
@@ -317,15 +289,11 @@ const handleChangeJoinMethod = async () => {
       :isGroupTop="chatStore.isGroupTop"
       @close="handleGroupDrawerClose"
       @topChange="handleGroupTopChange"
-      @deleteChatHistory="handleDeleteGroupChatHistory"
       @exitGroup="handleExitGroup"
       @dissolveGroup="handleDissolveGroup"
-      @viewGroupInfo="handleViewGroupInfo"
-      @manageMembers="handleManageMembers"
       @changeGroupName="handleChangeGroupName"
       @changeGroupNotice="handleChangeGroupNotice"
-      @muteAll="handleMuteAll"
-      @changeJoinMethod="handleChangeJoinMethod"
+      @changeGroupNickName="handleChangeGroupNickName"
     />
   </div>
 </template>
