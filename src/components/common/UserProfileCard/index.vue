@@ -57,6 +57,7 @@
 </template>
 
 <script setup>
+//TODO这个组件在 私聊 群聊中 调用还有很大问题
 import { Trophy } from '@element-plus/icons-vue'
 import { computed } from 'vue'
 import StatusIndicator from '@/components/common/StatusIndicator/index.vue'
@@ -73,7 +74,7 @@ const props = defineProps({
     default: '',
   },
 })
-
+console.log('props', props.userInfo)
 const emit = defineEmits(['edit-profile', 'send-message', 'like'])
 const hobbies = computed(() => {
   // 检查 userInfo 和 hobbies 是否存在

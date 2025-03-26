@@ -11,8 +11,8 @@ import { ElMessage } from 'element-plus'
 import GroupChatOptionsDrawer from '@/components/common/GroupOptionsDrawer/index.vue'
 import { computed } from 'vue'
 import eventBus from '@/EventBus/eventBus.js'
-import { changeChatRoomName, updateChatRoomNickname } from '@/api/chatRoom.js'
-
+import { changeChatRoomName, quitOrDismissChatRoom, updateChatRoomNickname } from '@/api/chatRoom.js'
+//TODO在进行任何操作之后，都要刷新列表
 // 消息显示组件的引用，用于操作DOM
 const messageDisplayRef = ref(null)
 
@@ -172,21 +172,6 @@ const isGroupChat = computed(() => {
 // 群聊抽屉可见性
 const groupDrawerVisible = ref(false)
 
-// 群聊信息
-const groupInfo = computed(() => {
-  return chatStore.groupInfo || {}
-})
-
-// // 判断当前用户是否为群主
-// const isGroupOwner = computed(() => {
-//   return 1
-// })
-//
-// // 判断当前用户是否为管理员
-// const isGroupAdmin = computed(() => {
-//
-// })
-
 /**
  * 打开更多选项抽屉
  */
@@ -225,17 +210,13 @@ const handleChangeGroupNickName = async (value) => {
 }
 
 /**
- * 处理退出群聊
- */
-const handleExitGroup = async () => {
-  console.log('退出群聊')
-}
-
-/**
  * 处理解散群聊
  */
 const handleDissolveGroup = async () => {
   console.log('解散群')
+  console.log()
+  const res = await quitOrDismissChatRoom(chatStore.groupInfo.chatRooms.roomId)
+  console.log(res.data)
 }
 
 /**
@@ -280,16 +261,13 @@ const handleChangeGroupNotice = () => {
       @deleteFriend="handleDeleteFriend"
     />
 
-    <!--      :isGroupOwner="isGroupOwner"-->
-    <!--      :isGroupAdmin="isGroupAdmin"-->
     <!-- 群聊更多选项抽屉 -->
     <GroupChatOptionsDrawer
       :visible="groupDrawerVisible"
-      :groupInfo="groupInfo"
+      :groupInfo="chatStore.groupInfo"
       :isGroupTop="chatStore.isGroupTop"
       @close="handleGroupDrawerClose"
       @topChange="handleGroupTopChange"
-      @exitGroup="handleExitGroup"
       @dissolveGroup="handleDissolveGroup"
       @changeGroupName="handleChangeGroupName"
       @changeGroupNotice="handleChangeGroupNotice"

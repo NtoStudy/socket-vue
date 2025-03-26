@@ -1,9 +1,67 @@
+<template>
+  <el-drawer
+    v-model="drawerVisible"
+    :show-close="false"
+    direction="rtl"
+    size="400px"
+    :modal-class="'chat-drawer-modal'"
+    :with-header="false"
+    :close-on-click-modal="true"
+    :close-on-press-escape="true"
+    @closed="handleClose"
+  >
+    <div class="drawer-content">
+      <el-scrollbar>
+        <!-- 群聊信息头部 -->
+        <div class="group-header">
+          <div class="group-avatar">
+            <img :src="groupInfo.chatRooms.avatarUrl || ''" alt="群头像" />
+          </div>
+          <div class="group-info">
+            <div class="group-name">{{ groupInfo.chatRooms.roomName || '群聊' }}</div>
+            <div class="group-id">群号：{{ groupInfo.chatRooms.groupNumber || '' }}</div>
+          </div>
+        </div>
+
+        <!-- 群成员列表部分 -->
+        <MemberList
+          :members="groupMembers"
+          :is-group-owner="chatRoomRole === '群主'"
+          :is-group-admin="chatRoomRole === '管理员'"
+          @send-message="handleSendMessageToMember"
+          @set-admin="handleSetAdmin"
+          @kick-member="handleKickMember"
+          @transfer-owner="handleTransferOwner"
+          @add-member="addGroupMember"
+        />
+
+        <!-- 群设置选项 -->
+        <GroupSettings
+          :is-group-top="props.isGroupTop"
+          :nickname="myNickname"
+          :group-name="groupName"
+          :is-group-owner="chatRoomRole === '群主'"
+          :is-group-admin="chatRoomRole === '管理员'"
+          @top-change="handleTopChange"
+          @save-nickname="saveMyNickname"
+          @save-group-name="saveGroupName"
+          @change-notice="handleChangeGroupNotice"
+          @dissolve-group="handleDissolveGroup"
+        />
+      </el-scrollbar>
+    </div>
+  </el-drawer>
+</template>
+
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
 import { ElMessageBox } from 'element-plus'
-import { ArrowRight } from '@element-plus/icons-vue'
 import { chatRoomUser } from '@/api/chatRoom.js'
 import { getUsersInfoInChatRoom } from '@/api/user.js'
+import router from '@/router/index.js'
+import { chatFriendOrChatRoomStore } from '@/store/chat.js'
+import MemberList from './components/MemberList.vue'
+import GroupSettings from './components/GroupSettings.vue'
 
 // 定义组件的属性
 const props = defineProps({
@@ -16,13 +74,11 @@ const props = defineProps({
     default: false,
   },
   isGroupTop: {
-    // 新增群聊置顶状态
     type: Boolean,
     default: false,
   },
   groupInfo: {
     type: Object,
-    default: () => ({}),
   },
   isGroupOwner: {
     type: Boolean,
@@ -34,7 +90,7 @@ const props = defineProps({
   },
 })
 
-// 定义组件的事件
+// 定义事件
 const emit = defineEmits([
   'close',
   'topChange',
@@ -51,12 +107,17 @@ const drawerVisible = computed({
   set: (value) => emit('close', value),
 })
 
-// 模拟群成员数据 (实际应用中应该从API获取)
-const groupMembers = ref()
+// 群成员数据
+const groupMembers = ref([])
+const chatRoomRole = computed(() => {
+  return props.groupInfo.role
+})
+
+// 获取群成员信息
 const getChatRoomUser = async () => {
-  const res = await chatRoomUser(props.groupInfo.roomId)
+  const res = await chatRoomUser(props.groupInfo.chatRooms.roomId)
   if (res.data.code === 200) {
-    const userPromises = res.data.data.map((item) => getUsersInfoInChatRoom(item, props.groupInfo.roomId))
+    const userPromises = res.data.data.map((item) => getUsersInfoInChatRoom(item, props.groupInfo.chatRooms.roomId))
     const responses = await Promise.all(userPromises)
     groupMembers.value = responses
       .map((response) => ({
@@ -93,26 +154,12 @@ const handleTopChange = (value) => {
 }
 
 /**
- * 处理退出群聊点击
- */
-const handleExitGroup = () => {
-  ElMessageBox.confirm('确定要退出该群聊吗？', '提示', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    type: 'warning',
-  })
-    .then(() => {
-      emit('exitGroup')
-      handleClose()
-    })
-    .catch(() => {})
-}
-
-/**
  * 处理解散群聊点击
  */
 const handleDissolveGroup = () => {
-  ElMessageBox.confirm('确定要解散该群聊吗？此操作不可恢复。', '提示', {
+  const message =
+    chatRoomRole.value === '群主' ? '确定要解散该群聊吗？此操作不可恢复。' : '确定要退出群聊吗？此操作不可恢复'
+  ElMessageBox.confirm(message, '提示', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
     type: 'danger',
@@ -130,7 +177,7 @@ const groupName = ref(props.groupInfo.chatRooms?.roomName || '')
 
 // 监听 props 变化，更新本地状态
 watch(
-  () => props.groupInfo?.myNickname,
+  () => props.groupInfo.nickname,
   (newValue) => {
     if (newValue !== undefined) {
       myNickname.value = newValue
@@ -139,7 +186,7 @@ watch(
 )
 
 watch(
-  () => props.groupInfo?.roomName,
+  () => props.groupInfo.chatRooms?.roomName,
   (newValue) => {
     if (newValue) {
       groupName.value = newValue
@@ -150,137 +197,180 @@ watch(
 /**
  * 保存我的本群昵称
  */
-const saveMyNickname = () => {
-  emit('changeGroupNickName', myNickname.value)
+const saveMyNickname = (value) => {
+  emit('changeGroupNickName', value)
 }
 
 /**
  * 保存群名称
  */
-const saveGroupName = () => {
-  emit('changeGroupName', groupName.value)
+const saveGroupName = (value) => {
+  emit('changeGroupName', value)
 }
+
 /**
  * 处理修改群公告
  */
 const handleChangeGroupNotice = () => {
   emit('changeGroupNotice')
 }
+
+/**
+ * 添加群成员
+ */
 const addGroupMember = () => {
   console.log('添加群成员')
 }
 
-const nicknamePlaceholder = computed(() => {
-  return myNickname.value ? myNickname.value : '我的群昵称'
-})
-const groupNamePlaceholder = computed(() => {
-  return groupName.value ? groupName.value : '群聊名称'
-})
+// 初始化和监听
 onMounted(() => {
   getChatRoomUser()
 })
 
 watch(
-  () => props.groupInfo.roomId,
+  () => props.groupInfo.chatRooms.roomId,
   () => {
     getChatRoomUser()
   },
 )
+
+const chatStore = chatFriendOrChatRoomStore()
+
+/**
+ * 处理发送消息给群成员
+ * @param {Object} member - 群成员信息
+ */
+const handleSendMessageToMember = (member) => {
+  // 关闭抽屉
+  emit('close')
+
+  // 设置聊天对象为该成员
+  chatStore.setFriendId(member.userId)
+
+  // 跳转到聊天页面
+  router.push('/main/chat')
+}
+
+/**
+ * 处理设置管理员
+ * @param {Object} member - 群成员信息
+ */
+const handleSetAdmin = (member) => {
+  // 这里可以添加权限检查
+  console.log('设置管理员:', member)
+  // 后续实现设置管理员的逻辑
+}
+
+/**
+ * 处理踢出群成员
+ * @param {Object} member - 群成员信息
+ */
+const handleKickMember = (member) => {
+  // 这里可以添加权限检查
+  console.log('踢出群成员:', member)
+  // 后续实现踢出群成员的逻辑
+}
+
+/**
+ * 处理转让群主
+ * @param {Object} member - 群成员信息
+ */
+const handleTransferOwner = (member) => {
+  // 这里可以添加权限检查
+  console.log('转让群主给:', member)
+  // 后续实现转让群主的逻辑
+}
 </script>
 
-<template>
-  <el-drawer
-    v-model="drawerVisible"
-    :show-close="false"
-    direction="rtl"
-    size="400px"
-    :modal-class="'chat-drawer-modal'"
-    :with-header="false"
-    :close-on-click-modal="true"
-    :close-on-press-escape="true"
-    @closed="handleClose"
-  >
-    <div class="drawer-content">
-      <el-scrollbar>
-        <!-- 群聊信息头部 -->
-        <div class="group-header">
-          <div class="group-avatar">
-            <img :src="groupInfo.avatarUrl || ''" alt="群头像" />
-          </div>
-          <div class="group-info">
-            <div class="group-name">{{ groupInfo.roomName || '群聊' }}</div>
-            <div class="group-id">群号：{{ groupInfo.groupNumber || '' }}</div>
-          </div>
-        </div>
-
-        <!-- 群成员列表 -->
-        <div class="group-members-section">
-          <div class="section-title">群聊成员</div>
-          <div class="members-grid">
-            <div v-for="member in groupMembers" :key="member.id" class="member-item">
-              <div class="member-avatar">
-                <img :src="member.avatar" alt="成员头像" />
-              </div>
-              <div class="member-name">{{ member.nickname ? member.nickname : member.username }}</div>
-            </div>
-            <div class="member-item add-member" @click="addGroupMember">
-              <div class="member-avatar add-icon">
-                <el-icon><plus /></el-icon>
-              </div>
-              <div class="member-name">邀请</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 选项列表 - 不折叠 -->
-        <div class="option-list">
-          <!-- 置顶选项 -->
-          <div class="option-item with-switch">
-            <div class="option-info">
-              <span class="option-text">设为置顶</span>
-            </div>
-            <el-switch :model-value="props.isGroupTop" @change="handleTopChange" />
-          </div>
-
-          <!-- 我的本群昵称 -->
-          <div class="option-item input-option">
-            <div class="option-label">我的本群昵称</div>
-            <el-input v-model="myNickname" :placeholder="nicknamePlaceholder" @blur="saveMyNickname" />
-          </div>
-
-          <!-- 修改群名称 -->
-          <div class="option-item input-option">
-            <div class="option-label">群聊昵称</div>
-            <el-input v-model="groupName" :placeholder="groupNamePlaceholder" @blur="saveGroupName" />
-          </div>
-
-          <!-- 修改群公告 -->
-          <div class="option-item" @click="handleChangeGroupNotice">
-            <div class="option-info">
-              <span class="option-text">设置群公告</span>
-            </div>
-            <el-icon><ArrowRight /></el-icon>
-          </div>
-
-          <!-- 退出群聊 -->
-          <div class="option-item danger" @click="handleExitGroup">
-            <div class="option-info">
-              <span class="option-text">退出群聊</span>
-            </div>
-          </div>
-
-          <!-- 解散群聊 -->
-          <div class="option-item delete" @click="handleDissolveGroup">
-            <div class="option-info">
-              <span class="option-text">解散群聊</span>
-            </div>
-          </div>
-        </div>
-      </el-scrollbar>
-    </div>
-  </el-drawer>
-</template>
-
 <style lang="scss" scoped>
-@use './group.scss';
+.drawer-content {
+  padding: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  .group-header {
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #f0f0f0;
+    background-color: #f9f9f9;
+
+    .group-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-right: 12px;
+      flex-shrink: 0;
+
+      img {
+        width: 100%;
+        height: 100%;
+        background-color: #ff4d4d;
+        object-fit: cover;
+      }
+    }
+
+    .group-info {
+      flex: 1;
+      overflow: hidden;
+
+      .group-name {
+        font-size: 18px;
+        font-weight: 500;
+        margin-bottom: 4px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .group-id {
+        font-size: 12px;
+        color: #999;
+      }
+    }
+  }
+}
+
+// 自定义抽屉样式
+:deep(.el-drawer) {
+  background-color: #fff;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+:deep(.el-drawer__body) {
+  padding: 0;
+  overflow: hidden;
+}
+
+:deep(.el-scrollbar) {
+  height: 100%;
+}
+
+:deep(.el-scrollbar__wrap) {
+  overflow-x: hidden;
+}
+
+:deep(.el-select) {
+  width: 120px;
+}
+
+:deep(.el-select .el-input__inner) {
+  height: 32px;
+}
+
+:deep(.el-switch) {
+  --el-switch-on-color: #409eff;
+}
+
+:deep(.user-profile-popover) {
+  padding: 0;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+  .el-popper__arrow {
+    display: none;
+  }
+}
 </style>
