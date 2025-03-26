@@ -38,6 +38,9 @@ export const chatFriendOrChatRoomStore = defineStore(
      * @param {String} newChatRoomId - 新的聊天室ID
      */
     const setChatRoomId = (newChatRoomId) => {
+      // 如果是同一个聊天室，不做任何操作
+      if (chatRoomId.value === newChatRoomId) return
+
       chatRoomId.value = newChatRoomId
       // 如果设置了新的聊天室ID，清空好友信息
       if (newChatRoomId) {

@@ -78,8 +78,7 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 .friend-requests {
-  height: 100%;
-  flex:1;
+  flex: 1;
   padding: 20px;
   overflow-y: auto;
   background-color: #f9f9f9;
@@ -143,7 +142,7 @@ onMounted(() => {
 
     .request-right {
       flex: 1;
-      
+
       .request-header {
         display: flex;
         align-items: center;
@@ -181,17 +180,17 @@ onMounted(() => {
       justify-content: flex-end;
       align-items: center;
       min-width: 100px;
-      
+
       p {
         padding: 6px 12px;
         border-radius: 4px;
         font-size: 14px;
-        
+
         &:nth-child(1) {
           background-color: #f0f9eb;
           color: #67c23a;
         }
-        
+
         &:nth-child(2) {
           background-color: #f4f4f5;
           color: #909399;
@@ -204,20 +203,20 @@ onMounted(() => {
 @media (max-width: 768px) {
   .friend-requests {
     padding: 15px;
-    
+
     .request-item {
       flex-direction: column;
       align-items: flex-start;
-      
+
       .request-avatar {
         margin-bottom: 10px;
       }
-      
+
       .request-content {
         width: 100%;
         flex-direction: column;
         align-items: flex-start;
-        
+
         .request-left {
           margin-top: 15px;
           width: 100%;

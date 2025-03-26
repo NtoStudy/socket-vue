@@ -2,7 +2,7 @@ import { nextTick, reactive, shallowRef } from 'vue'
 import { chatService } from '@/services/chatService.js'
 import { formatMessages } from '@/utils/messageUtils.js'
 import _ from 'lodash'
-
+//TODO等大部分组件写完的时候再多了解一下这些消息处理的逻辑
 export function useChatMessages(messageDisplayRef) {
   // 使用 shallowRef 存储消息，减少深层响应式监听
   const messages = shallowRef([])
@@ -96,6 +96,7 @@ export function useChatMessages(messageDisplayRef) {
    * 加载群聊消息
    * @param {String} chatRoomId - 聊天室ID
    */
+  // 在 useChatMessages.js 中修改 loadChatRoomMessages 函数
   const loadChatRoomMessages = async (chatRoomId) => {
     if (!chatRoomId) return
 
@@ -106,20 +107,20 @@ export function useChatMessages(messageDisplayRef) {
       // 重置分页参数
       resetPagination()
 
+      // 先清空消息列表，避免消息累加
+      updateMessages([])
+
       // 设置消息窗口状态
       messageWindowStatus.value = '群聊'
 
-      // 获取消息历史
-      const newMessages = await chatService.handleChatRoomMessages(chatRoomId, pagination)
+      // 获取群聊消息
+      const chatRoomMessages = await chatService.handleChatRoomMessages(chatRoomId, pagination)
 
-      // 更新消息
-      updateMessages(newMessages)
+      updateMessages(chatRoomMessages)
 
-      // 确保DOM更新后再滚动
+      // 更新DOM后滚动到底部
       nextTick(() => {
-        if (messageDisplayRef.value) {
-          messageDisplayRef.value.scrollToBottom()
-        }
+        messageDisplayRef.value?.scrollToBottom()
       })
     } catch (error) {
       console.error('加载群聊消息失败:', error)
@@ -127,7 +128,10 @@ export function useChatMessages(messageDisplayRef) {
       pagination.loading = false
     }
   }
-
+  /**
+   * 加载更多消息
+   * @param {Object} chatStore - 聊天状态存储
+   */
   /**
    * 加载更多消息
    * @param {Object} chatStore - 聊天状态存储
@@ -156,17 +160,40 @@ export function useChatMessages(messageDisplayRef) {
         return
       }
 
-      // 合并消息，确保不重复
-      const newMessages = [...olderMessages, ...messages.value]
-      updateMessages(newMessages)
-      console.log('加载完成，消息数量:', newMessages.length)
+      // 使用 Set 和 Map 来去重，确保消息不会重复
+      const messageMap = new Map()
+
+      // 先添加历史消息
+      olderMessages.forEach((msg) => {
+        if (msg.messageId) {
+          messageMap.set(msg.messageId, msg)
+        }
+      })
+
+      // 再添加当前消息，如果有相同ID的消息，会覆盖历史消息
+      messages.value.forEach((msg) => {
+        if (msg.messageId) {
+          messageMap.set(msg.messageId, msg)
+        }
+      })
+
+      // 将 Map 转换回数组，并按时间排序
+      const combinedMessages = Array.from(messageMap.values()).sort((a, b) => {
+        // 使用 originalTimestamp 或 sentTime 进行排序
+        const timeA = a.originalTimestamp || new Date(a.sentTime).getTime()
+        const timeB = b.originalTimestamp || new Date(b.sentTime).getTime()
+        return timeA - timeB
+      })
+
+      console.log('加载更多消息，去重后消息数量:', combinedMessages.length)
+      updateMessages(combinedMessages)
+      console.log('加载完成，消息数量:', combinedMessages.length)
     } catch (error) {
       console.error('加载更多消息失败:', error)
     } finally {
       pagination.loading = false
     }
   }
-
   // 使用节流函数包装加载更多消息的函数，避免频繁调用
   const throttledLoadMoreMessages = (chatStore) => _.throttle(() => loadMoreMessages(chatStore), 1000)()
 

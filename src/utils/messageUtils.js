@@ -63,14 +63,33 @@ export const formatMessages = (messagesList, timestampInterval = 180000) => {
       if (!message) return null
 
       try {
-        const timestamp = new Date(message.sentTime).getTime()
+        let timestamp
+
+        // 检查 sentTime 的格式
+        if (typeof message.sentTime === 'string') {
+          // 如果只有时间部分（如 "13:21" 或 "13:21:40"）
+          if (/^\d{1,2}:\d{1,2}(:\d{1,2})?$/.test(message.sentTime)) {
+            // 使用当前日期 + 提供的时间
+            const [hours, minutes, seconds = '00'] = message.sentTime.split(':')
+            const today = new Date()
+            today.setHours(parseInt(hours, 10))
+            today.setMinutes(parseInt(minutes, 10))
+            today.setSeconds(parseInt(seconds, 10))
+            timestamp = today.getTime()
+          } else {
+            // 尝试正常解析日期时间字符串
+            timestamp = new Date(message.sentTime).getTime()
+          }
+        } else {
+          // 如果不是字符串，尝试直接转换
+          timestamp = new Date(message.sentTime).getTime()
+        }
+
         // 检查时间戳是否有效
         if (isNaN(timestamp)) {
           console.warn('Invalid timestamp for message:', message)
-          return {
-            ...message,
-            originalTimestamp: 0,
-          }
+          // 使用当前时间作为备用
+          timestamp = Date.now()
         }
 
         return {
@@ -81,7 +100,7 @@ export const formatMessages = (messagesList, timestampInterval = 180000) => {
         console.error('Error processing message:', error, message)
         return {
           ...message,
-          originalTimestamp: 0,
+          originalTimestamp: Date.now(), // 使用当前时间作为备用
         }
       }
     })
@@ -92,15 +111,16 @@ export const formatMessages = (messagesList, timestampInterval = 180000) => {
 
   return messagesWithOriginalTime.map((message, index, array) => {
     try {
-      const sentDate = new Date(message.sentTime)
+      // 使用原始时间戳创建日期对象
+      const sentDate = new Date(message.originalTimestamp)
 
       // 格式化显示时间
       if (now - sentDate < oneDay) {
         // 如果在24小时之内，只显示时分
-        message.sentTime = sentDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        message.formattedTime = sentDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       } else if (sentDate.getFullYear() === now.getFullYear()) {
         // 如果在今年之内，显示月日时分
-        message.sentTime =
+        message.formattedTime =
           sentDate.toLocaleDateString([], {
             month: '2-digit',
             day: '2-digit',
@@ -109,7 +129,7 @@ export const formatMessages = (messagesList, timestampInterval = 180000) => {
           sentDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       } else {
         // 如果不是今年，则显示年月日时分
-        message.sentTime =
+        message.formattedTime =
           sentDate.toLocaleDateString([], {
             year: 'numeric',
             month: '2-digit',
@@ -117,6 +137,11 @@ export const formatMessages = (messagesList, timestampInterval = 180000) => {
           }) +
           ' ' +
           sentDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      }
+
+      // 保留原始的 sentTime，但添加格式化后的时间
+      if (typeof message.sentTime === 'string') {
+        message.sentTime = message.formattedTime
       }
 
       // 确定是否显示时间戳
@@ -144,6 +169,7 @@ export const formatMessages = (messagesList, timestampInterval = 180000) => {
     }
   })
 }
+
 /**
  * 处理右键点击消息事件
  * @param {Object} message - 被点击的消息对象
