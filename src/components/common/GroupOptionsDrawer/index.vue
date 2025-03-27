@@ -15,11 +15,11 @@
         <!-- 群聊信息头部 -->
         <div class="group-header">
           <div class="group-avatar">
-            <img :src="groupInfo.chatRooms.avatarUrl || ''" alt="群头像" />
+            <img :src="groupInfo.avatarUrl || ''" alt="群头像" />
           </div>
           <div class="group-info">
-            <div class="group-name">{{ groupInfo.chatRooms.roomName || '群聊' }}</div>
-            <div class="group-id">群号：{{ groupInfo.chatRooms.groupNumber || '' }}</div>
+            <div class="group-name">{{ groupInfo.roomName || '群聊' }}</div>
+            <div class="group-id">群号：{{ groupInfo.groupNumber || '' }}</div>
           </div>
         </div>
 
@@ -116,15 +116,15 @@ const profilesStore = useProfilesStore()
 
 // 获取群成员信息
 const getChatRoomUser = async () => {
-  if (!props.groupInfo?.chatRooms?.roomId) return
+  if (!props.groupInfo?.roomId) return
 
   try {
     // 1. 获取群成员ID列表
-    const res = await chatRoomUser(props.groupInfo.chatRooms.roomId)
+    const res = await chatRoomUser(props.groupInfo.roomId)
     if (res.data.code === 200) {
       // 2. 使用 profilesStore 批量获取群成员信息
       const memberIds = res.data.data
-      const members = await profilesStore.getGroupMembersProfiles(memberIds, props.groupInfo.chatRooms.roomId)
+      const members = await profilesStore.getGroupMembersProfiles(memberIds, props.groupInfo.roomId)
 
       // 3. 格式化并排序成员信息
       groupMembers.value = members
@@ -190,7 +190,7 @@ const handleDissolveGroup = () => {
 
 // 添加本地状态来跟踪群昵称和群名称
 const myNickname = ref(props.groupInfo?.nickname || '')
-const groupName = ref(props.groupInfo.chatRooms?.roomName || '')
+const groupName = ref(props.groupInfo?.roomName || '')
 
 // 监听 props 变化，更新本地状态
 watch(
@@ -203,7 +203,7 @@ watch(
 )
 
 watch(
-  () => props.groupInfo.chatRooms?.roomName,
+  () => props.groupInfo?.roomName,
   (newValue) => {
     if (newValue) {
       groupName.value = newValue
@@ -245,7 +245,7 @@ onMounted(() => {
 })
 
 watch(
-  () => props.groupInfo.chatRooms.roomId,
+  () => props.groupInfo.roomId,
   () => {
     getChatRoomUser()
   },
