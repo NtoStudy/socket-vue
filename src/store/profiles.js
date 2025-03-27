@@ -50,11 +50,6 @@ export const useProfilesStore = defineStore('profiles', () => {
       groupMemberProfiles.value[roomId] = {}
     }
 
-    // 如果缓存中已有该成员信息，直接返回
-    if (groupMemberProfiles.value[roomId][userId]) {
-      return groupMemberProfiles.value[roomId][userId]
-    }
-
     try {
       const res = await getUsersInfoInChatRoom(userId, roomId)
       if (res.data.code === 200) {
@@ -78,7 +73,6 @@ export const useProfilesStore = defineStore('profiles', () => {
     if (!userIds || !userIds.length || !roomId) return []
     const promises = userIds.map((userId) => getGroupMemberProfile(userId, roomId))
     const results = await Promise.all(promises)
-    console.log(results, 'getGroupMembersProfiles')
     return results.filter((result) => result !== null)
   }
 

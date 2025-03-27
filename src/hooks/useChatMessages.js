@@ -86,7 +86,6 @@ export function useChatMessages(messageDisplayRef) {
         }
       })
     } catch (error) {
-      console.error('加载好友消息失败:', error)
     } finally {
       pagination.loading = false
     }
@@ -184,10 +183,7 @@ export function useChatMessages(messageDisplayRef) {
         const timeB = b.originalTimestamp || new Date(b.sentTime).getTime()
         return timeA - timeB
       })
-
-      console.log('加载更多消息，去重后消息数量:', combinedMessages.length)
       updateMessages(combinedMessages)
-      console.log('加载完成，消息数量:', combinedMessages.length)
     } catch (error) {
       console.error('加载更多消息失败:', error)
     } finally {

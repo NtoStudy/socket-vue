@@ -105,6 +105,7 @@ const handleLike = async () => {
   const res = await putUsersLike(chatStore.friendInfo.userId)
   if (res.data.code === 200) {
     // 此时点赞成功，应该更新点赞状态
+    ElMessage.success('点赞成功')
     await chatStore.getFriendInfo(chatStore.friendId)
   }
 }

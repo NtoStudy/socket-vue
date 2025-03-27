@@ -105,7 +105,7 @@ const drawerVisible = computed({
   get: () => props.visible,
   set: (value) => emit('close', value),
 })
-
+const profile = useProfilesStore()
 // 群成员数据
 const groupMembers = ref([])
 const chatRoomRole = computed(() => {
@@ -152,7 +152,6 @@ const getChatRoomUser = async () => {
   } catch (error) {
     console.error('获取群成员失败:', error)
   }
-  console.log(groupMembers.value)
 }
 
 /**

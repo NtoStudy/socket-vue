@@ -14,7 +14,7 @@
         <el-icon>
           <Trophy />
         </el-icon>
-        <span class="like-count">{{ userInfo?.likeCount || socialStore.getLikeCount(userInfo?.userId) || 0 }}</span>
+        <span class="like-count">{{ userInfo?.likeCount || 0 }}</span>
       </div>
     </div>
 
@@ -67,12 +67,10 @@ import { Trophy } from '@element-plus/icons-vue'
 import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import StatusIndicator from '@/components/common/StatusIndicator/index.vue'
-import { useSocialStore } from '@/store/social.js'
 import { useProfilesStore } from '@/store/profiles.js'
 import { chatFriendOrChatRoomStore } from '@/store/chat.js'
 
 const router = useRouter()
-const socialStore = useSocialStore()
 const profilesStore = useProfilesStore()
 const chatStore = chatFriendOrChatRoomStore()
 
@@ -123,10 +121,7 @@ const hobbies = computed(() => {
 // 处理点赞事件
 const handleLikeUser = async () => {
   if (props.userInfo?.userId) {
-    const success = await socialStore.handleLike(props.userInfo.userId)
-    if (success) {
-      emit('like')
-    }
+    emit('like')
   }
 }
 

@@ -14,6 +14,7 @@
           </template>
           <UserProfileCard
             :user-info="member"
+            @like="handleLike(member)"
             :current-status="getMemberStatus(member)"
             :user-avatar="member.avatar"
             :user-type="'groupMember'"
@@ -63,7 +64,8 @@
 <script setup>
 import { Plus } from '@element-plus/icons-vue'
 import UserProfileCard from '@/components/common/UserProfileCard/index.vue'
-import { computed } from 'vue'
+import { ElMessage } from 'element-plus'
+import { useUserInfoStore } from '@/store/user.js'
 
 const props = defineProps({
   members: {
@@ -89,7 +91,20 @@ const getMemberStatus = (member) => {
 }
 console.log('members:', props.members)
 const emit = defineEmits(['send-message', 'set-admin', 'kick-member', 'transfer-owner', 'add-member'])
-
+const handleLike = async (member) => {
+  console.log(member.userId)
+  if (member.userId === useUserInfoStore().userInfo.userId) {
+    ElMessage.warning('不能点赞自己')
+  } else {
+    //TODO点赞用websocket来实现
+    // const res = await putUsersLike(member.userId)
+    // if (res.data.code === 200) {
+    //   // 此时点赞成功，应该更新点赞状态
+    //   ElMessage.success('点赞成功')
+    //   await profile.getGroupMemberProfile(member.userId, chatInfo.chatRoomId)
+    // }
+  }
+}
 // 处理发送消息给群成员
 const handleSendMessage = (member) => {
   emit('send-message', member)
