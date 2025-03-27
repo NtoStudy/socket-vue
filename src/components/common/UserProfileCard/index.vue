@@ -9,19 +9,21 @@
         <div class="qq-number">{{ userInfo?.number || '' }}</div>
       </div>
 
-      <!-- 新增点赞按钮 -->
-      <div class="like-button" @click="handleLike">
+      <!-- 点赞按钮 -->
+      <div class="like-button" @click="handleLikeUser" v-if="showLikeButton">
         <el-icon>
           <Trophy />
         </el-icon>
-        <span class="like-count">{{ userInfo?.likeCount || 0 }}</span>
+        <span class="like-count">{{ userInfo?.likeCount || socialStore.getLikeCount(userInfo?.userId) || 0 }}</span>
       </div>
     </div>
 
     <!-- 在线状态 -->
     <StatusIndicator :status="currentStatus" />
 
+    <!-- 备注信息插槽 -->
     <slot name="remark"></slot>
+
     <!-- 个人信息列表 -->
     <div class="profile-details">
       <div class="profile-item">
@@ -49,35 +51,69 @@
     <div class="profile-actions">
       <!-- 默认插槽内容 -->
       <slot>
-        <el-button class="action-btn edit-btn" @click="$emit('edit-profile')">编辑资料</el-button>
-        <el-button class="action-btn message-btn" type="primary" @click="$emit('send-message')">发消息</el-button>
+        <el-button v-if="showEditButton" class="action-btn edit-btn" @click="$emit('edit-profile')">
+          编辑资料
+        </el-button>
+        <el-button v-if="showMessageButton" class="action-btn message-btn" type="primary" @click="handleSendMessage">
+          发消息
+        </el-button>
       </slot>
     </div>
   </div>
 </template>
 
 <script setup>
-//TODO这个组件在 私聊 群聊中 调用还有很大问题
 import { Trophy } from '@element-plus/icons-vue'
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import StatusIndicator from '@/components/common/StatusIndicator/index.vue'
+import { useSocialStore } from '@/store/social.js'
+import { useProfilesStore } from '@/store/profiles.js'
+import { chatFriendOrChatRoomStore } from '@/store/chat.js'
+
+const router = useRouter()
+const socialStore = useSocialStore()
+const profilesStore = useProfilesStore()
+const chatStore = chatFriendOrChatRoomStore()
 
 const props = defineProps({
   userInfo: {
     type: Object,
+    required: true,
   },
   currentStatus: {
     type: Object,
+    default: () => ({ label: '在线' }),
   },
   userAvatar: {
     type: String,
     default: '',
   },
+  // 控制按钮显示
+  showLikeButton: {
+    type: Boolean,
+    default: true,
+  },
+  showEditButton: {
+    type: Boolean,
+    default: false,
+  },
+  showMessageButton: {
+    type: Boolean,
+    default: true,
+  },
+  // 用户类型
+  userType: {
+    type: String,
+    default: 'friend', // 'friend', 'groupMember', 'self'
+    validator: (value) => ['friend', 'groupMember', 'self'].includes(value),
+  },
 })
-console.log('props', props.userInfo)
+
 const emit = defineEmits(['edit-profile', 'send-message', 'like'])
+
+// 计算兴趣爱好标签
 const hobbies = computed(() => {
-  // 检查 userInfo 和 hobbies 是否存在
   if (!props.userInfo || !props.userInfo.hobbies) {
     return []
   }
@@ -85,9 +121,34 @@ const hobbies = computed(() => {
 })
 
 // 处理点赞事件
-const handleLike = () => {
-  emit('like')
+const handleLikeUser = async () => {
+  if (props.userInfo?.userId) {
+    const success = await socialStore.handleLike(props.userInfo.userId)
+    if (success) {
+      emit('like')
+    }
+  }
 }
+
+// 处理发送消息
+const handleSendMessage = () => {
+  if (props.userInfo?.userId) {
+    // 设置聊天对象
+    chatStore.setFriendId(props.userInfo.userId)
+    // 跳转到聊天页面
+    //TODO可以设置路由/:id然后跳转到id
+    router.push('/main/chat')
+    emit('send-message')
+  }
+}
+
+// 组件挂载时，尝试获取完整用户信息
+onMounted(async () => {
+  if (props.userInfo?.userId && props.userType === 'friend') {
+    //TODO这里传递的是好友id
+    await profilesStore.getUserProfile(props.userInfo.userId)
+  }
+})
 </script>
 
 <style lang="scss" scoped>

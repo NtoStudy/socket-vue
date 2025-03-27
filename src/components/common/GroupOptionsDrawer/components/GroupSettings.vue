@@ -74,7 +74,7 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['top-change', 'save-nickname', 'save-group-name', 'change-notice', 'dissolve-group'])
+defineEmits(['top-change', 'save-nickname', 'save-group-name', 'change-notice', 'dissolve-group'])
 
 // 本地状态
 const localNickname = ref(props.nickname)

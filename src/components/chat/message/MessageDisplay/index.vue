@@ -47,7 +47,13 @@ const currentStatus = computed(() => {
     label: useUserInfo.userInfo.status || '在线',
   }
 })
-
+// 计算好友状态对象
+const friendStatus = computed(() => {
+  return {
+    id: chatStore.friendInfo.userId || '2',
+    label: chatStore.friendInfo.status || '在线',
+  }
+})
 /**
  * 滚动到消息框底部
  */
@@ -203,11 +209,12 @@ defineExpose({
       </MessageItem>
 
       <MessageItem v-else :message="message" :is-current-user="false" @right-click="handleMessageRightClick">
+        <!--这是别人的组件-->
         <template #avatar>
           <AvatarItem
             :is-current-user="false"
             :user-info="chatStore.friendInfo"
-            :current-status="{ id: '1', label: '在线' }"
+            :current-status="friendStatus"
             :remark="remark"
             :is-editing-remark="isEditingRemark"
             @like="handleLike"
@@ -229,6 +236,7 @@ defineExpose({
   overflow-y: auto !important;
   position: relative;
   scroll-behavior: smooth;
+
   &::-webkit-scrollbar {
     width: 6px;
   }

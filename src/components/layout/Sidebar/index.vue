@@ -13,8 +13,11 @@
             :user-info="userInfo"
             :current-status="currentStatus"
             :user-avatar="userAvatar"
+            :user-type="'self'"
+            :show-like-button="true"
+            :show-edit-button="true"
+            :show-message-button="false"
             @edit-profile="handleEditProfile"
-            @send-message="handleSendMessage"
           />
         </el-popover>
       </div>
@@ -143,11 +146,6 @@ const handleSetCustomStatus = (statusText) => {
 // 处理编辑资料
 const handleEditProfile = () => {
   showEditProfileDialog.value = true
-}
-
-// 处理发送消息
-const handleSendMessage = () => {
-  console.log('发送消息')
 }
 
 // 保存用户资料

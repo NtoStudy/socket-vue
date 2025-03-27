@@ -24,17 +24,12 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['like', 'edit-remark', 'save-remark'])
+const emit = defineEmits(['like', 'edit-remark', 'save-remark', 'update:remark'])
 
 // 计算头像显示文本
 const avatarText = computed(() => {
   return props.isCurrentUser ? '我' : 'AI'
 })
-
-// 处理点赞事件
-const handleLike = () => {
-  emit('like')
-}
 
 // 处理备注编辑
 const handleRemarkEdit = () => {
@@ -60,9 +55,10 @@ const handleRemarkSave = () => {
 
     <UserProfileCard
       v-if="!isCurrentUser"
-      @like="handleLike"
+      @like="$emit('like')"
       :user-info="userInfo"
       :current-status="currentStatus"
+      :user-type="'friend'"
       :user-avatar="''"
     >
       <template #remark>
@@ -89,7 +85,15 @@ const handleRemarkSave = () => {
       <el-button class="action-btn" type="primary"> 发消息</el-button>
     </UserProfileCard>
 
-    <UserProfileCard v-else :user-info="userInfo" :current-status="currentStatus" :user-avatar="''">
+    <UserProfileCard
+      v-else
+      :user-info="userInfo"
+      :current-status="currentStatus"
+      :user-avatar="''"
+      :user-type="'self'"
+      :show-like-button="true"
+      :show-edit-button="true"
+    >
       <el-button class="action-btn" type="primary"> 发消息</el-button>
     </UserProfileCard>
   </el-popover>

@@ -12,7 +12,13 @@
               <div class="member-name">{{ member.nickname ? member.nickname : member.username }}</div>
             </div>
           </template>
-          <UserProfileCard :user-info="member" :current-status="{ online: true }" :user-avatar="member.avatar">
+          <UserProfileCard
+            :user-info="member"
+            :current-status="getMemberStatus(member)"
+            :user-avatar="member.avatar"
+            :user-type="'groupMember'"
+            @send-message="handleSendMessage(member)"
+          >
             <!-- 自定义底部按钮 -->
             <template #default>
               <div class="profile-action-buttons">
@@ -57,8 +63,9 @@
 <script setup>
 import { Plus } from '@element-plus/icons-vue'
 import UserProfileCard from '@/components/common/UserProfileCard/index.vue'
+import { computed } from 'vue'
 
-defineProps({
+const props = defineProps({
   members: {
     type: Array,
     default: () => [],
@@ -73,6 +80,14 @@ defineProps({
   },
 })
 
+// 计算好友状态对象
+const getMemberStatus = (member) => {
+  return {
+    id: member.userId || '',
+    label: member.status || '在线',
+  }
+}
+console.log('members:', props.members)
 const emit = defineEmits(['send-message', 'set-admin', 'kick-member', 'transfer-owner', 'add-member'])
 
 // 处理发送消息给群成员
@@ -185,6 +200,7 @@ const handleTransferOwner = (member) => {
 
   &.message-btn {
     background-color: #1890ff;
+    border-color: #1890ff;
   }
 
   &.admin-btn {
@@ -204,5 +220,8 @@ const handleTransferOwner = (member) => {
     color: #67c23a;
     border-color: #67c23a;
   }
+}
+.el-button + .el-button {
+  margin-left: 0;
 }
 </style>

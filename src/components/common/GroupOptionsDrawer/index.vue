@@ -57,7 +57,6 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { ElMessageBox } from 'element-plus'
 import { chatRoomUser } from '@/api/chatRoom.js'
-import { getUsersInfoInChatRoom } from '@/api/user.js'
 import router from '@/router/index.js'
 import { chatFriendOrChatRoomStore } from '@/store/chat.js'
 import MemberList from './components/MemberList.vue'
@@ -112,30 +111,48 @@ const groupMembers = ref([])
 const chatRoomRole = computed(() => {
   return props.groupInfo.role
 })
+import { useProfilesStore } from '@/store/profiles.js'
+const profilesStore = useProfilesStore()
 
 // 获取群成员信息
 const getChatRoomUser = async () => {
-  const res = await chatRoomUser(props.groupInfo.chatRooms.roomId)
-  if (res.data.code === 200) {
-    const userPromises = res.data.data.map((item) => getUsersInfoInChatRoom(item, props.groupInfo.chatRooms.roomId))
-    const responses = await Promise.all(userPromises)
-    groupMembers.value = responses
-      .map((response) => ({
-        userId: response.data.data.userId,
-        username: response.data.data.username,
-        avatar: response.data.data.avatar,
-        nickname: response.data.data.nickname,
-        number: response.data.data.number,
-        role: response.data.data.role,
-      }))
-      .sort((a, b) => {
-        if (a.role === '群主') return -1
-        if (b.role === '群主') return 1
-        if (a.role === '管理员') return -1
-        if (b.role === '管理员') return 1
-        return 0
-      })
+  if (!props.groupInfo?.chatRooms?.roomId) return
+
+  try {
+    // 1. 获取群成员ID列表
+    const res = await chatRoomUser(props.groupInfo.chatRooms.roomId)
+    if (res.data.code === 200) {
+      // 2. 使用 profilesStore 批量获取群成员信息
+      const memberIds = res.data.data
+      const members = await profilesStore.getGroupMembersProfiles(memberIds, props.groupInfo.chatRooms.roomId)
+
+      // 3. 格式化并排序成员信息
+      groupMembers.value = members
+        .map((member) => ({
+          userId: member.userId,
+          username: member.username,
+          avatar: member.avatar,
+          number: member.number,
+          role: member.role,
+          avatarUrl: member.avatarUrl,
+          status: member.status,
+          customStatus: member.customStatus,
+          hobbies: member.hobbies,
+          likeCount: member.likeCount,
+          nickname: member.nickname,
+        }))
+        .sort((a, b) => {
+          if (a.role === '群主') return -1
+          if (b.role === '群主') return 1
+          if (a.role === '管理员') return -1
+          if (b.role === '管理员') return 1
+          return 0
+        })
+    }
+  } catch (error) {
+    console.error('获取群成员失败:', error)
   }
+  console.log(groupMembers.value)
 }
 
 /**
