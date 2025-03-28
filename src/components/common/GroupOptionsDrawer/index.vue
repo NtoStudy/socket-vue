@@ -56,7 +56,7 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
 import { ElMessageBox } from 'element-plus'
-import { chatRoomUser } from '@/api/chatRoom.js'
+import { chatRoomUser } from '@/api/modules/chatRoom.js'
 import router from '@/router/index.js'
 import { chatFriendOrChatRoomStore } from '@/store/chat.js'
 import MemberList from './components/MemberList.vue'

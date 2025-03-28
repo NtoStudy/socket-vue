@@ -44,8 +44,8 @@
 <script setup>
 import { ref, reactive } from 'vue'
 import { ArrowRight } from '@element-plus/icons-vue'
-import { getFriendGroupFriendList } from '@/api/friendGroups.js'
-import { getUsersInfoById } from '@/api/user.js'
+import { getFriendGroupFriendList } from '@/api/modules/friendGroups.js'
+import { getUsersInfoById } from '@/api/modules/user.js'
 import { getStatusClass } from '@/utils/statusUtils.js'
 
 defineProps({

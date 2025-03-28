@@ -1,34 +1,34 @@
 import instance from '@/api/index.js'
 
 /**
- * 创建好友分组
+ * 创建新的好友分组接口
  * @param {string} groupName - 分组名称
- * @returns {Promise} - 返回创建好友分组请求的Promise对象
+ * @returns {Promise} - 返回创建结果的Promise对象
  */
 export const createFriendGroup = (groupName) =>
   instance({
     url: '/friend-groups/create',
     method: 'post',
-    params: { groupName },
+    data: { groupName }, // 使用data传递请求体数据
   })
 
 /**
- * 修改分组名称
+ * 修改已有分组的名称接口
  * @param {number} groupId - 分组ID
  * @param {string} groupName - 新的分组名称
- * @returns {Promise} - 返回修改分组名称请求的Promise对象
+ * @returns {Promise} - 返回修改结果的Promise对象
  */
 export const updateFriendGroup = (groupId, groupName) =>
   instance({
     url: '/friend-groups/update',
     method: 'post',
-    params: { groupId, groupName },
+    data: { groupId, groupName }, // 使用data传递请求体数据
   })
 
 /**
- * 删除分组
+ * 删除指定的好友分组接口
  * @param {number} groupId - 分组ID
- * @returns {Promise} - 返回删除分组请求的Promise对象
+ * @returns {Promise} - 返回删除结果的Promise对象
  */
 export const deleteFriendGroup = (groupId) =>
   instance({
@@ -38,8 +38,8 @@ export const deleteFriendGroup = (groupId) =>
   })
 
 /**
- * 获取分组列表
- * @returns {Promise} - 返回获取分组列表请求的Promise对象
+ * 获取当前用户的所有分组接口
+ * @returns {Promise} - 返回包含分组列表的Promise对象
  */
 export const getFriendGroupList = () =>
   instance({
@@ -47,11 +47,14 @@ export const getFriendGroupList = () =>
     method: 'get',
   })
 
+/**
+ * 查询指定分组内的所有好友接口
+ * @param {number} groupId - 分组ID
+ * @returns {Promise} - 返回包含分组内好友列表的Promise对象
+ */
 export const getFriendGroupFriendList = (groupId) =>
   instance({
     url: '/friend-groups/friendList',
     method: 'get',
-    params: {
-      groupId,
-    },
+    params: { groupId },
   })

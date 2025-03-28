@@ -33,10 +33,15 @@
 <script setup>
 import { useFriendManagerStore } from '@/store/friendManager.js'
 import { computed, onMounted, ref } from 'vue'
-import { chatRoomNumber, friendNumber } from '@/api/notification.js'
+import { chatRoomNumber, friendNumber } from '@/api/modules/notification.js'
 import Sidebar from '@/components/layout/HeaderSidebar/index.vue'
 import ContactList from './ContactList/index.vue'
-import { createFriendGroup, deleteFriendGroup, getFriendGroupList, updateFriendGroup } from '@/api/friendGroups.js'
+import {
+  createFriendGroup,
+  deleteFriendGroup,
+  getFriendGroupList,
+  updateFriendGroup,
+} from '@/api/modules/friendGroups.js'
 
 // 初始化未读消息数量的Ref
 const friendCount = ref()

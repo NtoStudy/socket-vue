@@ -1,10 +1,10 @@
 import instance from '@/api/index.js'
 
 /**
- * 用户登录函数
- * @param {string} number - 用户名或手机号
+ * 用户登录接口
+ * @param {string} number - 用户名
  * @param {string} password - 用户密码
- * @returns {Promise} - 返回登录请求的Promise对象
+ * @returns {Promise} - 返回包含JWT令牌的Promise对象
  */
 export const userLogin = (number, password) =>
   instance({
@@ -17,10 +17,10 @@ export const userLogin = (number, password) =>
   })
 
 /**
- * 用户注册函数
+ * 用户注册接口
  * @param {string} username - 用户名
  * @param {string} password - 用户密码
- * @returns {Promise} - 返回注册请求的Promise对象
+ * @returns {Promise} - 返回注册结果的Promise对象
  */
 export const userRegister = (username, password) =>
   instance({
@@ -33,8 +33,8 @@ export const userRegister = (username, password) =>
   })
 
 /**
- * 获取用户信息函数
- * @returns {*}
+ * 获取当前登录用户信息接口
+ * @returns {Promise} - 返回包含用户信息的Promise对象
  */
 export const userInfoByJwt = () =>
   instance({
@@ -43,9 +43,9 @@ export const userInfoByJwt = () =>
   })
 
 /**
- * 获取用户信息函数
- * @param {string} number - 用户ID
- * @returns {Promise} - 返回获取用户信息请求的Promise对象
+ * 根据用户账号查询用户信息接口
+ * @param {string} number - 用户账号
+ * @returns {Promise} - 返回包含用户状态信息的Promise对象
  */
 export const getUserInfoByNumber = (number) =>
   instance({
@@ -56,6 +56,12 @@ export const getUserInfoByNumber = (number) =>
     },
   })
 
+/**
+ * 在群聊中根据用户ID查询用户详细信息接口
+ * @param {number} userId - 用户ID
+ * @param {number} roomId - 群聊房间ID
+ * @returns {Promise} - 返回包含群聊用户详细信息的Promise对象
+ */
 export const getUsersInfoInChatRoom = (userId, roomId) =>
   instance({
     url: '/users/userInfoByIdInGroup',
@@ -66,6 +72,11 @@ export const getUsersInfoInChatRoom = (userId, roomId) =>
     },
   })
 
+/**
+ * 根据用户ID查询好友详细信息接口
+ * @param {number} userId - 用户ID
+ * @returns {Promise} - 返回包含好友详细信息的Promise对象
+ */
 export const getUsersInfoById = (userId) =>
   instance({
     url: '/users/infoById',
@@ -75,6 +86,11 @@ export const getUsersInfoById = (userId) =>
     },
   })
 
+/**
+ * 更新当前用户个人信息接口
+ * @param {object} userData - 用户数据对象
+ * @returns {Promise} - 返回更新结果的Promise对象
+ */
 export const postUsersUpdate = (userData) =>
   instance({
     url: '/users/update',
@@ -82,6 +98,11 @@ export const postUsersUpdate = (userData) =>
     data: userData,
   })
 
+/**
+ * 给指定用户点赞接口
+ * @param {number} friendId - 好友ID
+ * @returns {Promise} - 返回点赞结果的Promise对象
+ */
 export const putUsersLike = (friendId) =>
   instance({
     url: '/users/like',

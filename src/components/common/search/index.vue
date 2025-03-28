@@ -1,10 +1,10 @@
 <script setup>
 import { Search } from '@element-plus/icons-vue'
 import { ref } from 'vue'
-import { getUserInfoByNumber } from '@/api/user.js'
+import { getUserInfoByNumber } from '@/api/modules/user.js'
 import { ElMessage } from 'element-plus'
-import { chatRoomInquire, groupAddChatRoom } from '@/api/chatRoom.js'
-import { addFriend } from '@/api/friend.js'
+import { chatRoomInquire, groupAddChatRoom } from '@/api/modules/chatRoom.js'
+import { addFriend } from '@/api/modules/friend.js'
 
 const tabs = ref(['用户', '群聊'])
 const activeTab = ref('用户')

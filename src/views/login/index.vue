@@ -41,7 +41,7 @@
 
 <script setup>
 import { nextTick, ref } from 'vue'
-import { userInfoByJwt, userLogin, userRegister } from '@/api/user.js' // 添加 userRegister 引入
+import { userInfoByJwt, userLogin, userRegister } from '@/api/modules/user.js' // 添加 userRegister 引入
 import { useRouter } from 'vue-router'
 import { useUserInfoStore } from '@/store/user.js'
 

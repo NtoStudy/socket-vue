@@ -1,6 +1,6 @@
 import { messageService } from './messageService.js'
-import { getUsersInfoById } from '@/api/user.js'
-import { postFriendPin } from '@/api/friend.js'
+import { getUsersInfoById } from '@/api/modules/user.js'
+import { postFriendPin } from '@/api/modules/friend.js'
 import { ElMessage } from 'element-plus'
 import eventBus from '@/EventBus/eventBus.js'
 

@@ -1,7 +1,7 @@
 <script setup>
 import { onMounted, onUnmounted, ref } from 'vue'
-import { getFriendList } from '@/api/friend.js'
-import { chatRoomList } from '@/api/chatRoom.js'
+import { getFriendList } from '@/api/modules/friend.js'
+import { chatRoomList } from '@/api/modules/chatRoom.js'
 import { chatFriendOrChatRoomStore } from '@/store/chat.js'
 import eventBus from '@/EventBus/eventBus.js'
 import { isActive, processFriendList, processChatRoomList, combineAndSortChats } from '@/utils/ChatListUtils.js'

@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue'
-import { uploadMethod, uploadVideo } from '@/api/upload.js'
+import { uploadMethod, uploadVideo } from '@/api/modules/upload.js'
 import { ElMessage } from 'element-plus'
 import ToolBar from './components/ToolBar.vue'
 import TextArea from './components/TextArea.vue'
