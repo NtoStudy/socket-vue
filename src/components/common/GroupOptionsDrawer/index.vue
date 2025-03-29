@@ -72,8 +72,8 @@
 
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
-import { ElMessageBox } from 'element-plus'
-import { chatRoomUser } from '@/api/modules/chatRoom.js'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { chatRoomUser, setChatRoomAdmin, transferChatRoomOwner } from '@/api/modules/chatRoom.js'
 import router from '@/router/index.js'
 import { chatFriendOrChatRoomStore } from '@/store/chat.js'
 import MemberList from './components/MemberList.vue'
@@ -211,6 +211,7 @@ const drawerVisible = computed({
 // 群成员数据
 const groupMembers = ref([])
 const chatRoomRole = computed(() => {
+  console.log('chatRoomRole', props.groupInfo.role)
   return props.groupInfo.role
 })
 import { useProfilesStore } from '@/store/profiles.js'
@@ -366,10 +367,19 @@ const handleSendMessageToMember = (member) => {
  * 处理设置管理员
  * @param {Object} member - 群成员信息
  */
-const handleSetAdmin = (member) => {
+const handleSetAdmin = async (member) => {
   // 这里可以添加权限检查
   console.log('设置管理员:', member)
-  // 后续实现设置管理员的逻辑
+  //TODO页面实时更新
+  let res
+  if (member.role === '管理员') {
+    res = await setChatRoomAdmin(chatStore.chatRoomId, member.userId, 0)
+    ElMessage.success('取消管理员成功')
+  } else {
+    res = await setChatRoomAdmin(chatStore.chatRoomId, member.userId, 1)
+    ElMessage.success('设置管理员成功')
+  }
+  console.log(res.data)
 }
 
 /**
@@ -386,10 +396,24 @@ const handleKickMember = (member) => {
  * 处理转让群主
  * @param {Object} member - 群成员信息
  */
-const handleTransferOwner = (member) => {
+const handleTransferOwner = async (member) => {
   // 这里可以添加权限检查
   console.log('转让群主给:', member)
   // 后续实现转让群主的逻辑
+
+  ElMessageBox.confirm('确定要转让群主吗？', '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning',
+  })
+    .then(async () => {
+      const res = await transferChatRoomOwner(chatStore.chatRoomId, member.userId)
+      console.log(res.data)
+      ElMessage.success('转让群主成功')
+    })
+    .catch(() => {
+      ElMessage.info('取消转让群主')
+    })
 }
 </script>
 

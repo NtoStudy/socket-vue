@@ -218,7 +218,7 @@ export const kickOutChatRoomUsers = (roomId, userIds) =>
  * 设置管理员
  * @param {number} roomId - 群聊ID
  * @param {number} userId - 用户ID
- * @param {number} status - 状态（1: 设置，2: 取消）
+ * @param {number} status - 状态（1: 设置，0: 取消）
  * @returns {Promise} - 返回设置管理员请求的Promise对象
  */
 export const setChatRoomAdmin = (roomId, userId, status) =>
