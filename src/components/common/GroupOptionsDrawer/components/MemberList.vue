@@ -34,7 +34,10 @@
                   设置管理
                 </el-button>
                 <el-button
-                  v-if="isGroupOwner || isGroupAdmin"
+                  v-if="
+                    (isGroupOwner && member.role !== '群主') ||
+                    (isGroupAdmin && member.role !== '群主' && member.role !== '管理员')
+                  "
                   class="action-btn kick-btn"
                   type="danger"
                   @click="handleKickMember(member)"
@@ -81,6 +84,7 @@ const props = defineProps({
     default: false,
   },
 })
+console.log('members:', props.members)
 
 // 计算好友状态对象
 const getMemberStatus = (member) => {
@@ -117,6 +121,7 @@ const handleSetAdmin = (member) => {
 
 // 处理踢出群成员
 const handleKickMember = (member) => {
+  console.log(member)
   emit('kick-member', member)
 }
 
@@ -236,6 +241,7 @@ const handleTransferOwner = (member) => {
     border-color: #67c23a;
   }
 }
+
 .el-button + .el-button {
   margin-left: 0;
 }

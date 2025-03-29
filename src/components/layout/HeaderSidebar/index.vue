@@ -2,7 +2,7 @@
   <div class="sidebar">
     <div class="sidebar-search">
       <el-input :prefix-icon="Search" :placeholder="searchPlaceholder" style="width: 80%" />
-      
+
       <!-- 替换el-popover为自定义下拉菜单 -->
       <div class="custom-dropdown">
         <el-button :icon="Plus" @click="toggleDropdown" />
@@ -42,7 +42,7 @@ import search from '@/components/common/search/index.vue'
 import createGroup from '@/components/common/createGroup/index.vue'
 
 // 定义属性
-const props = defineProps({
+defineProps({
   searchPlaceholder: {
     type: String,
     default: '搜索',
@@ -139,7 +139,7 @@ onUnmounted(() => {
 /* 自定义下拉菜单样式 */
 .custom-dropdown {
   position: relative;
-  
+
   .dropdown-menu {
     position: absolute;
     top: 100%;
@@ -151,7 +151,7 @@ onUnmounted(() => {
     z-index: 10;
     margin-top: 5px;
     padding: 5px 0;
-    
+
     &::before {
       content: '';
       position: absolute;
@@ -164,24 +164,24 @@ onUnmounted(() => {
       box-shadow: -2px -2px 5px rgba(0, 0, 0, 0.03);
     }
   }
-  
+
   .dropdown-item {
     display: flex;
     align-items: center;
     padding: 8px 12px;
     cursor: pointer;
     transition: all 0.2s ease;
-    
+
     &:hover {
       background-color: #f5f7fa;
     }
-    
+
     .dropdown-icon {
       font-size: 16px;
       margin-right: 8px;
       color: #606266;
     }
-    
+
     .dropdown-text {
       font-size: 14px;
       color: #606266;

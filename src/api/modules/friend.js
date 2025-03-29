@@ -72,3 +72,29 @@ export const postFriendPin = (friendId, status) =>
     method: 'put',
     data: { friendId, status }, // 使用data传递请求体数据
   })
+
+/**
+ * 获取消息历史
+ * @param {Ref<any>} receiverId - 接收者ID
+ * @param {number} pageNum - 页码
+ * @param {number} pageSize - 每页大小
+ * @returns {Promise} - 返回获取消息历史的Promise对象
+ */
+export const messageHistory = (receiverId, pageNum, pageSize) =>
+  instance({
+    url: '/messages/history',
+    method: 'get',
+    params: { receiverId, pageNum, pageSize },
+  })
+
+/**
+ * 删除消息
+ * @param {int} messageId - 消息ID
+ * @returns {Promise} - 返回删除消息请求的Promise对象
+ */
+export const messageDelete = (messageId) =>
+  instance({
+    url: '/messages/delete',
+    method: 'delete',
+    params: { messageId },
+  })

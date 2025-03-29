@@ -11,27 +11,25 @@
     <!-- 我的本群昵称 -->
     <div class="option-item input-option">
       <div class="option-label">我的本群昵称</div>
-      <el-input
-        v-model="localNickname"
-        :placeholder="nicknamePlaceholder"
-        @blur="$emit('save-nickname', localNickname)"
-      />
+      <el-input v-model="localNickname" :placeholder="nicknamePlaceholder" @blur="handleSaveNickname" />
     </div>
 
     <!-- 修改群名称 -->
     <div class="option-item input-option" v-if="isGroupOwner || isGroupAdmin">
       <div class="option-label">群聊昵称</div>
-      <el-input
-        v-model="localGroupName"
-        :placeholder="groupNamePlaceholder"
-        @blur="$emit('save-group-name', localGroupName)"
-      />
+      <el-input v-model="localGroupName" :placeholder="groupNamePlaceholder" @blur="handleSaveGroupName" />
     </div>
 
     <!-- 修改群公告 -->
-    <div class="option-item" @click="$emit('change-notice')" v-if="isGroupOwner || isGroupAdmin">
+    <div class="option-item notice-option" @click="$emit('change-notice')" v-if="isGroupOwner || isGroupAdmin">
       <div class="option-info">
-        <span class="option-text">设置群公告</span>
+        <span class="option-text">群公告</span>
+      </div>
+      <div class="notice-preview" v-if="groupNotice">
+        <div class="notice-content">{{ groupNotice.content }}</div>
+      </div>
+      <div class="notice-empty" v-else>
+        <span>发布第一条公告</span>
       </div>
       <el-icon>
         <ArrowRight />
@@ -50,6 +48,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { ArrowRight } from '@element-plus/icons-vue'
+import { ElMessageBox } from 'element-plus'
 
 const props = defineProps({
   isGroupTop: {
@@ -72,9 +71,13 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  groupNotice: {
+    type: Object,
+    default: null,
+  },
 })
 
-defineEmits(['top-change', 'save-nickname', 'save-group-name', 'change-notice', 'dissolve-group'])
+const emit = defineEmits(['top-change', 'save-nickname', 'save-group-name', 'change-notice', 'dissolve-group'])
 
 // 本地状态
 const localNickname = ref(props.nickname)
@@ -98,7 +101,45 @@ watch(
     }
   },
 )
+// 处理保存群昵称
+const handleSaveNickname = () => {
+  // 如果昵称没有变化，不做任何操作
+  if (localNickname.value === props.nickname) return
 
+  ElMessageBox.confirm(`确定要将您的群昵称修改为 "${localNickname.value}" 吗？`, '修改群昵称', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning',
+  })
+    .then(() => {
+      // 用户点击确定，触发保存事件
+      emit('save-nickname', localNickname.value)
+    })
+    .catch(() => {
+      // 用户点击取消，恢复原来的昵称
+      localNickname.value = props.nickname
+    })
+}
+
+// 处理保存群名称
+const handleSaveGroupName = () => {
+  // 如果群名称没有变化，不做任何操作
+  if (localGroupName.value === props.groupName) return
+
+  ElMessageBox.confirm(`确定要将群聊名称修改为 "${localGroupName.value}" 吗？`, '修改群聊名称', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning',
+  })
+    .then(() => {
+      // 用户点击确定，触发保存事件
+      emit('save-group-name', localGroupName.value)
+    })
+    .catch(() => {
+      // 用户点击取消，恢复原来的群名称
+      localGroupName.value = props.groupName
+    })
+}
 // 计算属性
 const nicknamePlaceholder = computed(() => {
   return localNickname.value ? localNickname.value : '我的群昵称'
@@ -126,10 +167,6 @@ const groupNamePlaceholder = computed(() => {
       align-items: flex-start;
       cursor: default;
 
-      &:hover {
-        background-color: transparent;
-      }
-
       .option-label {
         font-size: 14px;
         margin-bottom: 8px;
@@ -155,12 +192,50 @@ const groupNamePlaceholder = computed(() => {
       }
     }
 
-    .option-info {
-      display: flex;
-      align-items: center;
+    &.notice-option {
+      flex-direction: column;
+      align-items: flex-start;
 
-      .option-text {
-        font-size: 14px;
+      .option-info {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        margin-bottom: 8px;
+      }
+
+      .notice-preview {
+        width: 100%;
+        background-color: #f5f5f5;
+        border-radius: 4px;
+        padding: 8px 12px;
+        margin-bottom: 8px;
+
+        .notice-content {
+          font-size: 13px;
+          color: #666;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          display: -webkit-box;
+          -webkit-box-orient: vertical;
+        }
+      }
+
+      .notice-empty {
+        width: 100%;
+        background-color: #f5f5f5;
+        border-radius: 4px;
+        padding: 8px 12px;
+        margin-bottom: 8px;
+        color: #999;
+        font-size: 13px;
+        text-align: center;
+      }
+
+      .el-icon {
+        position: absolute;
+        right: 16px;
+        top: 16px;
       }
     }
   }

@@ -43,11 +43,28 @@
           :is-group-owner="chatRoomRole === '群主'"
           :is-group-admin="chatRoomRole === '管理员'"
           @top-change="handleTopChange"
+          :group-notice="currentNotice"
           @save-nickname="saveMyNickname"
           @save-group-name="saveGroupName"
-          @change-notice="handleChangeGroupNotice"
+          @change-notice="showNoticePanel = true"
           @dissolve-group="handleDissolveGroup"
         />
+
+        <!-- 群公告面板 -->
+        <el-dialog
+          v-model="showNoticePanel"
+          title="群公告"
+          width="600px"
+          :close-on-click-modal="true"
+          :show-close="true"
+        >
+          <GroupNoticePanel
+            :notices="groupNotices"
+            :is-group-owner="chatRoomRole === '群主'"
+            :is-group-admin="chatRoomRole === '管理员'"
+            @publish-notice="handlePublishNotice"
+          />
+        </el-dialog>
       </el-scrollbar>
     </div>
   </el-drawer>
@@ -61,7 +78,7 @@ import router from '@/router/index.js'
 import { chatFriendOrChatRoomStore } from '@/store/chat.js'
 import MemberList from './components/MemberList.vue'
 import GroupSettings from './components/GroupSettings.vue'
-
+import GroupNoticePanel from '@/components/common/GroupNoticePacel/index.vue'
 // 定义组件的属性
 const props = defineProps({
   visible: {
@@ -88,7 +105,6 @@ const props = defineProps({
     default: false,
   },
 })
-
 // 定义事件
 const emit = defineEmits([
   'close',
@@ -99,13 +115,99 @@ const emit = defineEmits([
   'changeGroupNotice',
   'changeGroupNickName',
 ])
+const showNoticePanel = ref(false)
+const groupNotices = ref([])
+const currentNotice = computed(() => {
+  if (groupNotices.value.length === 0) return null
+  // 返回置顶公告或最新公告
+  const pinnedNotice = groupNotices.value.find((notice) => notice.isPinned)
+  return pinnedNotice || groupNotices.value[0]
+})
+// 处理发布公告
+const handlePublishNotice = async (noticeData) => {
+  try {
+    // 这里应该调用API发布公告
+    // const res = await publishGroupNotice(props.groupInfo.roomId, noticeData)
+
+    // 模拟API调用成功
+    const newNotice = {
+      id: Date.now().toString(),
+      content: noticeData.content,
+      publisherId: '当前用户ID', // 应该从用户store中获取
+      publisherName: '当前用户名', // 应该从用户store中获取
+      publisherAvatar: 'https://example.com/avatar.jpg', // 应该从用户store中获取
+      publishTime: new Date().toISOString(),
+      isPinned: noticeData.isPinned,
+    }
+
+    // 更新本地公告列表
+    if (noticeData.isPinned) {
+      // 如果是置顶公告，取消其他公告的置顶状态
+      groupNotices.value = groupNotices.value.map((notice) => ({
+        ...notice,
+        isPinned: false,
+      }))
+    }
+
+    groupNotices.value = [newNotice, ...groupNotices.value]
+  } catch (error) {
+    console.error('发布公告失败:', error)
+  }
+}
+
+// 获取群公告列表
+const getGroupNotices = async () => {
+  if (!props.groupInfo?.roomId) return
+
+  try {
+    // 这里应该调用API获取群公告列表
+    // const res = await getGroupNoticeList(props.groupInfo.roomId)
+
+    // 模拟API调用结果
+    groupNotices.value = [
+      {
+        id: '1',
+        content: '辩论赛海报27.08剩余210.92',
+        publisherId: 'user1',
+        publisherName: '斯人',
+        publisherAvatar: 'https://example.com/avatar1.jpg',
+        publishTime: '2023-09-12T16:00:00Z',
+        isPinned: true,
+      },
+      {
+        id: '2',
+        content: '打印表花费5元剩余238元',
+        publisherId: 'user2',
+        publisherName: '斯人',
+        publisherAvatar: 'https://example.com/avatar2.jpg',
+        publishTime: '2023-09-22T17:56:00Z',
+        isPinned: false,
+      },
+      {
+        id: '3',
+        content: '班费花费50剩余243',
+        publisherId: 'user3',
+        publisherName: '斯人',
+        publisherAvatar: 'https://example.com/avatar3.jpg',
+        publishTime: '2023-04-29T22:45:00Z',
+        isPinned: false,
+      },
+    ]
+  } catch (error) {
+    console.error('获取群公告失败:', error)
+  }
+}
+
+// 在组件挂载和群ID变化时获取群公告
+onMounted(() => {
+  getGroupNotices()
+})
 
 // 使用计算属性处理抽屉可见性
 const drawerVisible = computed({
   get: () => props.visible,
   set: (value) => emit('close', value),
 })
-const profile = useProfilesStore()
 // 群成员数据
 const groupMembers = ref([])
 const chatRoomRole = computed(() => {
@@ -222,13 +324,6 @@ const saveMyNickname = (value) => {
  */
 const saveGroupName = (value) => {
   emit('changeGroupName', value)
-}
-
-/**
- * 处理修改群公告
- */
-const handleChangeGroupNotice = () => {
-  emit('changeGroupNotice')
 }
 
 /**
