@@ -73,7 +73,7 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { chatRoomUser, setChatRoomAdmin, transferChatRoomOwner } from '@/api/modules/chatRoom.js'
+import { chatRoomUser, setChatRoomAdmin, transferChatRoomOwner } from '@/api/modules'
 import router from '@/router/index.js'
 import { chatFriendOrChatRoomStore } from '@/store/chat.js'
 import MemberList from './components/MemberList.vue'

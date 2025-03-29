@@ -23,14 +23,14 @@
           @click="$emit('select-friend', friend)"
         >
           <div class="friend-avatar">
-            <img :src="friend.users.avatar || ''" alt="头像" />
-            <div class="status-dot" :class="getStatusClass(friend.users.status)"></div>
+            <img :src="friend.avatar || ''" alt="头像" />
+            <div class="status-dot" :class="getStatusClass(friend.status)"></div>
           </div>
           <div class="friend-info">
             <div class="friend-name">
-              {{ friend.users.username }} <span v-if="friend.remark"> ({{ friend.remark }})</span>
+              {{ friend.username }} <span v-if="friend.remark"> ({{ friend.remark }})</span>
             </div>
-            <div class="friend-signature">{{ friend.users.signature || '这个人很懒，什么都没留下' }}</div>
+            <div class="friend-signature">{{ friend.signature || '这个人很懒，什么都没留下' }}</div>
           </div>
         </div>
         <div class="empty-tip" v-if="!friendGroupMap[item.groupId] || friendGroupMap[item.groupId].length === 0">
@@ -44,8 +44,7 @@
 <script setup>
 import { ref, reactive } from 'vue'
 import { ArrowRight } from '@element-plus/icons-vue'
-import { getFriendGroupFriendList } from '@/api/modules/friendGroups.js'
-import { getUsersInfoById } from '@/api/modules/user.js'
+import { getFriendGroupFriendList, getUsersInfoById } from '@/api/modules'
 import { getStatusClass } from '@/utils/statusUtils.js'
 
 defineProps({

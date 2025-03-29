@@ -1,5 +1,5 @@
 import { messageHistory } from '@/api/modules/friend.js'
-import { chatRoomHistory } from '@/api/modules/chatRoom.js'
+import { chatRoomHistory } from '@/api/modules'
 import { formatMessages, formatSentTime } from '@/utils/messageUtils.js'
 
 /**

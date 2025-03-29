@@ -1,9 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { getUsersInfoById } from '@/api/modules/user.js'
 import { ElMessage } from 'element-plus'
-import { postFriendPin } from '@/api/modules/friend.js'
-import { chatRoomInfoById, setChatRoomPinned } from '@/api/modules/chatRoom.js'
+import { postFriendPin, getUsersInfoById, chatRoomInfoById, setChatRoomPinned } from '@/api/modules'
 
 export const chatFriendOrChatRoomStore = defineStore(
   'chatFriendOrChatRoom',

@@ -1,77 +1,75 @@
 <script setup>
 import { Search } from '@element-plus/icons-vue'
 import { ref } from 'vue'
-import { getUserInfoByNumber } from '@/api/modules/user.js'
 import { ElMessage } from 'element-plus'
-import { chatRoomInquire, groupAddChatRoom } from '@/api/modules/chatRoom.js'
-import { addFriend } from '@/api/modules/friend.js'
-
+import { chatRoomInquire, groupAddChatRoom, getUserInfoByNumber, addFriend } from '@/api/modules'
+//TODO 搜索用户和群聊如果已经有好友则显示发信息
 const tabs = ref(['用户', '群聊'])
 const activeTab = ref('用户')
-const recommendFriendChats = ref()
-const recommendGroupChats = ref()
+const recommendFriendChats = ref(null)
+const recommendGroupChats = ref(null)
 const inputFriend = ref('')
+const loading = ref(false)
 
-/**
- * 切换标签页的函数
- * @param {String} tab - 要激活的标签页
- */
 const changeTab = (tab) => {
   activeTab.value = tab
-  // 当切换到用户标签页时，重置群聊数据和输入框
-  if (activeTab.value === '用户') {
-    recommendGroupChats.value = null
-    inputFriend.value = ''
-  }
-  // 当切换到群聊标签页时，重置好友数据和输入框
-  if (activeTab.value === '群聊') {
-    recommendFriendChats.value = null
-    inputFriend.value = ''
-  }
+  recommendFriendChats.value = null
+  recommendGroupChats.value = null
+  inputFriend.value = ''
 }
 
-/**
- * 查询用户或群聊的函数
- */
 const selectFriendNumber = async () => {
-  // 根据活动标签页查询用户或群聊
-  if (activeTab.value === '用户') {
-    const res = await getUserInfoByNumber(inputFriend.value)
-    if (res.data.code === 200) {
-      recommendFriendChats.value = res.data.data
-      // 如果查询结果为空，显示错误提示
-      if (res.data.data === null) {
-        ElMessage.error('用户不存在')
+  if (!inputFriend.value.trim()) {
+    ElMessage.warning('请输入搜索内容')
+    return
+  }
+
+  loading.value = true
+  try {
+    if (activeTab.value === '用户') {
+      const res = await getUserInfoByNumber(inputFriend.value)
+      if (res.data.code === 200) {
+        recommendFriendChats.value = res.data.data || null
+        if (!res.data.data) {
+          ElMessage.error('用户不存在')
+        }
+      }
+    } else {
+      const res = await chatRoomInquire(inputFriend.value)
+      recommendGroupChats.value = res.data.data || null
+      if (!res.data.data) {
+        ElMessage.error('群聊不存在')
       }
     }
+  } catch (error) {
+    ElMessage.error('搜索失败')
+    console.error(error)
+  } finally {
+    loading.value = false
   }
-  if (activeTab.value === '群聊') {
-    const res = await chatRoomInquire(inputFriend.value)
-    recommendGroupChats.value = res.data.data
-    // 如果查询结果为空，显示错误提示
-    if (res.data.data === null) {
-      ElMessage.error('用户不存在')
+}
+
+const handleAddFriend = async (user) => {
+  try {
+    const res = await addFriend(user.number)
+    if (res.data.code === 200) {
+      ElMessage.success('好友请求已发送')
     }
+  } catch (error) {
+    console.error(error)
+    ElMessage.error('添加好友失败')
   }
 }
 
-/**
- * 添加好友的函数
- */
-const handleAddFriend = async () => {
-  const res = await addFriend(inputFriend.value)
-  if (res.data.code === 200) {
-    ElMessage.success('请求已发送')
-  }
-}
-
-/**
- * 添加群聊的函数
- */
-const handleAddGroup = async () => {
-  const res = await groupAddChatRoom(inputFriend.value)
-  if (res.data.code === 200) {
-    ElMessage.success('请求已发送')
+const handleAddGroup = async (group) => {
+  try {
+    const res = await groupAddChatRoom(group.groupNumber)
+    if (res.data.code === 200) {
+      ElMessage.success('加群请求已发送')
+    }
+  } catch (error) {
+    console.error(error)
+    ElMessage.error('加入群聊失败')
   }
 }
 
@@ -81,12 +79,14 @@ const props = defineProps({
     default: false,
   },
 })
+
 const emit = defineEmits(['close'])
 
-/**
- * 关闭对话框的函数
- */
 const handleClose = () => {
+  activeTab.value = '用户'
+  inputFriend.value = ''
+  recommendFriendChats.value = null
+  recommendGroupChats.value = null
   emit('close', false)
 }
 </script>
@@ -104,42 +104,57 @@ const handleClose = () => {
         {{ tab }}
       </div>
     </div>
-    <el-input :prefix-icon="Search" placeholder="输入号码查询用户/群聊" v-model="inputFriend">
+
+    <el-input
+      v-model="inputFriend"
+      placeholder="输入号码查询用户/群聊"
+      :prefix-icon="Search"
+      clearable
+      @keyup.enter="selectFriendNumber"
+    >
       <template #append>
         <el-button @click="selectFriendNumber">搜索</el-button>
       </template>
     </el-input>
 
-    <el-scrollbar height="400px">
-      <el-empty v-if="activeTab === '用户' && recommendFriendChats === null" description="搜索好友" />
-      <el-empty v-if="activeTab === '群聊' && recommendGroupChats === null" description="搜索群聊" />
-      <div class="chat-item" v-if="recommendFriendChats" @click="handleAddFriend(recommendFriendChats)">
-        <div class="chat-avatar">
-          <img :src="recommendFriendChats.avatarUrl" alt="avatar" />
-        </div>
-        <div class="chat-content">
-          <span class="chat-title">{{ recommendFriendChats.userName }}({{ recommendFriendChats.number }})</span>
-        </div>
-        <el-button v-if="!(recommendFriendChats.isUser || recommendFriendChats.isContainer)">加好友</el-button>
-        <el-button v-else>发消息</el-button>
-      </div>
+    <el-scrollbar height="400px" v-loading="loading">
+      <template v-if="!loading">
+        <el-empty v-if="activeTab === '用户' && recommendFriendChats === null" description="搜索好友" />
+        <el-empty v-if="activeTab === '群聊' && recommendGroupChats === null" description="搜索群聊" />
 
-      <div class="chat-item" v-if="recommendGroupChats" @click="handleAddGroup(recommendGroupChats)">
-        <div class="chat-avatar">
-          <img :src="recommendGroupChats.avatarUrl" alt="avatar" />
+        <div
+          v-if="recommendFriendChats && activeTab === '用户'"
+          class="chat-item"
+          @click="handleAddFriend(recommendFriendChats)"
+        >
+          <div class="chat-avatar">
+            <img :src="recommendFriendChats.avatarUrl" alt="头像" />
+          </div>
+          <div class="chat-content">
+            <span class="chat-title"> {{ recommendFriendChats.userName }}({{ recommendFriendChats.number }}) </span>
+          </div>
+          <el-button>加好友</el-button>
         </div>
-        <div class="chat-content">
-          <span class="chat-title">{{ recommendGroupChats.roomName }}({{ recommendGroupChats.groupNumber }})</span>
+
+        <div
+          v-if="recommendGroupChats && activeTab === '群聊'"
+          class="chat-item"
+          @click="handleAddGroup(recommendGroupChats)"
+        >
+          <div class="chat-avatar">
+            <img :src="recommendGroupChats.avatarUrl" alt="群头像" />
+          </div>
+          <div class="chat-content">
+            <span class="chat-title"> {{ recommendGroupChats.roomName }}({{ recommendGroupChats.groupNumber }}) </span>
+          </div>
+          <el-button>加群</el-button>
         </div>
-        <el-button v-if="!recommendGroupChats.isContainer">加群</el-button>
-        <el-button v-else>发消息</el-button>
-      </div>
+      </template>
     </el-scrollbar>
   </el-dialog>
 </template>
 
 <style lang="scss" scoped>
-// 标签页样式
 .tabs {
   display: flex;
   gap: 20px;
@@ -149,6 +164,7 @@ const handleClose = () => {
     cursor: pointer;
     color: #666;
     font-size: 16px;
+    padding-bottom: 5px;
 
     &.active {
       color: #0099ff;
@@ -161,17 +177,16 @@ const handleClose = () => {
   display: flex;
   align-items: center;
   padding: 15px;
+  margin-top: 10px;
   background-color: #fff;
   border-radius: 8px;
-  margin-bottom: 10px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition:
-    transform 0.2s,
-    box-shadow 0.2s;
+  transition: all 0.3s ease;
 
   &:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    cursor: pointer;
   }
 
   .chat-avatar {
@@ -179,6 +194,7 @@ const handleClose = () => {
       width: 40px;
       height: 40px;
       border-radius: 50%;
+      object-fit: cover;
       margin-right: 15px;
     }
   }
@@ -191,20 +207,6 @@ const handleClose = () => {
       font-weight: 500;
       color: #333;
     }
-  }
-
-  .chat-badge {
-    width: 18px;
-    height: 18px;
-    background-color: #ff4d4d;
-    color: #fff;
-    border-radius: 50%;
-    font-size: 12px;
-    font-weight: bold;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-left: 10px;
   }
 }
 </style>

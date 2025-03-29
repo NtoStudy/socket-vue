@@ -55,7 +55,7 @@
 <script setup>
 import { ref } from 'vue'
 import { Plus } from '@element-plus/icons-vue'
-import { postUsersUpdate } from '@/api/modules/user.js'
+import { postUsersUpdate } from '@/api/modules'
 import { ElMessage } from 'element-plus'
 import { useUserInfoStore } from '@/store/user.js'
 import { getStatusClass } from '@/utils/statusUtils.js'
