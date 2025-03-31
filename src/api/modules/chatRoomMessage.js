@@ -11,27 +11,29 @@ export const groupMessageCount = (roomId) =>
     method: 'get',
     params: { roomId },
   })
-
 /**
- * 查看入群申请列表
- * @returns {Promise} - 返回获取入群申请列表请求的Promise对象
+ * 获取聊天室历史消息
+ * @param {number} chatRoomId - 聊天室ID
+ * @param {number} pageNum - 页码
+ * @param {number} pageSize - 每页大小
+ * @returns {Promise} - 返回获取聊天室历史消息请求的Promise对象
  */
-export const getChatRoomApplyList = () =>
+export const chatRoomHistory = (chatRoomId, pageNum, pageSize) =>
   instance({
-    url: '/chat-rooms/applyList',
+    url: '/group-messages/history',
     method: 'get',
+    params: { chatRoomId, pageNum, pageSize },
   })
 
 /**
- * 审批入群申请
- * @param {number} userId - 申请用户ID
- * @param {number} roomId - 群聊ID
- * @param {number} status - 审批状态（1: 同意，2: 拒绝）
- * @returns {Promise} - 返回审批入群申请请求的Promise对象
+ * 删除聊天室消息
+ * @param {number} chatRoomId - 聊天室ID
+ * @param {number} messageId - 消息ID
+ * @returns {Promise} - 返回删除聊天室消息请求的Promise对象
  */
-export const approveChatRoomApplication = (userId, roomId, status) =>
+export const chatRoomDelete = (chatRoomId, messageId) =>
   instance({
-    url: '/chat-rooms/approveApplication',
-    method: 'post',
-    params: { userId, roomId, status },
+    url: '/group-messages/delete',
+    method: 'delete',
+    params: { chatRoomId, messageId },
   })

@@ -43,6 +43,7 @@ import {
   chatRoomNumber,
   friendNumber,
 } from '@/api/index.js'
+import router from '@/router/index.js'
 
 // 初始化未读消息数量的Ref
 const friendCount = ref()
@@ -66,6 +67,10 @@ const FriendGroupList = async () => {
 const handleSelectFriend = (friend) => {
   console.log('选择了好友:', friend)
   // 这里可以添加跳转到聊天页面或其他操作
+  router.push({
+    path: `/main/chat/${friend.userId}`,
+    query: { fid: friend.userId },
+  })
 }
 // 模拟群聊数据，按照图片中的样式
 const groupItems = computed(() => [
@@ -77,6 +82,10 @@ const groupItems = computed(() => [
 const handleSelectGroupChat = (group) => {
   console.log('选择了群聊:', group)
   // 这里可以添加跳转到群聊页面或其他操作
+  router.push({
+    path: `/main/chat/${group.roomId}`,
+    query: { gid: group.roomId },
+  })
 }
 // 处理标签切换
 const handleTabChange = (tab) => {

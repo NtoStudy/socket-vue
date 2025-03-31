@@ -164,6 +164,22 @@ watch(
   },
 )
 
+watch(
+  () => [chatStore.friendId, chatStore.chatRoomId],
+  async ([newFriendId, newChatRoomId]) => {
+    // 清空当前消息
+    clearMessages()
+
+    if (newFriendId) {
+      // 加载好友消息
+      await loadFriendMessages(newFriendId)
+    } else if (newChatRoomId) {
+      // 加载群聊消息
+      await loadChatRoomMessages(newChatRoomId)
+    }
+  },
+  { immediate: true },
+)
 // 添加一个计算属性来判断当前是否为群聊
 const isGroupChat = computed(() => {
   return chatStore.chatRoomId !== null && chatStore.chatRoomId !== undefined

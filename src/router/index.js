@@ -18,6 +18,12 @@ const routes = [
         component: () => import('../views/chat/index.vue'),
       },
       {
+        // 新增带参数的聊天路由
+        path: 'chat/:id',
+        component: () => import('../views/chat/index.vue'),
+        props: true,
+      },
+      {
         path: 'friend',
         component: () => import('../views/friend/index.vue'),
       },

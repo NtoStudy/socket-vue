@@ -4,6 +4,7 @@ import { chatRoomList, getFriendList } from '@/api/index.js'
 import { chatFriendOrChatRoomStore } from '@/store/chat.js'
 import eventBus from '@/EventBus/eventBus.js'
 import { processFriendList, processChatRoomList, combineAndSortChats, isActive } from '@/utils/ChatListUtils.js'
+import router from '@/router/index.js'
 
 // 状态管理
 const chatFriendOrChatRoom = chatFriendOrChatRoomStore()
@@ -57,9 +58,17 @@ const handleChatItemClick = (chat) => {
   if (chat.chatType === 'friend') {
     chatFriendOrChatRoom.setFriendId(chat.friendId)
     chatFriendOrChatRoom.setChatRoomId(null) // 清除群聊选中状态
+    router.push({
+      path: `/main/chat/${chat.friendId}`,
+      query: { fid: chat.friendId },
+    })
   } else {
     chatFriendOrChatRoom.setChatRoomId(chat.roomId)
-    chatFriendOrChatRoom.setFriendId(null) // 清除好友选中状态
+    chatFriendOrChatRoom.setFriendId(null)
+    router.push({
+      path: `/main/chat/${chat.roomId}`,
+      query: { gid: chat.roomId },
+    })
   }
 }
 
