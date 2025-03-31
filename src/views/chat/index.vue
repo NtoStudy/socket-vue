@@ -16,21 +16,25 @@ import message from '@/components/chat/message/index.vue'
 const route = useRoute()
 const chatStore = chatFriendOrChatRoomStore()
 
-// 处理路由参数，设置当前聊天对象
+// 处理路由参数
 const handleRouteParams = () => {
   const id = route.params.id
-  const query = route.query
 
-  if (id) {
-    if (query.fid) {
-      // 私聊模式
-      chatStore.setFriendId(query.fid)
-      chatStore.setChatRoomId(null)
-    } else if (query.gid) {
-      // 群聊模式
-      chatStore.setFriendId(null)
-      chatStore.setChatRoomId(query.gid)
-    }
+  // 如果没有ID参数，清空当前聊天状态
+  if (!id) {
+    chatStore.setFriendId(null)
+    chatStore.setChatRoomId(null)
+    return
+  }
+
+  if (route.query.fid) {
+    // 私聊模式
+    chatStore.setFriendId(route.query.fid)
+    chatStore.setChatRoomId(null)
+  } else if (route.query.gid) {
+    // 群聊模式
+    chatStore.setFriendId(null)
+    chatStore.setChatRoomId(route.query.gid)
   }
 }
 

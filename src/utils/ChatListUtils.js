@@ -9,10 +9,31 @@ import { chatRoomHistory, groupMessageCount, friendMessageCount, messageHistory 
  */
 export const isActive = (chat, chatStore) => {
   if (chat.chatType === 'friend') {
-    return chatStore.friendId === chat.friendId && chatStore.chatRoomId === null
+    return chatStore.friendId === chat.friendId
   } else {
-    return chatStore.chatRoomId === chat.roomId && chatStore.friendId === null
+    return chatStore.chatRoomId === chat.roomId
   }
+}
+
+/**
+ * 判断聊天项是否为当前选中项
+ * @param {Object} chat - 聊天项对象
+ * @param {Object} route - 当前路由对象
+ * @returns {Boolean} - 是否为当前选中项
+ */
+export const isCurrentSelected = (chat, route) => {
+  const id = route.params.id
+  if (!id) return false
+  console.log('isCurrentSelected', id)
+
+  if (chat.chatType === 'friend' && route.query.fid) {
+    console.log(chat.friendId, route.query.fid, 'dwd')
+    return chat.friendId === Number(route.query.fid)
+  } else if (chat.chatType === 'group' && route.query.gid) {
+    return chat.roomId === Number(route.query.gid)
+  }
+
+  return false
 }
 
 /**

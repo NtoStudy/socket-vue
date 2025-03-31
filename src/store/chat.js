@@ -150,6 +150,14 @@ export const chatFriendOrChatRoomStore = defineStore(
     }
   },
   {
-    persist: true, // 持久化存储
+    persist: {
+      enabled: true,
+      strategies: [
+        {
+          storage: localStorage,
+          paths: ['friendId', 'chatRoomId'],
+        },
+      ],
+    },
   },
 )

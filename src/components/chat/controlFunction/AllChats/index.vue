@@ -3,9 +3,16 @@ import { onMounted, onUnmounted, ref } from 'vue'
 import { chatRoomList, getFriendList } from '@/api/index.js'
 import { chatFriendOrChatRoomStore } from '@/store/chat.js'
 import eventBus from '@/EventBus/eventBus.js'
-import { processFriendList, processChatRoomList, combineAndSortChats, isActive } from '@/utils/ChatListUtils.js'
+import {
+  processFriendList,
+  processChatRoomList,
+  combineAndSortChats,
+  isActive,
+  isCurrentSelected,
+} from '@/utils/ChatListUtils.js'
 import router from '@/router/index.js'
-
+import { useRoute } from 'vue-router'
+const route = useRoute()
 // 状态管理
 const chatFriendOrChatRoom = chatFriendOrChatRoomStore()
 const allChats = ref([])
@@ -91,7 +98,11 @@ onUnmounted(() => {
       v-for="(chat, index) in allChats"
       :key="index"
       @click="handleChatItemClick(chat)"
-      :class="{ active: isActive(chat, chatFriendOrChatRoom), pinned: chat.isPinned === 1 }"
+      :class="{
+        active: isActive(chat, chatFriendOrChatRoom),
+        pinned: chat.isPinned === 1,
+        selected: isCurrentSelected(chat, route),
+      }"
     >
       <div class="chat-avatar">
         <img :src="chat.avatarUrl" alt="avatar" />
@@ -159,6 +170,19 @@ onUnmounted(() => {
 
   &.active {
     background-color: #ebebeb;
+  }
+  &.selected {
+    background-color: #0099ff !important;
+    color: white;
+
+    .chat-title {
+      color: white !important;
+    }
+
+    .chat-time,
+    .chat-text {
+      color: rgba(255, 255, 255, 0.8) !important;
+    }
   }
 
   .chat-avatar {
