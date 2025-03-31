@@ -11,7 +11,7 @@ import { ElMessage } from 'element-plus'
 import GroupChatOptionsDrawer from '@/components/common/GroupOptionsDrawer/index.vue'
 import { computed } from 'vue'
 import eventBus from '@/EventBus/eventBus.js'
-import { changeChatRoomName, quitOrDismissChatRoom, updateChatRoomNickname } from '@/api/modules'
+import { changeChatRoomName, quitOrDismissChatRoom, updateChatRoomNickname } from '@/api/index.js'
 //TODO在进行任何操作之后，都要刷新列表
 // 消息显示组件的引用，用于操作DOM
 const messageDisplayRef = ref(null)

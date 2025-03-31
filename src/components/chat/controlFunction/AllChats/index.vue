@@ -1,9 +1,9 @@
 <script setup>
 import { onMounted, onUnmounted, ref } from 'vue'
-import { chatRoomList, getFriendList } from '@/api/modules'
+import { chatRoomList, getFriendList } from '@/api/index.js'
 import { chatFriendOrChatRoomStore } from '@/store/chat.js'
 import eventBus from '@/EventBus/eventBus.js'
-import { processFriendList, processChatRoomList, combineAndSortChats } from '@/utils/ChatListUtils.js'
+import { processFriendList, processChatRoomList, combineAndSortChats, isActive } from '@/utils/ChatListUtils.js'
 
 // 状态管理
 const chatFriendOrChatRoom = chatFriendOrChatRoomStore()

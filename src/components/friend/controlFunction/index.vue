@@ -42,7 +42,7 @@ import {
   updateFriendGroup,
   chatRoomNumber,
   friendNumber,
-} from '@/api/modules'
+} from '@/api/index.js'
 
 // 初始化未读消息数量的Ref
 const friendCount = ref()

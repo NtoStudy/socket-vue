@@ -1,4 +1,4 @@
-import instance from '@/api/index.js'
+import instance from '@/api/https.js'
 
 /**
  * 创建新的群聊

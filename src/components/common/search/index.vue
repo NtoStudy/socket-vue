@@ -2,7 +2,7 @@
 import { Search } from '@element-plus/icons-vue'
 import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
-import { chatRoomInquire, groupAddChatRoom, getUserInfoByNumber, addFriend } from '@/api/modules'
+import { chatRoomInquire, groupAddChatRoom, getUserInfoByNumber, addFriend } from '@/api/index.js'
 //TODO 搜索用户和群聊如果已经有好友则显示发信息
 const tabs = ref(['用户', '群聊'])
 const activeTab = ref('用户')

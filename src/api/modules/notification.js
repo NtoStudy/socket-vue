@@ -1,10 +1,10 @@
-import instance from '@/api/index.js'
+import instance from '@/api/https.js'
 
 /**
  * 获取所有未处理的好友请求接口
  * @returns {Promise} - 返回包含未处理好友请求列表的Promise对象
  */
-export const handleFriend = () =>
+export const getHandleFriend = () =>
   instance({
     url: '/notifications/friend',
     method: 'get',

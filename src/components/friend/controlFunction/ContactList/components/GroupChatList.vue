@@ -137,7 +137,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { ArrowRight } from '@element-plus/icons-vue'
-import { chatRoomsCreateGroup, chatRoomsJoinGroup, chatRoomsManageGroup, chatRoomsPinnedGroup } from '@/api/modules'
+import { chatRoomsCreateGroup, chatRoomsJoinGroup, chatRoomsManageGroup, chatRoomsPinnedGroup } from '@/api/index.js'
 
 const props = defineProps({
   groupItems: {

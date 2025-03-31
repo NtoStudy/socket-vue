@@ -1,6 +1,6 @@
 <script setup>
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { messageDelete, postFriendsRemark, chatRoomDelete } from '@/api/modules'
+import { messageDelete, postFriendsRemark, chatRoomDelete } from '@/api/index.js'
 import { useUserInfoStore } from '@/store/user.js'
 import { ref, onMounted, watch, computed, nextTick, onUnmounted } from 'vue'
 import { Loading } from '@element-plus/icons-vue'

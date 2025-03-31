@@ -44,7 +44,7 @@
 import { useFriendManagerStore } from '@/store/friendManager.js'
 import { storeToRefs } from 'pinia'
 import { computed, onMounted } from 'vue'
-import { chatRoomHandle handleFriend} from '@/api/modules'
+import { chatRoomHandle, handleFriend } from '@/api/index.js'
 
 const store = useFriendManagerStore()
 const { selectedMenu, friendRequests, groupRequests } = storeToRefs(store)

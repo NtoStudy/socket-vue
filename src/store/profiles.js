@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
-import { getUsersInfoInChatRoom, getUsersInfoById } from '@/api/modules'
+import { getUsersInfoInChatRoom, getUsersInfoById } from '@/api/index.js'
 
 export const useProfilesStore = defineStore('profiles', () => {
   // 用户信息缓存

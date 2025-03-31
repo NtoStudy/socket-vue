@@ -1,34 +1,14 @@
-import axios from 'axios'
-import { useUserInfoStore } from '@/store/user.js'
-const userStore = useUserInfoStore()
-const token = userStore?.token
+// 基础模块
+export * from './modules/user.js'
+export * from './modules/upload.js'
+export * from './modules/notification.js'
 
-const instance = axios.create({
-  baseURL: 'http://localhost:8080',
-  timeout: 10000,
-  headers: {
-    token: token || '',
-  },
-})
+// 好友相关
+export * from './modules/friend.js'
+export * from './modules/friendGroups.js'
 
-// 添加请求拦截器
-instance.interceptors.request.use(
-  function (config) {
-    return config
-  },
-  function (error) {
-    return Promise.reject(error)
-  },
-)
-
-// 添加响应拦截器
-instance.interceptors.response.use(
-  function (response) {
-    return response
-  },
-  function (error) {
-    return Promise.reject(error)
-  },
-)
-
-export default instance
+// 群聊相关
+export * from './modules/chatRoomBasic.js'
+export * from './modules/chatRoomMember.js'
+export * from './modules/chatRoomSetting.js'
+export * from './modules/chatRoomMessage.js'

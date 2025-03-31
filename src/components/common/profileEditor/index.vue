@@ -118,7 +118,7 @@ import { ref, computed, watch, reactive } from 'vue'
 import { Plus } from '@element-plus/icons-vue'
 import { nextTick } from 'vue'
 import { ElInput } from 'element-plus'
-import { postUsersUpdate } from '@/api/modules'
+import { postUsersUpdate } from '@/api/index.js'
 import { useUserInfoStore } from '@/store/user.js'
 
 const inputValue = ref('')

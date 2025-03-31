@@ -1,5 +1,5 @@
 import { formatSentTime, truncateContent } from '@/utils/messageUtils.js'
-import { chatRoomHistory, groupMessageCount, friendMessageCount, messageHistory } from '@/api/modules'
+import { chatRoomHistory, groupMessageCount, friendMessageCount, messageHistory } from '@/api/index.js'
 
 /**
  * 判断聊天项是否被选中

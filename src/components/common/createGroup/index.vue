@@ -60,7 +60,7 @@
 import { Close } from '@element-plus/icons-vue'
 import { ref, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { getFriendGroupList, chatRoomCreate } from '@/api/modules'
+import { getFriendGroupList, chatRoomCreate } from '@/api/index.js'
 // 导入FriendList组件
 import FriendList from '@/components/friend/controlFunction/ContactList/components/FriendList.vue'
 

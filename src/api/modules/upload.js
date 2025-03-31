@@ -1,4 +1,4 @@
-import instance from '@/api/index.js'
+import instance from '@/api/https.js'
 
 /**
  * 上传单个文件接口
