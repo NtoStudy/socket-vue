@@ -5,7 +5,17 @@
         <img :src="userAvatar || ''" alt="用户头像" class="profile-avatar" />
       </div>
       <div class="profile-info">
-        <div class="likes-count">{{ userInfo?.username || '未知用户' }}</div>
+        <div class="username-container">
+          <div class="likes-count">{{ userInfo?.username || '未知用户' }}</div>
+          <el-tag
+            v-if="userType === 'groupMember' && userInfo?.role"
+            :type="getRoleTagType(userInfo.role)"
+            size="small"
+            class="role-tag"
+          >
+            {{ userInfo.role }}
+          </el-tag>
+        </div>
         <div class="qq-number">{{ userInfo?.number || '' }}</div>
       </div>
 
@@ -107,6 +117,16 @@ const props = defineProps({
     validator: (value) => ['friend', 'groupMember', 'self'].includes(value),
   },
 })
+const getRoleTagType = (role) => {
+  switch (role) {
+    case '群主':
+      return 'danger'
+    case '管理员':
+      return 'warning'
+    default:
+      return 'info'
+  }
+}
 
 const emit = defineEmits(['edit-profile', 'send-message', 'like'])
 
@@ -275,6 +295,67 @@ onMounted(async () => {
 
   &:active {
     transform: scale(0.95);
+  }
+}
+
+.user-profile-card {
+  padding: 0;
+
+  .profile-header {
+    display: flex;
+    padding: 16px;
+    border-radius: 8px 8px 0 0;
+    align-items: center;
+  }
+}
+
+.profile-avatar-container {
+  position: relative;
+  margin-right: 12px;
+
+  .profile-avatar {
+    width: 60px;
+    height: 60px;
+    background-color: red;
+    border-radius: 6px;
+    object-fit: cover;
+  }
+}
+
+.profile-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  .username-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .role-tag {
+      font-size: 10px;
+      padding: 0 5px;
+      height: 20px;
+      line-height: 18px;
+    }
+  }
+
+  .qq-number {
+    font-size: 16px;
+    font-weight: 500;
+    color: #333;
+  }
+
+  .likes-count {
+    display: flex;
+    align-items: center;
+    color: #666;
+
+    .el-icon {
+      margin-right: 4px;
+      color: #ff6b6b;
+    }
   }
 }
 </style>

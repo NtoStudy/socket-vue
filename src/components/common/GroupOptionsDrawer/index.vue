@@ -60,6 +60,7 @@
         >
           <GroupNoticePanel
             :notices="groupNotices"
+            :roomId="props.groupInfo.roomId"
             :is-group-owner="chatRoomRole === '群主'"
             :is-group-admin="chatRoomRole === '管理员'"
             @publish-notice="handlePublishNotice"
@@ -124,75 +125,17 @@ const currentNotice = computed(() => {
   return pinnedNotice || groupNotices.value[0]
 })
 // 处理发布公告
-const handlePublishNotice = async (noticeData) => {
-  try {
-    // 这里应该调用API发布公告
-    // const res = await publishGroupNotice(props.groupInfo.roomId, noticeData)
-
-    // 模拟API调用成功
-    const newNotice = {
-      id: Date.now().toString(),
-      content: noticeData.content,
-      publisherId: '当前用户ID', // 应该从用户store中获取
-      publisherName: '当前用户名', // 应该从用户store中获取
-      publisherAvatar: 'https://example.com/avatar.jpg', // 应该从用户store中获取
-      publishTime: new Date().toISOString(),
-      isPinned: noticeData.isPinned,
-    }
-
-    // 更新本地公告列表
-    if (noticeData.isPinned) {
-      // 如果是置顶公告，取消其他公告的置顶状态
-      groupNotices.value = groupNotices.value.map((notice) => ({
-        ...notice,
-        isPinned: false,
-      }))
-    }
-
-    groupNotices.value = [newNotice, ...groupNotices.value]
-  } catch (error) {
-    console.error('发布公告失败:', error)
-  }
-}
+const handlePublishNotice = async (noticeData) => {}
 
 // 获取群公告列表
 const getGroupNotices = async () => {
   if (!props.groupInfo?.roomId) return
 
   try {
-    // 这里应该调用API获取群公告列表
-    // const res = await getGroupNoticeList(props.groupInfo.roomId)
-
-    // 模拟API调用结果
-    groupNotices.value = [
-      {
-        id: '1',
-        content: '辩论赛海报27.08剩余210.92',
-        publisherId: 'user1',
-        publisherName: '斯人',
-        publisherAvatar: 'https://example.com/avatar1.jpg',
-        publishTime: '2023-09-12T16:00:00Z',
-        isPinned: true,
-      },
-      {
-        id: '2',
-        content: '打印表花费5元剩余238元',
-        publisherId: 'user2',
-        publisherName: '斯人',
-        publisherAvatar: 'https://example.com/avatar2.jpg',
-        publishTime: '2023-09-22T17:56:00Z',
-        isPinned: false,
-      },
-      {
-        id: '3',
-        content: '班费花费50剩余243',
-        publisherId: 'user3',
-        publisherName: '斯人',
-        publisherAvatar: 'https://example.com/avatar3.jpg',
-        publishTime: '2023-04-29T22:45:00Z',
-        isPinned: false,
-      },
-    ]
+    const res = await getAnnouncementPage(props.groupInfo.roomId)
+    if (res.data.code === 200) {
+      groupNotices.value = res.data.data.records
+    }
   } catch (error) {
     console.error('获取群公告失败:', error)
   }
@@ -215,6 +158,7 @@ const chatRoomRole = computed(() => {
   return props.groupInfo.role
 })
 import { useProfilesStore } from '@/store/profiles.js'
+import { getAnnouncementPage } from '@/api/modules/chatRoomAnnouncements.js'
 const profilesStore = useProfilesStore()
 
 // 获取群成员信息

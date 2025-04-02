@@ -26,7 +26,12 @@
                 <el-button class="action-btn message-btn" type="primary" @click="handleSendMessage(member)">
                   发消息
                 </el-button>
-                <el-button v-if="isGroupOwner" class="action-btn admin-btn" @click="handleSetAdmin(member)">
+
+                <el-button
+                  v-if="isGroupOwner && member.role !== '群主'"
+                  class="action-btn admin-btn"
+                  @click="handleSetAdmin(member)"
+                >
                   {{ member.role === '管理员' ? '取消管理' : '设置管理' }}
                 </el-button>
                 <el-button
@@ -80,7 +85,6 @@ const props = defineProps({
     default: false,
   },
 })
-console.log('members:', props.members)
 
 // 计算好友状态对象
 const getMemberStatus = (member) => {
