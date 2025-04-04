@@ -198,31 +198,4 @@ onMounted(() => {
     }
   }
 }
-
-@media (max-width: 768px) {
-  .friend-requests {
-    padding: 15px;
-
-    .request-item {
-      flex-direction: column;
-      align-items: flex-start;
-
-      .request-avatar {
-        margin-bottom: 10px;
-      }
-
-      .request-content {
-        width: 100%;
-        flex-direction: column;
-        align-items: flex-start;
-
-        .request-left {
-          margin-top: 15px;
-          width: 100%;
-          justify-content: flex-start;
-        }
-      }
-    }
-  }
-}
 </style>

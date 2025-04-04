@@ -35,6 +35,11 @@ const routes = [
         path: 'settings',
         component: () => import('../views/setting/index.vue'),
       },
+      {
+        path: '/moment/:id',
+        name: 'MomentDetail',
+        component: () => import('@/components/moments/MomentDetailView.vue'),
+      },
     ],
   },
 ]

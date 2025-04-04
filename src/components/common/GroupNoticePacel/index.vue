@@ -68,7 +68,6 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { formatSentTime } from '@/utils/messageUtils.js'
 import { getUsersInfoInChatRoom } from '@/api/index.js'
 import { deleteAnnouncement, publishAnnouncement, updateAnnouncement } from '@/api/modules/chatRoomAnnouncements.js'
-import { MessageBox } from '@element-plus/icons-vue'
 
 const props = defineProps({
   notices: {

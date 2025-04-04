@@ -2,30 +2,34 @@
   <div class="moment-item">
     <!-- 用户头像 -->
     <div class="user-avatar">
-      <img :src="item.avatar" alt="avatar" />
+      <img :src="userInfo.avatarUrl" alt="avatar" />
     </div>
 
     <!-- 朋友圈内容区 -->
-    <div class="moment-content">
+    <div class="moment-content" @click="navigateToDetail()">
       <!-- 用户名和内容 -->
       <div class="user-info">
-        <div class="username">{{ item.username }}</div>
+        <div class="username">{{ userInfo.username }}</div>
         <div class="content">{{ item.content }}</div>
       </div>
 
       <!-- 图片区域 -->
-      <moment-images v-if="item.images && item.images.length" :images="item.images" @image-click="handleImageClick" />
+      <moment-images
+        v-if="item.mediaUrl && item.mediaUrl.length"
+        :images="item.mediaUrl"
+        @image-click="handleImageClick"
+      />
 
       <!-- 点赞和评论区域 -->
       <moment-interactions
-        v-if="item.likes.length > 0 || item.comments.length > 0"
-        :likes="item.likes"
-        :comments="item.comments"
+        v-if="item.likeCount > 0 || item.commentCount > 0"
+        :likes="item.likeCount"
+        :comments="item.commentCount"
       />
 
       <!-- 底部信息：时间和操作按钮 -->
       <div class="moment-footer">
-        <div class="time">{{ item.time }}</div>
+        <div class="time">{{ formatSentTime(item.createdAt) }}</div>
         <moment-actions :item="item" @toggle="toggleActions" @like="handleLike" @comment="handleComment" />
       </div>
     </div>
@@ -33,24 +37,72 @@
 </template>
 
 <script setup>
-import { defineProps, defineEmits } from 'vue'
+import { defineProps, defineEmits, ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import MomentImages from './MomentImages.vue'
 import MomentInteractions from './MomentInteractions.vue'
 import MomentActions from './MomentActions.vue'
+import { formatSentTime } from '@/utils/messageUtils.js'
+import { getInfoByIdInMoment } from '@/api/index.js'
 
-defineProps({
+const router = useRouter()
+const props = defineProps({
   item: {
     type: Object,
     required: true,
   },
 })
+// 用户信息缓存Map
+const userInfoMap = ref({})
+// 获取当前用户信息的计算属性
+const userInfo = computed(() => {
+  if (props.item.userId && userInfoMap.value[props.item.userId]) {
+    return userInfoMap.value[props.item.userId]
+  }
+  return { avatarUrl: props.item.avatar, username: props.item.username }
+})
 
-const emit = defineEmits(['update:item'])
+// 获取用户信息
+const fetchUserInfo = async () => {
+  if (!props.item.userId || userInfoMap.value[props.item.userId]) {
+    return
+  }
+
+  try {
+    const response = await getInfoByIdInMoment(props.item.userId)
+    if (response.data.code) {
+      // 将用户信息存储到Map中
+      userInfoMap.value[props.item.userId] = {
+        avatarUrl: response.data.data.avatarUrl,
+        username: response.data.data.username,
+      }
+    }
+  } catch (error) {
+    console.error('获取用户信息失败:', error)
+  }
+}
+// 导航到详情页
+const navigateToDetail = () => {
+  router.push({
+    name: 'MomentDetail',
+    params: { id: props.item.postId },
+  })
+}
 
 // 处理图片点击事件
 const handleImageClick = (image) => {
-  console.log('查看图片', image)
+  // 阻止事件冒泡，避免触发navigateToDetail
+  event.stopPropagation()
+  // 直接导航到详情页
+  navigateToDetail()
 }
+
+// 组件挂载时获取用户信息
+onMounted(() => {
+  fetchUserInfo()
+})
+
+const emit = defineEmits(['update:item'])
 
 // 处理点赞
 const handleLike = (item) => {
@@ -73,8 +125,17 @@ const handleLike = (item) => {
 const handleComment = (item) => {
   console.log('评论', item)
   item.showActions = false
+  // 导航到详情页并聚焦评论区
+  router.push({
+    name: 'MomentDetail',
+    params: { id: props.item.id },
+    state: {
+      moment: props.item,
+      userInfo: userInfo.value,
+      focusComment: true,
+    },
+  })
   emit('update:item', item)
-  // 这里可以添加评论逻辑
 }
 
 // 切换操作菜单显示状态
@@ -93,6 +154,7 @@ const toggleActions = (item) => {
   .user-avatar {
     width: 40px;
     height: 40px;
+    background-color: #00bcd4;
     margin-right: 10px;
     flex-shrink: 0;
 
@@ -106,6 +168,12 @@ const toggleActions = (item) => {
 
   .moment-content {
     flex: 1;
+    cursor: pointer;
+
+    &:hover {
+      background-color: #f9f9f9;
+      border-radius: 4px;
+    }
 
     .user-info {
       margin-bottom: 8px;
@@ -133,21 +201,6 @@ const toggleActions = (item) => {
       .time {
         font-size: 12px;
         color: #999;
-      }
-    }
-  }
-}
-
-// 移动端适配
-@media (max-width: 768px) {
-  .moment-item {
-    .moment-content {
-      .images-container {
-        .image-item {
-          img {
-            height: 80px;
-          }
-        }
       }
     }
   }

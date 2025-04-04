@@ -60,13 +60,13 @@
       <textarea v-model="momentContent" class="publish-textarea" placeholder="这一刻的想法..."></textarea>
 
       <div class="emoji-container">
-        <el-icon class="emoji-icon" @click="addEmoji"><SmileFilled /></el-icon>
+        <el-icon class="emoji-icon" @click="addEmoji"><View /></el-icon>
       </div>
 
       <div class="image-upload-container">
-        <div class="image-preview" v-if="selectedImage">
-          <img :src="selectedImage" alt="预览图片" />
-          <el-icon class="remove-image" @click="selectedImage = null">
+        <div class="image-preview" v-if="mediaUrl">
+          <img :src="mediaUrl" alt="预览图片" />
+          <el-icon class="remove-image" @click="mediaUrl = null">
             <Close />
           </el-icon>
         </div>
@@ -87,9 +87,11 @@
 </template>
 
 <script setup>
+//TODO上传图片之后再做
 import { ref } from 'vue'
 import { Bell, Camera, Refresh, Plus, Close, Star } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
+import { createPost } from '@/api/modules/userPost.js'
 
 // 弹窗显示状态
 const showPublishDialog = ref(false)
@@ -98,9 +100,10 @@ const showNotificationDialog = ref(false)
 // 朋友圈内容
 const momentContent = ref('')
 // 选中的图片
-const selectedImage = ref(null)
+const mediaUrl = ref('')
+const mediaType = ref('')
 // 图片上传input引用
-const imageInput = ref(null)
+const imageInput = ref('')
 
 // 模拟通知数据
 const notifications = ref([
@@ -174,7 +177,7 @@ const handleImageSelect = (event) => {
   if (file) {
     const reader = new FileReader()
     reader.onload = (e) => {
-      selectedImage.value = e.target.result
+      mediaUrl.value = e.target.result
     }
     reader.readAsDataURL(file)
   }
@@ -186,22 +189,19 @@ const addEmoji = () => {
 }
 
 // 发布朋友圈
-const publishMoment = () => {
-  if (!momentContent.value.trim() && !selectedImage.value) {
-    ElMessage.warning('请输入内容或上传图片')
+const publishMoment = async () => {
+  if (!momentContent.value.trim()) {
+    ElMessage.warning('朋友圈内容不能为空')
     return
   }
-
-  console.log('发布朋友圈', {
-    content: momentContent.value,
-    image: selectedImage.value,
-  })
-
-  // 发布成功后清空内容并关闭弹窗
-  momentContent.value = ''
-  selectedImage.value = null
-  showPublishDialog.value = false
-  ElMessage.success('发布成功')
+  const res = await createPost(momentContent.value, mediaType.value, mediaUrl.value)
+  if (res.data.code === 200) {
+    momentContent.value = ''
+    mediaUrl.value = ''
+    mediaType.value = ''
+    showPublishDialog.value = false
+    ElMessage.success('发布成功')
+  }
 }
 </script>
 

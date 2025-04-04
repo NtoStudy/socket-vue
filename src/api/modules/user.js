@@ -73,6 +73,20 @@ export const getUsersInfoInChatRoom = (userId, roomId) =>
   })
 
 /**
+ * 根据用户ID查询朋友圈详细信息接口
+ * @param userId
+ * @returns {*}
+ */
+export const getInfoByIdInMoment = (userId) =>
+  instance({
+    url: '/users/infoByIdInMoment',
+    method: 'get',
+    params: {
+      userId,
+    },
+  })
+
+/**
  * 根据用户ID查询好友详细信息接口
  * @param {number} userId - 用户ID
  * @returns {Promise} - 返回包含好友详细信息的Promise对象
