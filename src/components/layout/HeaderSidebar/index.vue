@@ -25,7 +25,11 @@
     <slot></slot>
 
     <!-- 添加搜索和创建群聊对话框 -->
-    <search v-if="isAddDialogVisible" :isAddDialogVisible="isAddDialogVisible" @close="closeAddDialogVisible" />
+    <searchComponent
+      v-if="isAddDialogVisible"
+      :isAddDialogVisible="isAddDialogVisible"
+      @close="closeAddDialogVisible"
+    />
     <createGroup
       v-if="isCreateDialogVisible"
       :isCreateDialogVisible="isCreateDialogVisible"
@@ -38,7 +42,7 @@
 <script setup>
 import { ChatRound, Plus, Search, User } from '@element-plus/icons-vue'
 import { ref, onMounted, onUnmounted } from 'vue'
-import search from '@/components/common/search/index.vue'
+import searchComponent from '@/components/common/search/index.vue'
 import createGroup from '@/components/common/createGroup/index.vue'
 
 // 定义属性

@@ -9,7 +9,7 @@ export const addFriend = (friendNumber) =>
   instance({
     url: '/friends/add',
     method: 'post',
-    data: { friendNumber }, // 使用data传递请求体数据
+    params: { friendNumber }, // 使用data传递请求体数据
   })
 
 /**
@@ -32,7 +32,7 @@ export const handleFriend = (relationId, status) =>
   instance({
     url: '/friends/accept',
     method: 'put',
-    data: { relationId, status }, // 使用data传递请求体数据
+    params: { relationId, status }, // 使用data传递请求体数据
   })
 
 /**
@@ -57,7 +57,7 @@ export const postFriendsRemark = (friendId, remark) =>
   instance({
     url: '/friends/remark',
     method: 'post',
-    data: { friendId, remark }, // 使用data传递请求体数据
+    params: { friendId, remark }, // 使用data传递请求体数据
   })
 
 /**
@@ -70,7 +70,7 @@ export const postFriendPin = (friendId, status) =>
   instance({
     url: '/friends/togglePin',
     method: 'put',
-    data: { friendId, status }, // 使用data传递请求体数据
+    params: { friendId, status }, // 使用data传递请求体数据
   })
 
 /**

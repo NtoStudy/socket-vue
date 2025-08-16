@@ -29,7 +29,7 @@ export const uploadMethods = (files) => {
   return instance({
     url: '/upload/batch',
     method: 'post',
-    data: formData,
+    params: formData,
   })
 }
 
@@ -42,5 +42,5 @@ export const uploadVideo = (formData) =>
   instance({
     url: '/upload/chunk',
     method: 'post',
-    data: formData,
+    params: formData,
   })

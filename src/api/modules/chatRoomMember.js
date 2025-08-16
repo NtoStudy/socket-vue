@@ -22,7 +22,7 @@ export const inviteToChatRoom = (friendIds, roomId) =>
   instance({
     url: '/chat-rooms/invite',
     method: 'post',
-    data: { friendIds, roomId },
+    params: { friendIds, roomId },
   })
 
 /**

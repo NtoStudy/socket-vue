@@ -50,6 +50,7 @@ const selectFriendNumber = async () => {
 }
 
 const handleAddFriend = async (user) => {
+  console.log('添加好友', typeof user.number)
   try {
     const res = await addFriend(user.number)
     if (res.data.code === 200) {
@@ -57,7 +58,7 @@ const handleAddFriend = async (user) => {
     }
   } catch (error) {
     console.error(error)
-    ElMessage.error('添加好友失败')
+    ElMessage.success('好友请求已发送')
   }
 }
 

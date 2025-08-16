@@ -125,14 +125,15 @@ export const getPostComments = (postId) => {
 }
 
 /**
- * 删除自己的评论
- * @param {number} commentId - 评论ID
- * @returns {Promise} - 返回操作结果的Promise对象
+ * 删除朋友圈评论
+ * @param postId
+ * @param commentId
+ * @returns {*}
  */
-export const deleteComment = (commentId) => {
+export const deleteComment = (postId, commentId) => {
   return instance({
     url: '/post-comments/deleteById',
     method: 'delete',
-    params: { commentId },
+    params: { postId, commentId },
   })
 }

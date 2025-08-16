@@ -10,7 +10,7 @@ export const chatRoomCreate = (roomName, userIds) =>
   instance({
     url: '/chat-rooms/create',
     method: 'post',
-    data: { roomName, userIds },
+    params: { roomName, userIds },
   })
 
 /**

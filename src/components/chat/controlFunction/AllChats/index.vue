@@ -121,7 +121,7 @@ onUnmounted(() => {
           <span class="chat-text">{{ chat.content }}</span>
         </div>
       </div>
-      <div class="chat-badge" v-if="chat.count > 0">{{ chat.count }}</div>
+      <!--      <div class="chat-badge" v-if="chat.count > 0">{{ chat.count }}</div>-->
     </div>
   </div>
 </template>

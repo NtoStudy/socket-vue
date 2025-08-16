@@ -109,7 +109,7 @@ export const postUsersUpdate = (userData) =>
   instance({
     url: '/users/update',
     method: 'post',
-    data: userData,
+    params: userData,
   })
 
 /**

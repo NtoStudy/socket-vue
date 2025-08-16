@@ -83,8 +83,8 @@ const handleRegisterSubmit = async () => {
     return
   }
   const res = await userRegister(registerForm.value.number, registerForm.value.password)
-  alert('注册成功')
-  isRegister.value = false // 注册成功后切换回登录表单
+  alert(`注册成功,您的账号是 ${res.data.data}`)
+  isRegister.value = false
 }
 </script>
 

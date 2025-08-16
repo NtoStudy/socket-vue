@@ -9,7 +9,7 @@ export const createFriendGroup = (groupName) =>
   instance({
     url: '/friend-groups/create',
     method: 'post',
-    data: { groupName }, // 使用data传递请求体数据
+    params: { groupName }, // 使用data传递请求体数据
   })
 
 /**
@@ -22,7 +22,7 @@ export const updateFriendGroup = (groupId, groupName) =>
   instance({
     url: '/friend-groups/update',
     method: 'post',
-    data: { groupId, groupName }, // 使用data传递请求体数据
+    params: { groupId, groupName }, // 使用data传递请求体数据
   })
 
 /**

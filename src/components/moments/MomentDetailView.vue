@@ -129,6 +129,9 @@ import { ArrowLeft, Star, ChatDotRound } from '@element-plus/icons-vue'
 import { formatSentTime } from '@/utils/messageUtils.js'
 import { getPostDetail, getPostLikes, getPostComments, likePost, commentPost } from '@/api/modules/userPost.js'
 import CommentReplies from './CommentReplies.vue'
+import { ElMessage } from 'element-plus'
+import { useUserInfoStore } from '@/store/user.js'
+
 const router = useRouter()
 const route = useRoute()
 const moment = ref(null)
@@ -178,34 +181,50 @@ const fetchMomentDetail = async () => {
     }
   }
 }
-
 // 处理点赞
 const handleLike = async () => {
-  if (!moment.value) return
+  if (!moment.value || !useUserInfoStore().userInfo) return
 
   try {
-    const isCancel = moment.value.isLiked ? 1 : 0
-    const response = await likePost(moment.value.id, isCancel)
+    // 检查当前用户是否已点赞
+    const currentUserId = useUserInfoStore().userInfo.userId
+    const isLiked = moment.value.likes && moment.value.likes.some((like) => like.userId === currentUserId)
 
-    if (response.data.code === 200) {
-      moment.value.isLiked = !moment.value.isLiked
+    const isCancel = isLiked ? 1 : 0
+    // const response = await likePost(moment.value.postId, isCancel)
 
-      if (moment.value.isLiked) {
-        moment.value.likeCount++
-        // 添加当前用户到点赞列表
-        if (!moment.value.likes) moment.value.likes = []
-        moment.value.likes.push('当前用户')
-      } else {
-        moment.value.likeCount--
-        // 从点赞列表中移除当前用户
-        if (moment.value.likes) {
-          const index = moment.value.likes.indexOf('当前用户')
-          if (index !== -1) {
-            moment.value.likes.splice(index, 1)
-          }
-        }
-      }
-    }
+    // if (response.data.code === 200) {
+    //   if (isCancel === 0) {
+    //     // 添加点赞
+    //     if (!moment.value.likes) moment.value.likes = []
+    //
+    //     // 添加新的点赞记录
+    //     moment.value.likes.push({
+    //       userId: currentUserId,
+    //       username: userStore.userInfo.username,
+    //       avatarUrl: userStore.userInfo.avatarUrl,
+    //       postId: moment.value.postId,
+    //       createdAt: new Date().toISOString()
+    //     })
+    //
+    //     moment.value.likeCount = (moment.value.likeCount || 0) + 1
+    //     ElMessage.success('点赞成功')
+    //   } else {
+    //     // 取消点赞
+    //     if (moment.value.likes) {
+    //       const index = moment.value.likes.findIndex(like => like.userId === currentUserId)
+    //       if (index !== -1) {
+    //         moment.value.likes.splice(index, 1)
+    //       }
+    //     }
+    //
+    //     moment.value.likeCount = Math.max((moment.value.likeCount || 1) - 1, 0)
+    //     ElMessage.success('取消点赞成功')
+    //   }
+    //
+    //   // 更新点赞状态
+    //   moment.value.isLiked = !isLiked
+    // }
   } catch (error) {
     console.error('点赞操作失败:', error)
   }
@@ -246,7 +265,7 @@ onMounted(() => {
 <style lang="scss" scoped>
 .moment-detail-view {
   min-height: 100vh;
-  width: 600px;
+  max-width: 600px;
   margin: 0 auto;
   background-color: #f7f7f7;
   display: flex;
