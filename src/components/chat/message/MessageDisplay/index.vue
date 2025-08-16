@@ -53,9 +53,7 @@ const friendStatus = computed(() => {
     label: chatStore.friendInfo.status || '在线',
   }
 })
-/**
- * 滚动到消息框底部
- */
+// 滚动到消息框底部
 const scrollToBottom = () => {
   if (messagesContainer.value) {
     messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight
@@ -63,9 +61,7 @@ const scrollToBottom = () => {
   }
 }
 
-/**
- * 处理滚动事件
- */
+// 处理滚动事件
 const handleScroll = () => {
   // 防止事件冲突
   if (!messagesContainer.value) return
@@ -80,11 +76,7 @@ const handleScroll = () => {
   isScrolledToBottom.value = scrollTop + clientHeight >= scrollHeight - 10
 }
 
-/**
- * 处理右键点击消息事件的包装函数
- * @param {Object} message - 被点击的消息对象
- * @param {Event} event - 鼠标事件对象
- */
+// 处理右键点击消息事件的包装函数
 const handleMessageRightClick = (message, event) => {
   handleRightClickMessage(
     message,
@@ -97,9 +89,7 @@ const handleMessageRightClick = (message, event) => {
   )
 }
 
-/**
- * 处理点赞
- */
+// 处理点赞
 const handleLike = async () => {
   const res = await putUsersLike(chatStore.friendInfo.userId)
   if (res.data.code === 200) {
@@ -109,16 +99,12 @@ const handleLike = async () => {
   }
 }
 
-/**
- * 处理备注编辑
- */
+// 处理备注编辑
 const handleRemarkEdit = () => {
   isEditingRemark.value = true
 }
 
-/**
- * 处理备注保存
- */
+// 处理备注保存
 const handleRemarkSave = async () => {
   try {
     const res = await postFriendsRemark(chatStore.friendId, remark.value)

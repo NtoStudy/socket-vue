@@ -1,8 +1,4 @@
-/**
- * 根据状态标签获取对应的CSS类名
- * @param {string} statusLabel - 状态标签
- * @returns {string} - 对应的CSS类名
- */
+// 根据状态标签获取对应的CSS类名
 export const getStatusClass = (statusLabel) => {
   const labelMap = {
     在线: 'status-online',
@@ -23,9 +19,7 @@ export const getStatusClass = (statusLabel) => {
   return labelMap[statusLabel] || 'status-online'
 }
 
-/**
- * 状态标签列表，用于选择状态
- */
+// 状态标签列表，用于选择状态
 export const statusOptions = [
   { label: '在线', value: '在线' },
   { label: 'Q我吧', value: 'Q我吧' },

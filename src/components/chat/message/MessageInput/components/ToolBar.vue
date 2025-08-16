@@ -4,23 +4,17 @@ import { Film, Microphone, MoreFilled, VideoCamera, Picture } from '@element-plu
 // 定义组件的事件
 const emit = defineEmits(['send-picture', 'send-video', 'more-options'])
 
-/**
- * 触发图片上传事件
- */
+// 触发图片上传事件
 const handleSendPicture = () => {
   emit('send-picture')
 }
 
-/**
- * 触发视频上传事件
- */
+// 触发视频上传事件
 const handleSendVideo = () => {
   emit('send-video')
 }
 
-/**
- * 触发更多选项事件
- */
+// 触发更多选项事件
 const handleMoreOptions = () => {
   emit('more-options')
 }

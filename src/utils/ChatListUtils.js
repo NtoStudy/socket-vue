@@ -1,12 +1,7 @@
 import { formatSentTime, truncateContent } from '@/utils/messageUtils.js'
 import { chatRoomHistory, groupMessageCount, friendMessageCount, messageHistory } from '@/api/index.js'
 
-/**
- * 判断聊天项是否被选中
- * @param {Object} chat - 聊天项对象
- * @param {Object} chatStore - 聊天状态存储
- * @returns {Boolean} - 是否被选中
- */
+// 判断聊天项是否被选中
 export const isActive = (chat, chatStore) => {
   if (chat.chatType === 'friend') {
     return chatStore.friendId === chat.friendId
@@ -15,12 +10,7 @@ export const isActive = (chat, chatStore) => {
   }
 }
 
-/**
- * 判断聊天项是否为当前选中项
- * @param {Object} chat - 聊天项对象
- * @param {Object} route - 当前路由对象
- * @returns {Boolean} - 是否为当前选中项
- */
+// 判断聊天项是否为当前选中项
 export const isCurrentSelected = (chat, route) => {
   const id = route.params.id
   if (!id) return false
@@ -36,11 +26,7 @@ export const isCurrentSelected = (chat, route) => {
   return false
 }
 
-/**
- * 格式化消息内容
- * @param {Object} message - 消息对象
- * @returns {String} - 格式化后的内容
- */
+// 格式化消息内容
 export const formatMessageContent = (message) => {
   if (message.messageType === 'text') {
     return truncateContent(message.content)
@@ -52,11 +38,7 @@ export const formatMessageContent = (message) => {
   return null
 }
 
-/**
- * 处理好友列表数据
- * @param {Array} friendData - 原始好友数据
- * @returns {Promise<Array>} - 处理后的好友列表
- */
+// 处理好友列表数据
 export const processFriendList = async (friendData) => {
   if (!friendData || !friendData.length) return []
 
@@ -117,11 +99,7 @@ export const processFriendList = async (friendData) => {
   return await Promise.allSettled(messageHistoryPromises)
 }
 
-/**
- * 处理群聊列表数据
- * @param {Array} groupData - 原始群聊数据
- * @returns {Promise<Array>} - 处理后的群聊列表
- */
+// 处理群聊列表数据
 export const processChatRoomList = async (groupData) => {
   if (!groupData || !groupData.length) return []
 
@@ -182,12 +160,7 @@ export const processChatRoomList = async (groupData) => {
   return await Promise.allSettled(messageHistoryPromises)
 }
 
-/**
- * 合并并排序聊天数据
- * @param {Array} friendResults - 好友结果数组
- * @param {Array} groupResults - 群聊结果数组
- * @returns {Array} - 排序后的聊天列表
- */
+// 合并并排序聊天数据
 export const combineAndSortChats = (friendResults, groupResults) => {
   // 合并数据
   const friendChats = friendResults

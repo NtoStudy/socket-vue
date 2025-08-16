@@ -7,9 +7,7 @@ const emit = defineEmits(['send-message'])
 // 响应式变量：绑定用户输入的消息
 const inputMessage = ref('')
 
-/**
- * 处理文本消息发送逻辑
- */
+// 处理文本消息发送逻辑
 const handleTextMessage = () => {
   if (inputMessage.value.trim()) {
     emit('send-message', inputMessage.value)

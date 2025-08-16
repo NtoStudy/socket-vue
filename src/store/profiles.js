@@ -10,10 +10,7 @@ export const useProfilesStore = defineStore('profiles', () => {
   // 群成员信息缓存
   const groupMemberProfiles = ref({}) // 格式: { roomId: { userId: memberInfo } }
 
-  /**
-   * 获取用户信息
-   * @param {String} userId - 用户ID
-   */
+  // 获取用户信息
   const getUserProfile = async (userId) => {
     if (!userId) return null
 
@@ -36,11 +33,7 @@ export const useProfilesStore = defineStore('profiles', () => {
     return null
   }
 
-  /**
-   * 获取群成员信息
-   * @param {String} userId - 用户ID
-   * @param {String} roomId - 群聊ID
-   */
+  // 获取群成员信息
   const getGroupMemberProfile = async (userId, roomId) => {
     if (!userId || !roomId) return null
 
@@ -63,11 +56,7 @@ export const useProfilesStore = defineStore('profiles', () => {
     return null
   }
 
-  /**
-   * 批量获取群成员信息
-   * @param {Array} userIds - 用户ID数组
-   * @param {String} roomId - 群聊ID
-   */
+  // 批量获取群成员信息
   const getGroupMembersProfiles = async (userIds, roomId) => {
     if (!userIds || !userIds.length || !roomId) return []
     const promises = userIds.map((userId) => getGroupMemberProfile(userId, roomId))
@@ -75,9 +64,7 @@ export const useProfilesStore = defineStore('profiles', () => {
     return results.filter((result) => result !== null)
   }
 
-  /**
-   * 清除缓存
-   */
+  // 清除缓存
   const clearCache = () => {
     userProfiles.value = {}
     groupMemberProfiles.value = {}

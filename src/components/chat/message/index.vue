@@ -43,10 +43,7 @@ const drawerVisible = ref(false)
 // 用于存储文件URL的响应式变量
 const fileUrl = ref('')
 
-/**
- * 处理WebSocket接收到的消息
- * @param {Object} message - 接收到的消息
- */
+// 处理WebSocket接收到的消息
 const onWebSocketMessage = (message) => {
   // 处理文件上传完成的消息
   if (message.type === 'file-upload-complete') {
@@ -59,10 +56,7 @@ const onWebSocketMessage = (message) => {
   handleWebSocketMessage(message)
 }
 
-/**
- * 发送消息到聊天
- * @param {Object} messageInfo - 消息信息
- */
+// 发送消息到聊天
 const sendMessageToChat = (messageInfo) => {
   const senderId = userStore.userInfo.userId
   const friendId = chatStore.friendId
@@ -71,27 +65,19 @@ const sendMessageToChat = (messageInfo) => {
   sendMessage(messageInfo, senderId, friendId, chatRoomId, websocket)
 }
 
-/**
- * 处理抽屉关闭
- * @param {Boolean} visible - 抽屉可见性
- */
+// 处理抽屉关闭
 const handleDrawerClose = (visible) => {
   drawerVisible.value = visible
 }
 
-/**
- * 处理置顶状态变更
- * @param {Boolean} value - 新的置顶状态
- */
+// 处理置顶状态变更
 const handleTopChange = async (value) => {
   await chatStore.updateTopStatus(value)
   // 触发事件更新好友列表
   eventBus.emit('call-handleFriendList')
 }
 
-/**
- * 处理删除聊天记录
- */
+// 处理删除聊天记录
 const handleDeleteChatHistory = () => {
   // 实现删除聊天记录功能
   console.log('删除聊天记录')
@@ -99,9 +85,7 @@ const handleDeleteChatHistory = () => {
   ElMessage.info('删除聊天记录功能尚未实现')
 }
 
-/**
- * 处理删除好友
- */
+// 处理删除好友
 const handleDeleteFriend = () => {
   // 实现删除好友功能
   console.log('删除好友')
@@ -188,9 +172,7 @@ const isGroupChat = computed(() => {
 // 群聊抽屉可见性
 const groupDrawerVisible = ref(false)
 
-/**
- * 打开更多选项抽屉
- */
+// 打开更多选项抽屉
 const openDrawer = () => {
   // 根据聊天类型打开不同的抽屉
   if (isGroupChat.value) {
@@ -200,16 +182,12 @@ const openDrawer = () => {
   }
 }
 
-/**
- * 处理群聊抽屉关闭
- */
+// 处理群聊抽屉关闭
 const handleGroupDrawerClose = () => {
   groupDrawerVisible.value = false
 }
 
-/**
- * 处理群聊置顶状态变更
- */
+// 处理群聊置顶状态变更
 const handleGroupTopChange = async (value) => {
   const success = await chatStore.updateGroupTopStatus(value)
   if (success) {
@@ -217,17 +195,13 @@ const handleGroupTopChange = async (value) => {
   }
 }
 
-/**
- * 修改我的本群昵称
- */
+// 修改我的本群昵称
 const handleChangeGroupNickName = async (value) => {
   const res = await updateChatRoomNickname(value, chatStore.chatRoomId)
   console.log('修改群昵称结果', res.data)
 }
 
-/**
- * 处理解散群聊
- */
+// 处理解散群聊
 const handleDissolveGroup = async () => {
   console.log('解散群')
   console.log()
@@ -235,18 +209,14 @@ const handleDissolveGroup = async () => {
   console.log(res.data)
 }
 
-/**
- * 处理修改群名称
- */
+// 处理修改群名称
 const handleChangeGroupName = async (value) => {
   console.log('修改群名称')
   const res = await changeChatRoomName(chatStore.chatRoomId, value)
   console.log(res.data)
 }
 
-/**
- * 处理修改群公告
- */
+// 处理修改群公告
 const handleChangeGroupNotice = () => {
   console.log('修改群公告')
 }

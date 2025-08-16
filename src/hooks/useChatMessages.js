@@ -17,27 +17,19 @@ export function useChatMessages(messageDisplayRef) {
     loading: false,
   })
 
-  /**
-   * 更新消息列表，确保触发响应式更新
-   * @param {Array} newMessages - 新的消息列表
-   */
+  // 更新消息列表，确保触发响应式更新
   const updateMessages = (newMessages) => {
     messages.value = [...newMessages]
   }
 
-  /**
-   * 重置分页参数
-   */
+  // 重置分页参数
   const resetPagination = () => {
     pagination.page = 1
     pagination.hasMore = true
     pagination.loading = false
   }
 
-  /**
-   * 处理WebSocket接收到的消息
-   * @param {Object} message - 接收到的消息
-   */
+  // 处理WebSocket接收到的消息
   const handleWebSocketMessage = (message) => {
     // 处理文件上传完成的消息
     if (message.type === 'file-upload-complete') {
@@ -56,10 +48,7 @@ export function useChatMessages(messageDisplayRef) {
     return null
   }
 
-  /**
-   * 加载好友消息
-   * @param {String} friendId - 好友ID
-   */
+  // 加载好友消息
   const loadFriendMessages = async (friendId) => {
     if (!friendId) return
 
@@ -91,10 +80,7 @@ export function useChatMessages(messageDisplayRef) {
     }
   }
 
-  /**
-   * 加载群聊消息
-   * @param {String} chatRoomId - 聊天室ID
-   */
+  // 加载群聊消息
   // 在 useChatMessages.js 中修改 loadChatRoomMessages 函数
   const loadChatRoomMessages = async (chatRoomId) => {
     if (!chatRoomId) return
@@ -127,14 +113,8 @@ export function useChatMessages(messageDisplayRef) {
       pagination.loading = false
     }
   }
-  /**
-   * 加载更多消息
-   * @param {Object} chatStore - 聊天状态存储
-   */
-  /**
-   * 加载更多消息
-   * @param {Object} chatStore - 聊天状态存储
-   */
+  // 加载更多消息
+  // 加载更多消息
   const loadMoreMessages = async (chatStore) => {
     // 如果正在加载或没有更多消息，则返回
     if (pagination.loading || !pagination.hasMore) return
@@ -193,24 +173,14 @@ export function useChatMessages(messageDisplayRef) {
   // 使用节流函数包装加载更多消息的函数，避免频繁调用
   const throttledLoadMoreMessages = (chatStore) => _.throttle(() => loadMoreMessages(chatStore), 1000)()
 
-  /**
-   * 处理消息删除
-   * @param {Object} deletedMessage - 被删除的消息
-   */
+  // 处理消息删除
   const handleMessageDeleted = (deletedMessage) => {
     // 从消息列表中移除被删除的消息
     const filteredMessages = messages.value.filter((msg) => msg.messageId !== deletedMessage.messageId)
     updateMessages(filteredMessages)
   }
 
-  /**
-   * 发送消息
-   * @param {Object} messageInfo - 消息信息
-   * @param {String} senderId - 发送者ID
-   * @param {String} friendId - 好友ID
-   * @param {String} chatRoomId - 聊天室ID
-   * @param {Object} websocket - WebSocket服务实例
-   */
+  // 发送消息
   const sendMessage = (messageInfo, senderId, friendId, chatRoomId, websocket) => {
     const message = chatService.sendMessage(
       messageInfo,
@@ -233,17 +203,12 @@ export function useChatMessages(messageDisplayRef) {
     }
   }
 
-  /**
-   * 清空消息列表
-   */
+  // 清空消息列表
   const clearMessages = () => {
     updateMessages([])
   }
 
-  /**
-   * 设置消息窗口状态
-   * @param {String} status - 新的状态
-   */
+  // 设置消息窗口状态
   const setMessageWindowStatus = (status) => {
     messageWindowStatus.value = status
   }

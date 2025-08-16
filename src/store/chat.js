@@ -16,10 +16,7 @@ export const chatFriendOrChatRoomStore = defineStore(
     const groupInfo = ref({})
     const isGroupTop = ref(false)
 
-    /**
-     * 设置好友ID
-     * @param {String} newFriendId - 新的好友ID
-     */
+    // 设置好友ID
     const setFriendId = (newFriendId) => {
       friendId.value = newFriendId
       // 如果设置了新的好友ID，自动获取好友信息
@@ -32,10 +29,7 @@ export const chatFriendOrChatRoomStore = defineStore(
       }
     }
 
-    /**
-     * 设置聊天室ID
-     * @param {String} newChatRoomId - 新的聊天室ID
-     */
+    // 设置聊天室ID
     const setChatRoomId = (newChatRoomId) => {
       // 如果是同一个聊天室，不做任何操作
       if (chatRoomId.value === newChatRoomId) return
@@ -49,10 +43,7 @@ export const chatFriendOrChatRoomStore = defineStore(
       }
     }
 
-    /**
-     * 获取好友信息
-     * @param {String} id - 好友ID
-     */
+    // 获取好友信息
     const getFriendInfo = async (id) => {
       if (!id) {
         return
@@ -88,10 +79,7 @@ export const chatFriendOrChatRoomStore = defineStore(
       }
     }
 
-    /**
-     * 更新好友置顶状态
-     * @param {Boolean} value - 新的置顶状态
-     */
+    // 更新好友置顶状态
     const updateTopStatus = async (value) => {
       if (!friendId.value) return false
 
@@ -111,10 +99,7 @@ export const chatFriendOrChatRoomStore = defineStore(
       return false
     }
 
-    /**
-     * 更新群聊置顶状态
-     * @param {Boolean} value - 新的置顶状态
-     */
+    // 更新群聊置顶状态
     const updateGroupTopStatus = async (value) => {
       if (!chatRoomId.value) return false
 

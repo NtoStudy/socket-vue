@@ -10,16 +10,12 @@
 import AllChats from './AllChats/index.vue'
 import Sidebar from '@/components/layout/HeaderSidebar/index.vue'
 
-/**
- * 处理创建群聊事件
- */
+// 处理创建群聊事件
 const handleCreateGroup = () => {
   console.log('聊天页面处理创建群聊')
 }
 
-/**
- * 处理添加好友/群事件
- */
+// 处理添加好友/群事件
 const handleAddContact = () => {
   console.log('聊天页面处理添加好友/群')
 }

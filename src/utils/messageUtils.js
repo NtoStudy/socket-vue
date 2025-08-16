@@ -1,8 +1,4 @@
-/**
- * 格式化消息发送时间
- * @param {string} sentTime - 消息发送时间戳
- * @returns {string} 格式化后的时间字符串
- */
+// 格式化消息发送时间
 export const formatSentTime = (sentTime) => {
   if (!sentTime) {
     console.error('Invalid sentTime:', sentTime)
@@ -29,11 +25,7 @@ export const formatSentTime = (sentTime) => {
     return sentDate.toLocaleDateString([], { year: 'numeric', month: '2-digit', day: '2-digit' })
   }
 }
-/**
- * 截断消息内容
- * @param {string} content - 消息内容
- * @returns {string} 截断后的内容
- */
+// 截断消息内容
 export const truncateContent = (content) => {
   if (content) {
     const maxLength = 10
@@ -42,12 +34,7 @@ export const truncateContent = (content) => {
   return content
 }
 
-/**
- * 格式化消息列表，处理时间显示和时间戳显示逻辑
- * @param {Array} messagesList - 消息列表
- * @param {Number} timestampInterval - 显示时间戳的最小时间间隔（毫秒），默认3分钟
- * @returns {Array} 格式化后的消息列表
- */
+// 格式化消息列表，处理时间显示和时间戳显示逻辑
 export const formatMessages = (messagesList, timestampInterval = 180000) => {
   if (!Array.isArray(messagesList) || messagesList.length === 0) {
     return []
@@ -170,16 +157,7 @@ export const formatMessages = (messagesList, timestampInterval = 180000) => {
   })
 }
 
-/**
- * 处理右键点击消息事件
- * @param {Object} message - 被点击的消息对象
- * @param {Event} event - 鼠标事件对象
- * @param {Function} deleteCallback - 删除消息后的回调函数
- * @param {Object} messageApi - Element Plus 的消息 API
- * @param {Object} confirmApi - Element Plus 的确认框 API
- * @param {Function} deleteMessageApi - 删除消息的 API 函数
- * @param {Function} deleteChatRoomApi - 删除群聊消息的 API 函数
- */
+// 处理右键点击消息事件
 export const handleRightClickMessage = (
   message,
   event,
@@ -192,11 +170,7 @@ export const handleRightClickMessage = (
   // 防止默认的右键行为
   event.preventDefault()
 
-  /**
-   * 删除消息函数
-   * @param {String} messageId - 消息ID
-   * @param {String} chatRoomId - 聊天室ID，如果消息属于聊天室则提供
-   */
+  // 删除消息函数
   const deleteMessage = async (messageId, chatRoomId) => {
     try {
       let res

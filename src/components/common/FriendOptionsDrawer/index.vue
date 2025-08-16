@@ -21,32 +21,23 @@ const drawerVisible = computed({
   set: (value) => emit('close', value),
 })
 
-/**
- * 处理抽屉关闭事件
- */
+// 处理抽屉关闭事件
 const handleClose = () => {
   emit('close', false)
 }
 
-/**
- * 处理置顶状态变更
- * @param {Boolean} value - 新的置顶状态
- */
+// 处理置顶状态变更
 const handleTopChange = (value) => {
   emit('topChange', value)
 }
 
-/**
- * 处理删除聊天记录点击
- */
+// 处理删除聊天记录点击
 const handleDeleteChatHistory = () => {
   emit('deleteChatHistory')
   handleClose()
 }
 
-/**
- * 处理删除好友点击
- */
+// 处理删除好友点击
 const handleDeleteFriend = () => {
   emit('deleteFriend')
   handleClose()

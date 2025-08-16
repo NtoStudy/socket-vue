@@ -17,10 +17,7 @@ const route = useRoute()
 const chatFriendOrChatRoom = chatFriendOrChatRoomStore()
 const allChats = ref([])
 
-/**
- * 处理好友列表数据
- * @returns {Promise<Array>} - 处理后的好友列表
- */
+// 处理好友列表数据
 const handleFriendList = async () => {
   const res = await getFriendList()
   if (res.data.code === 200) {
@@ -29,10 +26,7 @@ const handleFriendList = async () => {
   return []
 }
 
-/**
- * 处理群聊列表数据
- * @returns {Promise<Array>} - 处理后的群聊列表
- */
+// 处理群聊列表数据
 const handleChatRoomList = async () => {
   const res = await chatRoomList()
   if (res.data.code === 200) {
@@ -41,9 +35,7 @@ const handleChatRoomList = async () => {
   return []
 }
 
-/**
- * 合并并加载所有聊天数据
- */
+// 合并并加载所有聊天数据
 const loadAllChats = async () => {
   try {
     // 获取好友和群聊数据
@@ -57,10 +49,7 @@ const loadAllChats = async () => {
   }
 }
 
-/**
- * 处理聊天项点击
- * @param {Object} chat - 被点击的聊天项
- */
+// 处理聊天项点击
 const handleChatItemClick = (chat) => {
   if (chat.chatType === 'friend') {
     chatFriendOrChatRoom.setFriendId(chat.friendId)

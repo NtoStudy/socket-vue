@@ -13,26 +13,19 @@ const uploading = ref(false)
 // 定义一个事件发射器，用于通知父组件发送消息
 const emit = defineEmits(['send-message', 'open-more-options'])
 
-/**
- * 触发文件选择框点击事件（图片上传）
- */
+// 触发文件选择框点击事件（图片上传）
 const sendPicture = () => {
   const input = document.getElementById('imageUpload')
   input.click()
 }
 
-/**
- * 触发文件选择框点击事件（视频上传）
- */
+// 触发文件选择框点击事件（视频上传）
 const sendVideo = () => {
   const input = document.getElementById('videoUpload')
   input.click()
 }
 
-/**
- * 处理视频上传逻辑
- * @param {Event} event - 文件上传事件
- */
+// 处理视频上传逻辑
 const handleVideoUpload = async (event) => {
   const file = event.target.files[0]
   if (!file) return
@@ -73,10 +66,7 @@ const handleVideoUpload = async (event) => {
   }
 }
 
-/**
- * 处理图片上传逻辑
- * @param {Event} event - 文件上传事件
- */
+// 处理图片上传逻辑
 const handleImageUpload = async (event) => {
   const files = event.target.files
   if (files && files.length > 0) {
@@ -95,17 +85,12 @@ const handleImageUpload = async (event) => {
   }
 }
 
-/**
- * 处理文本消息发送
- * @param {String} message - 文本消息内容
- */
+// 处理文本消息发送
 const handleSendTextMessage = (message) => {
   emit('send-message', { type: 'text', content: message })
 }
 
-/**
- * 处理更多选项按钮点击
- */
+// 处理更多选项按钮点击
 const handleMoreOptions = () => {
   emit('open-more-options')
 }

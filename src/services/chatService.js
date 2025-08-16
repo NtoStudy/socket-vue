@@ -5,12 +5,7 @@ import { ElMessage } from 'element-plus'
 import eventBus from '@/EventBus/eventBus.js'
 
 export const chatService = {
-  /**
-   * 处理用户聊天消息
-   * @param {String} friendId - 好友ID
-   * @param {Object} pagination - 分页参数
-   * @returns {Promise<Array>} - 消息数组
-   */
+  // 处理用户聊天消息
   async handleFriendMessages(friendId, pagination) {
     if (!friendId) return []
 
@@ -31,12 +26,7 @@ export const chatService = {
     }
   },
 
-  /**
-   * 处理群聊消息
-   * @param {String} chatRoomId - 聊天室ID
-   * @param {Object} pagination - 分页参数
-   * @returns {Promise<Array>} - 消息数组
-   */
+  // 处理群聊消息
   async handleChatRoomMessages(chatRoomId, pagination) {
     if (!chatRoomId) return []
 
@@ -57,14 +47,7 @@ export const chatService = {
     }
   },
 
-  /**
-   * 加载更多消息
-   * @param {String} type - 消息类型 ('friend' 或 'group')
-   * @param {String} id - 好友ID或群聊ID
-   * @param {Object} pagination - 分页参数
-   * @param {Array} currentMessages - 当前消息列表
-   * @returns {Promise<Array>} - 更新后的消息数组
-   */
+  // 加载更多消息
   async loadMoreMessages(type, id, pagination, currentMessages) {
     if (!pagination.hasMore || pagination.loading) return currentMessages
 
@@ -109,16 +92,7 @@ export const chatService = {
     }
   },
 
-  /**
-   * 发送消息
-   * @param {Object} messageInfo - 消息信息，包含type和content属性
-   * @param {String} messageWindowStatus - 消息窗口状态
-   * @param {String} senderId - 发送者ID
-   * @param {String} friendId - 好友ID
-   * @param {String} chatRoomId - 聊天室ID
-   * @param {Object} websocket - WebSocket服务实例
-   * @returns {Object} - 创建的消息对象
-   */
+  // 发送消息
   sendMessage({ type, content }, messageWindowStatus, senderId, friendId, chatRoomId, websocket) {
     // 检查消息内容是否为空
     if (!content.trim()) {
@@ -149,11 +123,7 @@ export const chatService = {
     return message
   },
 
-  /**
-   * 获取好友信息
-   * @param {String} friendId - 好友ID
-   * @returns {Promise<Object>} - 好友信息
-   */
+  // 获取好友信息
   async getFriendInfo(friendId) {
     if (!friendId) {
       console.log('没有有效的 friendId')
@@ -173,12 +143,7 @@ export const chatService = {
     return null
   },
 
-  /**
-   * 处理置顶状态变更
-   * @param {String} friendId - 好友ID
-   * @param {Boolean} value - 新的置顶状态
-   * @returns {Promise<Boolean>} - 操作是否成功
-   */
+  // 处理置顶状态变更
   async handleTopChange(friendId, value) {
     try {
       const status = value ? 1 : 0

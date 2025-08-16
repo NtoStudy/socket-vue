@@ -201,24 +201,17 @@ const getChatRoomUser = async () => {
   }
 }
 
-/**
- * 处理抽屉关闭事件
- */
+// 处理抽屉关闭事件
 const handleClose = () => {
   emit('close', false)
 }
 
-/**
- * 处理置顶状态变更
- * @param {Boolean} value - 新的置顶状态
- */
+// 处理置顶状态变更
 const handleTopChange = (value) => {
   emit('topChange', value)
 }
 
-/**
- * 处理解散群聊点击
- */
+// 处理解散群聊点击
 const handleDissolveGroup = () => {
   const message =
     chatRoomRole.value === '群主' ? '确定要解散该群聊吗？此操作不可恢复。' : '确定要退出群聊吗？此操作不可恢复'
@@ -257,23 +250,17 @@ watch(
   },
 )
 
-/**
- * 保存我的本群昵称
- */
+// 保存我的本群昵称
 const saveMyNickname = (value) => {
   emit('changeGroupNickName', value)
 }
 
-/**
- * 保存群名称
- */
+// 保存群名称
 const saveGroupName = (value) => {
   emit('changeGroupName', value)
 }
 
-/**
- * 添加群成员
- */
+// 添加群成员
 const addGroupMember = () => {
   console.log('添加群成员')
 }
@@ -292,10 +279,7 @@ watch(
 
 const chatStore = chatFriendOrChatRoomStore()
 
-/**
- * 处理发送消息给群成员
- * @param {Object} member - 群成员信息
- */
+// 处理发送消息给群成员
 const handleSendMessageToMember = (member) => {
   // 关闭抽屉
   emit('close')
@@ -307,10 +291,7 @@ const handleSendMessageToMember = (member) => {
   router.push('/main/chat')
 }
 
-/**
- * 处理设置管理员
- * @param {Object} member - 群成员信息
- */
+// 处理设置管理员
 const handleSetAdmin = async (member) => {
   // 这里可以添加权限检查
   console.log('设置管理员:', member)
@@ -326,20 +307,14 @@ const handleSetAdmin = async (member) => {
   console.log(res.data)
 }
 
-/**
- * 处理踢出群成员
- * @param {Object} member - 群成员信息
- */
+// 处理踢出群成员
 const handleKickMember = (member) => {
   // 这里可以添加权限检查
   console.log('踢出群成员:', member)
   // 后续实现踢出群成员的逻辑
 }
 
-/**
- * 处理转让群主
- * @param {Object} member - 群成员信息
- */
+// 处理转让群主
 const handleTransferOwner = async (member) => {
   // 这里可以添加权限检查
   console.log('转让群主给:', member)
